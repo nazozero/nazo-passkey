@@ -1,0 +1,421 @@
+{
+  "root": "/workspace/scratch/f7903e352d2d",
+  "entries": [
+    {
+      "path": "evidence/chrono-baseline-review.json",
+      "category": "chrono-baseline",
+      "bytes": 8804,
+      "sha256": "63453eb90ac69bb9aa197af36c61e958c73add40cca8585623294492f2bc258e"
+    },
+    {
+      "path": "evidence/chrono-baseline-review.md",
+      "category": "chrono-baseline",
+      "bytes": 6503,
+      "sha256": "975d826235e583e500e5fcc93c3a0d1abc4e9871872e73b05174db469d1a0a9d"
+    },
+    {
+      "path": "evidence/nazo-826-source-provenance.json",
+      "category": "826-provenance",
+      "bytes": 629,
+      "sha256": "66d9ee9fa0e76d256f3c90a846e07520614f103a23c2f89bbe110720dedb2979"
+    },
+    {
+      "path": "evidence/nazo-final-source-provenance.json",
+      "category": "c002-provenance",
+      "bytes": 472,
+      "sha256": "362073e95b962ae559d7f82d26318e2cb1f44234ad672db06c0c05d99e0c508b"
+    },
+    {
+      "path": "evidence/nazo-integration-log-summary.json",
+      "category": "test-log-summary",
+      "bytes": 106033,
+      "sha256": "f50a0ab7ad78ced2062e0734f12a9129bc5ae2ca57e75477ed66bd0192ac7173"
+    },
+    {
+      "path": "evidence/nazo-integration-review.md",
+      "category": "report",
+      "bytes": 19509,
+      "sha256": "cfbf9ee7137db7a31484aadbbc4a5bd171636adcdde5ca3ea236beb7bb81ad2b"
+    },
+    {
+      "path": "generate_nazo_integration_evidence.py",
+      "category": "report-generator",
+      "bytes": 17908,
+      "sha256": "4e85835909b68f7e01d4c98167fdbadf90cfdeb3aa0ddab070788288d7336c62"
+    },
+    {
+      "path": "nazo-826-fmt-check.log",
+      "category": "completed-command-check",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "nazo-826-pin-fetch-locked.log",
+      "category": "completed-command-check",
+      "bytes": 74,
+      "sha256": "9df94ceeeed1d7854b7cdcd5e555cc07dd48e3d30d74773872a7110c0a257c12"
+    },
+    {
+      "path": "nazo-826-static-contracts.log",
+      "category": "completed-command-check",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "nazo-actix-security-reviewed-update.log",
+      "category": "reviewed-actix-security-update",
+      "bytes": 187,
+      "sha256": "d5cd7eed9f2869f0509f61508945353929102127e896d3d38391fc234f97b2db"
+    },
+    {
+      "path": "nazo-actix-security-update.log",
+      "category": "publication-age-rejection",
+      "bytes": 522,
+      "sha256": "a2d9256e67e6ed7c5a7b7da63f238eded4b6ba1b91aed5ed30770eda96d4199f"
+    },
+    {
+      "path": "nazo-b3-cargo-audit.json",
+      "category": "raw-audit-history",
+      "bytes": 1900,
+      "sha256": "64cca158ff4ef5e8a8a958779e5c15c7c56fcb24f61130a448c2d9b1890abc61"
+    },
+    {
+      "path": "nazo-b3-cargo-audit.log",
+      "category": "raw-audit-history",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "nazo-b3-fmt-check.log",
+      "category": "completed-command-check",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "nazo-b3-pin-fetch-locked.log",
+      "category": "completed-command-check",
+      "bytes": 74,
+      "sha256": "9df94ceeeed1d7854b7cdcd5e555cc07dd48e3d30d74773872a7110c0a257c12"
+    },
+    {
+      "path": "nazo-b3-static-contracts.log",
+      "category": "completed-command-check",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "nazo-cargo-audit.json",
+      "category": "raw-audit-history",
+      "bytes": 375,
+      "sha256": "834bd678beff7b9add1d7fcc35a17116c0b884d72e8633eef843734b335eede9"
+    },
+    {
+      "path": "nazo-cargo-audit.log",
+      "category": "raw-audit-history",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "nazo-final-cargo-audit-after-actix.json",
+      "category": "raw-audit-history",
+      "bytes": 1900,
+      "sha256": "64cca158ff4ef5e8a8a958779e5c15c7c56fcb24f61130a448c2d9b1890abc61"
+    },
+    {
+      "path": "nazo-final-cargo-audit-after-actix.log",
+      "category": "raw-audit-history",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "nazo-final-cargo-audit.json",
+      "category": "raw-audit-history",
+      "bytes": 18161,
+      "sha256": "4da5783947e78779dee20ff8ce75806c967176625ec2cd0beca01e47931b7f36"
+    },
+    {
+      "path": "nazo-final-cargo-audit.log",
+      "category": "raw-audit-history",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "nazo-final-native-transport-guard.log",
+      "category": "native-feature-security-guard",
+      "bytes": 302,
+      "sha256": "2a075f3ba1c07c8b710ef1e0a03c7a0050ad1149e800e99a548947db6f9a6b73"
+    },
+    {
+      "path": "nazo-http-configuration-13.log",
+      "category": "provisional-test-history",
+      "bytes": 2768,
+      "sha256": "1316171176e946dd6a2242e022dd5db4c537569147cb38c6f7956b0badf09d5d"
+    },
+    {
+      "path": "nazo-http-configuration-36.log",
+      "category": "checkpoint-c002-test",
+      "bytes": 2768,
+      "sha256": "2b960a5320ef8c1923e28a75ea76e058c166dd0562c1ea49435de025567ccfff"
+    },
+    {
+      "path": "nazo-http-mfa-12.log",
+      "category": "provisional-test-history",
+      "bytes": 1303,
+      "sha256": "ad5380c0da95165b7f3cbcb6c565dfbed88c4a64a83149482950405794fec7f9"
+    },
+    {
+      "path": "nazo-http-mfa-35.log",
+      "category": "checkpoint-c002-test",
+      "bytes": 1303,
+      "sha256": "9634d2f05bc4e95501d8c709b71a3990907369a3b4561456609a741c15bb105d"
+    },
+    {
+      "path": "nazo-http-passkey-11.log",
+      "category": "provisional-test-history",
+      "bytes": 6948,
+      "sha256": "b25f97763f75335f111a0a175298a19637acca6041dd79d86b3f891b704bc79b"
+    },
+    {
+      "path": "nazo-http-passkey-34.log",
+      "category": "checkpoint-c002-test",
+      "bytes": 1893,
+      "sha256": "59c77f86879d75b253a090cb5853e7ffb8130cebc164e8264b6e77821934ec51"
+    },
+    {
+      "path": "nazo-identity-authentication-contracts-04.log",
+      "category": "provisional-test-history",
+      "bytes": 3076,
+      "sha256": "768accab5bb8c1517d149a096082e91effc91d54097c163e2ed39ca91d51010c"
+    },
+    {
+      "path": "nazo-identity-authentication-contracts-22.log",
+      "category": "checkpoint-c002-test",
+      "bytes": 2797,
+      "sha256": "2c16721d50c1eb0c1812d8c410342f21b2a0758016ea9aa5c046632844aa3e69"
+    },
+    {
+      "path": "nazo-identity-unit-01.log",
+      "category": "provisional-test-history",
+      "bytes": 10989,
+      "sha256": "69f0a15d9fe1df8d4013b08ffaf792522cfec5a2886200666734674512413ec7"
+    },
+    {
+      "path": "nazo-identity-unit-21.log",
+      "category": "checkpoint-c002-test",
+      "bytes": 7220,
+      "sha256": "80c4a64c02ab8552bf5c6973fb3fe714e4bf810107cfd8b700da8bd484307919"
+    },
+    {
+      "path": "nazo-integration-check-current.log",
+      "category": "incomplete-check-history",
+      "bytes": 673,
+      "sha256": "5fb82025a62ce97c6cb22b1d274d0d1c2f1efbd96f957799fd57a661062705ac"
+    },
+    {
+      "path": "nazo-integration-check-sigkill.log",
+      "category": "local-sigkill-failure",
+      "bytes": 4869,
+      "sha256": "04a394d5930eacfe74f004af43ec64125a7aeb01ee4744b910f6b952a5f01990"
+    },
+    {
+      "path": "nazo-integration-check.log",
+      "category": "local-sigkill-retry-failure",
+      "bytes": 13264,
+      "sha256": "e4248d361a2e3acf16181e4d781130151ce2676fd1860db3e731765c4f27013c"
+    },
+    {
+      "path": "nazo-integration-results.json",
+      "category": "execution-ledger",
+      "bytes": 18270,
+      "sha256": "c97e617fb8a855e572729f7a3fa6d4f7ee5ccaf133984b2f61a3d60893566743"
+    },
+    {
+      "path": "nazo-native-direct-tls-20.log",
+      "category": "checkpoint-c002-test",
+      "bytes": 393,
+      "sha256": "080f47fefb49436a07074933fe963b18c50162575e75bbc1dfe2a56774194c1f"
+    },
+    {
+      "path": "nazo-native-http-adapter-19.log",
+      "category": "checkpoint-c002-test",
+      "bytes": 2789,
+      "sha256": "814913cf9056f6de2def2cef18684e26ee7c77a8049024eb8443949a42e7b22f"
+    },
+    {
+      "path": "nazo-packed-audit-fmt-check.log",
+      "category": "test-followup-fmt-check",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "nazo-postgres-mfa-06.log",
+      "category": "provisional-test-history",
+      "bytes": 2207,
+      "sha256": "aa3764470ba02288462f7c803db6f9420be515990e2d7476ec2764015d2a3f23"
+    },
+    {
+      "path": "nazo-postgres-mfa-26.log",
+      "category": "checkpoint-c002-test",
+      "bytes": 1614,
+      "sha256": "6694a109bb52cd70ba025d4e7aba3f64248c89abd65fc237ec77eb87eb46ec31"
+    },
+    {
+      "path": "nazo-postgres-migrations-03.log",
+      "category": "provisional-test-history",
+      "bytes": 952,
+      "sha256": "d83686e854906bd7226c1489ce7c82fab3cbf52ca8f8a7c860b4c31e908db43a"
+    },
+    {
+      "path": "nazo-postgres-migrations-24.log",
+      "category": "checkpoint-c002-test",
+      "bytes": 466,
+      "sha256": "69c5cef1078504c965b16a3c185cdc625f30c22b7aea0d7491cbc03a2c0dca3d"
+    },
+    {
+      "path": "nazo-postgres-passkey-audit-08.log",
+      "category": "provisional-test-history",
+      "bytes": 1030,
+      "sha256": "0bf62e29d99338b2dc658848e813d3ea1b9c27a8262e99d4f1728530c45e4031"
+    },
+    {
+      "path": "nazo-postgres-passkey-audit-28.log",
+      "category": "checkpoint-c002-test",
+      "bytes": 493,
+      "sha256": "29f722ce8eb1680aa7b038423405afb985c37c54964821e89fb7adfeb17f4973"
+    },
+    {
+      "path": "nazo-postgres-passkey-cas-05.log",
+      "category": "provisional-test-history",
+      "bytes": 1036,
+      "sha256": "61863dbae4f479dfe1a2f53a7493cd3fade81a1e5544304b32efcf91fc0e815a"
+    },
+    {
+      "path": "nazo-postgres-passkey-cas-25.log",
+      "category": "checkpoint-c002-test",
+      "bytes": 550,
+      "sha256": "e074c175bf956508af2337edc846711820fc59be06387d79458f3ac372764e05"
+    },
+    {
+      "path": "nazo-postgres-passkey-jsonb-02.log",
+      "category": "provisional-test-history",
+      "bytes": 7617,
+      "sha256": "edadbc8d5b2e0284e81cd90e72d30d58ce7c4aa00b09301c9326cdf7712d809b"
+    },
+    {
+      "path": "nazo-postgres-passkey-jsonb-23.log",
+      "category": "checkpoint-c002-test",
+      "bytes": 1481,
+      "sha256": "7a9b587445cc9223fb4db0f7b01190752fc7e54d2420dd9c167e6ccc91f9b6f1"
+    },
+    {
+      "path": "nazo-postgres-totp-07.log",
+      "category": "provisional-test-history",
+      "bytes": 1293,
+      "sha256": "9babd6da5d89492136ec0b922b3fc7a36597fbd79a16dcc7cc704e11157ba6a4"
+    },
+    {
+      "path": "nazo-postgres-totp-27.log",
+      "category": "checkpoint-c002-test",
+      "bytes": 701,
+      "sha256": "c034502f4d714b5258af307d1422deed3c046a8aa97a399d5efd9d979539b378"
+    },
+    {
+      "path": "nazo-server-all-targets-build-18.log",
+      "category": "checkpoint-c002-test",
+      "bytes": 1535,
+      "sha256": "423c5a33b3a3ef743b8a3bd3b7ace353a34af3e1414bef85c0eca6cc16864b30"
+    },
+    {
+      "path": "nazo-server-mfa-16.log",
+      "category": "checkpoint-c002-test",
+      "bytes": 1438,
+      "sha256": "02f565aaae1383c7c67dc07ddd7917b0f2fabd5d83870a1f76d5853f8d952fba"
+    },
+    {
+      "path": "nazo-server-passkey-14.log",
+      "category": "initial-server-failure",
+      "bytes": 15565,
+      "sha256": "9f6d0f31c8cc0ef726f9dfc5fa06d88018b4cd9cac576fa173a323b15df5d2bd"
+    },
+    {
+      "path": "nazo-server-passkey-15.log",
+      "category": "checkpoint-c002-test",
+      "bytes": 5940,
+      "sha256": "cfdc34ae3758fac12d0368ea1a901c70f285220d766b70b0fe98de5b07d4629f"
+    },
+    {
+      "path": "nazo-server-passkey-37.log",
+      "category": "final-826-test",
+      "bytes": 6058,
+      "sha256": "642d0804ba4ec8ef91208ef4ce95768e8425163723ce91089b645a4039592e10"
+    },
+    {
+      "path": "nazo-server-settings-17.log",
+      "category": "checkpoint-c002-test",
+      "bytes": 6366,
+      "sha256": "de21fbe0a79ac12602aec6b77a0ecb67e95d9d3b7ccc080a7f76fc54d6e32974"
+    },
+    {
+      "path": "nazo-valkey-authentication-state-31.log",
+      "category": "checkpoint-c002-test",
+      "bytes": 388,
+      "sha256": "b29f5bd3ab49163ee7c9773682e0366e72b6258060ccb423ee6a0d99b978a00c"
+    },
+    {
+      "path": "nazo-valkey-login-session-32.log",
+      "category": "checkpoint-c002-test",
+      "bytes": 464,
+      "sha256": "d9465d9f4792f2a68ebd06d389839bfdf679e2603d06e2db879aa24efdf5c234"
+    },
+    {
+      "path": "nazo-valkey-mfa-33.log",
+      "category": "checkpoint-c002-test",
+      "bytes": 378,
+      "sha256": "61b9d0c3bee5962dc8b468b188c940eb84136f904e64bceaf51761424aaef142"
+    },
+    {
+      "path": "nazo-valkey-passkey-09.log",
+      "category": "provisional-test-history",
+      "bytes": 4057,
+      "sha256": "db246fff15c2c50906471142878452b0e022c64fad1941e952a201e3093dbc1e"
+    },
+    {
+      "path": "nazo-valkey-passkey-29.log",
+      "category": "checkpoint-c002-test",
+      "bytes": 1081,
+      "sha256": "033a5a27de023e979bc068f054d39a45c8bbd30fbfa3c9c08d2fc133fe6b7cf9"
+    },
+    {
+      "path": "nazo-valkey-session-10.log",
+      "category": "provisional-test-history",
+      "bytes": 829,
+      "sha256": "a2c6ed4cbb21f29c483d4c31920883784757411e30ea4514b0fbeebfef94f0c5"
+    },
+    {
+      "path": "nazo-valkey-session-30.log",
+      "category": "checkpoint-c002-test",
+      "bytes": 829,
+      "sha256": "75503af9b9c47083f158d921c7015b5a0333f726f5fafbb8a4bd2b297e461451"
+    },
+    {
+      "path": "nazo_integration_services.py",
+      "category": "reproduction-harness",
+      "bytes": 9990,
+      "sha256": "7ebe1623741dfd1e4d21cced77639c0c8ab4fb8697fd5c75bda2efd9e93da061"
+    }
+  ],
+  "total_files": 67,
+  "total_bytes": 339034,
+  "sensitivity_review": {
+    "included_sensitive_pattern_hits": [],
+    "scope": "Text reports, Cargo/test logs, source provenance, advisory history and reproduction scripts only. No runtime database files, credential material, environment dumps or browser data. The harness uses disposable loopback fixtures and a fixed all-zero test-only signing key; no production credentials are embedded."
+  },
+  "github_ci_evidence": "Archived separately by the root/protocol agents; not implied by local checkpoint results.",
+  "archive": {
+    "path": "nazo-integration-local-logs.tar.gz",
+    "bytes": 59992,
+    "sha256": "98cbaaebd7ac85a753598d0fb2edb41c488e07860639bda8028f2a649850ea65",
+    "members_verified": 67
+  },
+  "provenance_note": "Archive members preserve original execution paths and source names. The adjacent docs/nazo-integration.md is a presentation copy with repository-relative links; archive evidence/nazo-integration-review.md is the original generated report."
+}

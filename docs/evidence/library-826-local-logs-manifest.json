@@ -1,0 +1,82 @@
+{
+  "archive": "library-826-local-logs.tar.gz",
+  "archive_bytes": 5177,
+  "archive_sha256": "e0a585c97f67c05b2021ee94b63b381bdd324c9302e894562fa4ac10c8f84072",
+  "files": [
+    {
+      "file": "packed-exclusion-order-aws-lc.log",
+      "bytes": 3331,
+      "sha256": "e3d27cf27b0cad3eb1e7ddfec6f56b582c5feaa6f33d085b09964fe6dbb744be"
+    },
+    {
+      "file": "packed-exclusion-order-default.log",
+      "bytes": 3331,
+      "sha256": "7223d694523af67872567f7b4bd65dab42c51ff1e67213b7494ea3460c8f434f"
+    },
+    {
+      "file": "packed-final-check.log",
+      "bytes": 155,
+      "sha256": "48b59a47bf6e134ed4eab21ae2f061bbd78a390012ce5dde3177818d2c0c5432"
+    },
+    {
+      "file": "packed-final-clippy.log",
+      "bytes": 155,
+      "sha256": "fc90b00eadcee603ec18d1115ccebde819c887f1c7dcb060d2546840e6c6df23"
+    },
+    {
+      "file": "packed-final-doc-aws.log",
+      "bytes": 321,
+      "sha256": "53ebb630e0c13b7f93397651db958d1c69358153fdd0e0d8887c3abc29fb14ea"
+    },
+    {
+      "file": "packed-final-doc-default.log",
+      "bytes": 321,
+      "sha256": "0a6f95a7aaacdd9ef7e16ec817f42a7549798f138b08161755b38ba8ea66f610"
+    },
+    {
+      "file": "packed-final-fmt.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "packed-final-tests-aws.log",
+      "bytes": 12061,
+      "sha256": "95f7ccb206e65e8c163b92acb37695d8155e5c8451ca9a25fc869ce4c59a93bd"
+    },
+    {
+      "file": "packed-final-tests-default.log",
+      "bytes": 11976,
+      "sha256": "334acd1308efd576153ddc636164477c581dad460da89de4c060885381ca0fc8"
+    },
+    {
+      "file": "packed-perf-build-aws-lc.log",
+      "bytes": 239,
+      "sha256": "e11c16a4b7b2ad2d288fa444e56857b47c300338705402017e19d295a30fc564"
+    },
+    {
+      "file": "packed-perf-build-rustcrypto.log",
+      "bytes": 239,
+      "sha256": "2376ae111ae514d0f7a4ffca4341113f601f7c9589de5c36453260d348319ede"
+    },
+    {
+      "file": "packed-perf-build-wasi.log",
+      "bytes": 239,
+      "sha256": "b010d53bf78ca3a3d7cacdeb913af776082672dcfded4c557591d22f687db0b1"
+    },
+    {
+      "file": "packed-profile-aws-lc.log",
+      "bytes": 1901,
+      "sha256": "1b162876fbe79dac7cb7f208173f5edffd6b6278c929b9b86743020c60120089"
+    },
+    {
+      "file": "packed-profile-default.log",
+      "bytes": 1901,
+      "sha256": "c2044cebe1ee51539b6de62395bdfe51460875548b8eefbcc8660deddf5496ce"
+    }
+  ],
+  "total_files": 14,
+  "total_uncompressed_bytes": 36170,
+  "members_verified_against_digests": 14,
+  "scope": "Exact retained local command logs for the final 8260480 source tree (local commit 6972f1e has identical tree), preceding targeted packed regressions, and the three final release artifact builds. The corresponding gate/build JSON preserves commands, source identity and exit status; the earlier targeted runs are not relabeled as complete final gates.",
+  "sensitivity_scan": "No provider token, AWS access ID or private-key PEM patterns found. Local test/build logs only."
+}

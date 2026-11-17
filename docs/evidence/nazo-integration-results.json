@@ -1,0 +1,717 @@
+[
+  {
+    "name": "identity-unit",
+    "command": [
+      "cargo",
+      "test",
+      "-p",
+      "nazo-identity",
+      "--lib"
+    ],
+    "exit_code": 0,
+    "seconds": 527.775,
+    "log": "/workspace/scratch/f7903e352d2d/nazo-identity-unit-01.log"
+  },
+  {
+    "name": "postgres-passkey-jsonb",
+    "command": [
+      "cargo",
+      "test",
+      "-p",
+      "nazo-postgres",
+      "--lib",
+      "passkey"
+    ],
+    "exit_code": 0,
+    "seconds": 640.35,
+    "log": "/workspace/scratch/f7903e352d2d/nazo-postgres-passkey-jsonb-02.log"
+  },
+  {
+    "name": "postgres-migrations",
+    "command": [
+      "cargo",
+      "test",
+      "-p",
+      "nazo-postgres",
+      "--test",
+      "migrations",
+      "pending_migrations_create_all_runtime_module_state_tables"
+    ],
+    "exit_code": 0,
+    "seconds": 157.928,
+    "log": "/workspace/scratch/f7903e352d2d/nazo-postgres-migrations-03.log"
+  },
+  {
+    "name": "identity-authentication-contracts",
+    "command": [
+      "cargo",
+      "test",
+      "-p",
+      "nazo-identity",
+      "--test",
+      "policy",
+      "--test",
+      "authentication_method_authority",
+      "--test",
+      "password_authentication",
+      "--test",
+      "federation_authentication"
+    ],
+    "exit_code": 0,
+    "passed": 23,
+    "failed": 0,
+    "ignored": 0,
+    "seconds": 16.464,
+    "log": "/workspace/scratch/f7903e352d2d/nazo-identity-authentication-contracts-04.log"
+  },
+  {
+    "name": "postgres-passkey-cas",
+    "command": [
+      "cargo",
+      "test",
+      "-p",
+      "nazo-postgres",
+      "--test",
+      "identity_repositories",
+      "passkey"
+    ],
+    "exit_code": 0,
+    "passed": 2,
+    "failed": 0,
+    "ignored": 0,
+    "seconds": 164.954,
+    "log": "/workspace/scratch/f7903e352d2d/nazo-postgres-passkey-cas-05.log"
+  },
+  {
+    "name": "postgres-mfa",
+    "command": [
+      "cargo",
+      "test",
+      "-p",
+      "nazo-postgres",
+      "--test",
+      "identity_repositories",
+      "mfa"
+    ],
+    "exit_code": 0,
+    "passed": 14,
+    "failed": 0,
+    "ignored": 0,
+    "seconds": 195.779,
+    "log": "/workspace/scratch/f7903e352d2d/nazo-postgres-mfa-06.log"
+  },
+  {
+    "name": "postgres-totp",
+    "command": [
+      "cargo",
+      "test",
+      "-p",
+      "nazo-postgres",
+      "--test",
+      "identity_repositories",
+      "totp"
+    ],
+    "exit_code": 0,
+    "passed": 5,
+    "failed": 0,
+    "ignored": 0,
+    "seconds": 235.755,
+    "log": "/workspace/scratch/f7903e352d2d/nazo-postgres-totp-07.log"
+  },
+  {
+    "name": "postgres-passkey-audit",
+    "command": [
+      "cargo",
+      "test",
+      "-p",
+      "nazo-postgres",
+      "--test",
+      "audit_commit_boundary",
+      "identity_mutations_and_required_audit_share_the_commit_boundary"
+    ],
+    "exit_code": 0,
+    "passed": 1,
+    "failed": 0,
+    "ignored": 0,
+    "seconds": 160.679,
+    "log": "/workspace/scratch/f7903e352d2d/nazo-postgres-passkey-audit-08.log"
+  },
+  {
+    "name": "valkey-passkey",
+    "command": [
+      "cargo",
+      "test",
+      "-p",
+      "nazo-valkey",
+      "--test",
+      "remaining_contract",
+      "passkey"
+    ],
+    "exit_code": 0,
+    "passed": 4,
+    "failed": 0,
+    "ignored": 0,
+    "seconds": 296.063,
+    "log": "/workspace/scratch/f7903e352d2d/nazo-valkey-passkey-09.log"
+  },
+  {
+    "name": "valkey-session",
+    "command": [
+      "cargo",
+      "test",
+      "-p",
+      "nazo-valkey",
+      "--test",
+      "session_contract"
+    ],
+    "exit_code": 0,
+    "passed": 6,
+    "failed": 0,
+    "ignored": 0,
+    "seconds": 7.114,
+    "log": "/workspace/scratch/f7903e352d2d/nazo-valkey-session-10.log"
+  },
+  {
+    "name": "http-passkey",
+    "command": [
+      "cargo",
+      "test",
+      "-p",
+      "nazoauth",
+      "--lib",
+      "passkey"
+    ],
+    "exit_code": 0,
+    "passed": 10,
+    "failed": 0,
+    "ignored": 0,
+    "seconds": 384.309,
+    "log": "/workspace/scratch/f7903e352d2d/nazo-http-passkey-11.log"
+  },
+  {
+    "name": "http-mfa",
+    "command": [
+      "cargo",
+      "test",
+      "-p",
+      "nazoauth",
+      "--lib",
+      "mfa"
+    ],
+    "exit_code": 0,
+    "passed": 9,
+    "failed": 0,
+    "ignored": 0,
+    "seconds": 0.496,
+    "log": "/workspace/scratch/f7903e352d2d/nazo-http-mfa-12.log"
+  },
+  {
+    "name": "http-configuration",
+    "command": [
+      "cargo",
+      "test",
+      "-p",
+      "nazoauth",
+      "--lib",
+      "config"
+    ],
+    "exit_code": 0,
+    "passed": 23,
+    "failed": 0,
+    "ignored": 0,
+    "seconds": 0.682,
+    "log": "/workspace/scratch/f7903e352d2d/nazo-http-configuration-13.log"
+  },
+  {
+    "name": "server-passkey",
+    "command": [
+      "cargo",
+      "test",
+      "-p",
+      "nazo-server",
+      "--lib",
+      "passkey"
+    ],
+    "exit_code": 101,
+    "passed": 35,
+    "failed": 2,
+    "ignored": 0,
+    "seconds": 1150.036,
+    "log": "/workspace/scratch/f7903e352d2d/nazo-server-passkey-14.log"
+  },
+  {
+    "name": "server-passkey",
+    "command": [
+      "cargo",
+      "test",
+      "-p",
+      "nazo-server",
+      "--lib",
+      "passkey"
+    ],
+    "exit_code": 0,
+    "passed": 37,
+    "failed": 0,
+    "ignored": 0,
+    "seconds": 362.715,
+    "log": "/workspace/scratch/f7903e352d2d/nazo-server-passkey-15.log",
+    "source_head": "500c550200a22cb15b12b593227bbb19f06ecceb",
+    "source_diff_sha256": "3a28a07598d93e1a47e54bbc0761958d3370c67917b13a38cb8f77513e9b3a8a",
+    "passkey_revision": "b3ecfa40c8f626903f36d6065640236ac87fe472"
+  },
+  {
+    "name": "server-mfa",
+    "command": [
+      "cargo",
+      "test",
+      "-p",
+      "nazo-server",
+      "--lib",
+      "mfa"
+    ],
+    "exit_code": 0,
+    "passed": 11,
+    "failed": 0,
+    "ignored": 0,
+    "seconds": 27.435,
+    "log": "/workspace/scratch/f7903e352d2d/nazo-server-mfa-16.log",
+    "source_head": "500c550200a22cb15b12b593227bbb19f06ecceb",
+    "source_diff_sha256": "3a28a07598d93e1a47e54bbc0761958d3370c67917b13a38cb8f77513e9b3a8a",
+    "passkey_revision": "b3ecfa40c8f626903f36d6065640236ac87fe472"
+  },
+  {
+    "name": "server-settings",
+    "command": [
+      "cargo",
+      "test",
+      "-p",
+      "nazo-server",
+      "--lib",
+      "settings"
+    ],
+    "exit_code": 0,
+    "passed": 70,
+    "failed": 0,
+    "ignored": 0,
+    "seconds": 0.946,
+    "log": "/workspace/scratch/f7903e352d2d/nazo-server-settings-17.log",
+    "source_head": "500c550200a22cb15b12b593227bbb19f06ecceb",
+    "source_diff_sha256": "3a28a07598d93e1a47e54bbc0761958d3370c67917b13a38cb8f77513e9b3a8a",
+    "passkey_revision": "b3ecfa40c8f626903f36d6065640236ac87fe472"
+  },
+  {
+    "name": "server-all-targets-build",
+    "command": [
+      "cargo",
+      "test",
+      "-p",
+      "nazo-server",
+      "--all-targets",
+      "--all-features",
+      "--no-run",
+      "--locked"
+    ],
+    "exit_code": 0,
+    "passed": 0,
+    "failed": 0,
+    "ignored": 0,
+    "seconds": 45.528,
+    "log": "/workspace/scratch/f7903e352d2d/nazo-server-all-targets-build-18.log",
+    "source_head": "500c550200a22cb15b12b593227bbb19f06ecceb",
+    "source_diff_sha256": "3a28a07598d93e1a47e54bbc0761958d3370c67917b13a38cb8f77513e9b3a8a",
+    "passkey_revision": "b3ecfa40c8f626903f36d6065640236ac87fe472"
+  },
+  {
+    "name": "native-http-adapter",
+    "command": [
+      "cargo",
+      "test",
+      "-p",
+      "nazo-http-actix",
+      "--lib"
+    ],
+    "exit_code": 0,
+    "passed": 9,
+    "failed": 0,
+    "ignored": 0,
+    "seconds": 111.871,
+    "log": "/workspace/scratch/f7903e352d2d/nazo-native-http-adapter-19.log",
+    "source_head": "500c550200a22cb15b12b593227bbb19f06ecceb",
+    "source_diff_sha256": "3a28a07598d93e1a47e54bbc0761958d3370c67917b13a38cb8f77513e9b3a8a",
+    "passkey_revision": "b3ecfa40c8f626903f36d6065640236ac87fe472"
+  },
+  {
+    "name": "native-direct-tls",
+    "command": [
+      "cargo",
+      "test",
+      "-p",
+      "nazo-server",
+      "--lib",
+      "direct_tls_serves_real_https_and_mtls_without_trusting_forged_headers"
+    ],
+    "exit_code": 0,
+    "passed": 1,
+    "failed": 0,
+    "ignored": 0,
+    "seconds": 0.777,
+    "log": "/workspace/scratch/f7903e352d2d/nazo-native-direct-tls-20.log",
+    "source_head": "500c550200a22cb15b12b593227bbb19f06ecceb",
+    "source_diff_sha256": "3a28a07598d93e1a47e54bbc0761958d3370c67917b13a38cb8f77513e9b3a8a",
+    "passkey_revision": "b3ecfa40c8f626903f36d6065640236ac87fe472"
+  },
+  {
+    "name": "identity-unit",
+    "command": [
+      "cargo",
+      "test",
+      "-p",
+      "nazo-identity",
+      "--lib"
+    ],
+    "exit_code": 0,
+    "passed": 63,
+    "failed": 0,
+    "ignored": 0,
+    "seconds": 55.997,
+    "log": "/workspace/scratch/f7903e352d2d/nazo-identity-unit-21.log",
+    "source_head": "c002858a138a134544c1cc64875f7e11a5af2629",
+    "source_diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "passkey_revision": "b3ecfa40c8f626903f36d6065640236ac87fe472"
+  },
+  {
+    "name": "identity-authentication-contracts",
+    "command": [
+      "cargo",
+      "test",
+      "-p",
+      "nazo-identity",
+      "--test",
+      "policy",
+      "--test",
+      "authentication_method_authority",
+      "--test",
+      "password_authentication",
+      "--test",
+      "federation_authentication"
+    ],
+    "exit_code": 0,
+    "passed": 23,
+    "failed": 0,
+    "ignored": 0,
+    "seconds": 7.753,
+    "log": "/workspace/scratch/f7903e352d2d/nazo-identity-authentication-contracts-22.log",
+    "source_head": "c002858a138a134544c1cc64875f7e11a5af2629",
+    "source_diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "passkey_revision": "b3ecfa40c8f626903f36d6065640236ac87fe472"
+  },
+  {
+    "name": "postgres-passkey-jsonb",
+    "command": [
+      "cargo",
+      "test",
+      "-p",
+      "nazo-postgres",
+      "--lib",
+      "passkey"
+    ],
+    "exit_code": 0,
+    "passed": 5,
+    "failed": 0,
+    "ignored": 0,
+    "seconds": 93.708,
+    "log": "/workspace/scratch/f7903e352d2d/nazo-postgres-passkey-jsonb-23.log",
+    "source_head": "c002858a138a134544c1cc64875f7e11a5af2629",
+    "source_diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "passkey_revision": "b3ecfa40c8f626903f36d6065640236ac87fe472"
+  },
+  {
+    "name": "postgres-migrations",
+    "command": [
+      "cargo",
+      "test",
+      "-p",
+      "nazo-postgres",
+      "--test",
+      "migrations",
+      "pending_migrations_create_all_runtime_module_state_tables"
+    ],
+    "exit_code": 0,
+    "passed": 1,
+    "failed": 0,
+    "ignored": 0,
+    "seconds": 271.256,
+    "log": "/workspace/scratch/f7903e352d2d/nazo-postgres-migrations-24.log",
+    "source_head": "c002858a138a134544c1cc64875f7e11a5af2629",
+    "source_diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "passkey_revision": "b3ecfa40c8f626903f36d6065640236ac87fe472"
+  },
+  {
+    "name": "postgres-passkey-cas",
+    "command": [
+      "cargo",
+      "test",
+      "-p",
+      "nazo-postgres",
+      "--test",
+      "identity_repositories",
+      "passkey"
+    ],
+    "exit_code": 0,
+    "passed": 2,
+    "failed": 0,
+    "ignored": 0,
+    "seconds": 21.161,
+    "log": "/workspace/scratch/f7903e352d2d/nazo-postgres-passkey-cas-25.log",
+    "source_head": "c002858a138a134544c1cc64875f7e11a5af2629",
+    "source_diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "passkey_revision": "b3ecfa40c8f626903f36d6065640236ac87fe472"
+  },
+  {
+    "name": "postgres-mfa",
+    "command": [
+      "cargo",
+      "test",
+      "-p",
+      "nazo-postgres",
+      "--test",
+      "identity_repositories",
+      "mfa"
+    ],
+    "exit_code": 0,
+    "passed": 14,
+    "failed": 0,
+    "ignored": 0,
+    "seconds": 8.797,
+    "log": "/workspace/scratch/f7903e352d2d/nazo-postgres-mfa-26.log",
+    "source_head": "c002858a138a134544c1cc64875f7e11a5af2629",
+    "source_diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "passkey_revision": "b3ecfa40c8f626903f36d6065640236ac87fe472"
+  },
+  {
+    "name": "postgres-totp",
+    "command": [
+      "cargo",
+      "test",
+      "-p",
+      "nazo-postgres",
+      "--test",
+      "identity_repositories",
+      "totp"
+    ],
+    "exit_code": 0,
+    "passed": 5,
+    "failed": 0,
+    "ignored": 0,
+    "seconds": 6.148,
+    "log": "/workspace/scratch/f7903e352d2d/nazo-postgres-totp-27.log",
+    "source_head": "c002858a138a134544c1cc64875f7e11a5af2629",
+    "source_diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "passkey_revision": "b3ecfa40c8f626903f36d6065640236ac87fe472"
+  },
+  {
+    "name": "postgres-passkey-audit",
+    "command": [
+      "cargo",
+      "test",
+      "-p",
+      "nazo-postgres",
+      "--test",
+      "audit_commit_boundary",
+      "identity_mutations_and_required_audit_share_the_commit_boundary"
+    ],
+    "exit_code": 0,
+    "passed": 1,
+    "failed": 0,
+    "ignored": 0,
+    "seconds": 9.052,
+    "log": "/workspace/scratch/f7903e352d2d/nazo-postgres-passkey-audit-28.log",
+    "source_head": "c002858a138a134544c1cc64875f7e11a5af2629",
+    "source_diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "passkey_revision": "b3ecfa40c8f626903f36d6065640236ac87fe472"
+  },
+  {
+    "name": "valkey-passkey",
+    "command": [
+      "cargo",
+      "test",
+      "-p",
+      "nazo-valkey",
+      "--test",
+      "remaining_contract",
+      "passkey"
+    ],
+    "exit_code": 0,
+    "passed": 4,
+    "failed": 0,
+    "ignored": 0,
+    "seconds": 43.315,
+    "log": "/workspace/scratch/f7903e352d2d/nazo-valkey-passkey-29.log",
+    "source_head": "c002858a138a134544c1cc64875f7e11a5af2629",
+    "source_diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "passkey_revision": "b3ecfa40c8f626903f36d6065640236ac87fe472"
+  },
+  {
+    "name": "valkey-session",
+    "command": [
+      "cargo",
+      "test",
+      "-p",
+      "nazo-valkey",
+      "--test",
+      "session_contract"
+    ],
+    "exit_code": 0,
+    "passed": 6,
+    "failed": 0,
+    "ignored": 0,
+    "seconds": 2.071,
+    "log": "/workspace/scratch/f7903e352d2d/nazo-valkey-session-30.log",
+    "source_head": "c002858a138a134544c1cc64875f7e11a5af2629",
+    "source_diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "passkey_revision": "b3ecfa40c8f626903f36d6065640236ac87fe472"
+  },
+  {
+    "name": "valkey-authentication-state",
+    "command": [
+      "cargo",
+      "test",
+      "-p",
+      "nazo-valkey",
+      "--test",
+      "remaining_contract",
+      "authentication_short_state"
+    ],
+    "exit_code": 0,
+    "passed": 1,
+    "failed": 0,
+    "ignored": 0,
+    "seconds": 0.501,
+    "log": "/workspace/scratch/f7903e352d2d/nazo-valkey-authentication-state-31.log",
+    "source_head": "c002858a138a134544c1cc64875f7e11a5af2629",
+    "source_diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "passkey_revision": "b3ecfa40c8f626903f36d6065640236ac87fe472"
+  },
+  {
+    "name": "valkey-login-session",
+    "command": [
+      "cargo",
+      "test",
+      "-p",
+      "nazo-valkey",
+      "--test",
+      "remaining_contract",
+      "login_session"
+    ],
+    "exit_code": 0,
+    "passed": 2,
+    "failed": 0,
+    "ignored": 0,
+    "seconds": 0.388,
+    "log": "/workspace/scratch/f7903e352d2d/nazo-valkey-login-session-32.log",
+    "source_head": "c002858a138a134544c1cc64875f7e11a5af2629",
+    "source_diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "passkey_revision": "b3ecfa40c8f626903f36d6065640236ac87fe472"
+  },
+  {
+    "name": "valkey-mfa",
+    "command": [
+      "cargo",
+      "test",
+      "-p",
+      "nazo-valkey",
+      "--test",
+      "remaining_contract",
+      "mfa_failure"
+    ],
+    "exit_code": 0,
+    "passed": 1,
+    "failed": 0,
+    "ignored": 0,
+    "seconds": 0.441,
+    "log": "/workspace/scratch/f7903e352d2d/nazo-valkey-mfa-33.log",
+    "source_head": "c002858a138a134544c1cc64875f7e11a5af2629",
+    "source_diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "passkey_revision": "b3ecfa40c8f626903f36d6065640236ac87fe472"
+  },
+  {
+    "name": "http-passkey",
+    "command": [
+      "cargo",
+      "test",
+      "-p",
+      "nazoauth",
+      "--lib",
+      "passkey"
+    ],
+    "exit_code": 0,
+    "passed": 10,
+    "failed": 0,
+    "ignored": 0,
+    "seconds": 80.516,
+    "log": "/workspace/scratch/f7903e352d2d/nazo-http-passkey-34.log",
+    "source_head": "c002858a138a134544c1cc64875f7e11a5af2629",
+    "source_diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "passkey_revision": "b3ecfa40c8f626903f36d6065640236ac87fe472"
+  },
+  {
+    "name": "http-mfa",
+    "command": [
+      "cargo",
+      "test",
+      "-p",
+      "nazoauth",
+      "--lib",
+      "mfa"
+    ],
+    "exit_code": 0,
+    "passed": 9,
+    "failed": 0,
+    "ignored": 0,
+    "seconds": 0.54,
+    "log": "/workspace/scratch/f7903e352d2d/nazo-http-mfa-35.log",
+    "source_head": "c002858a138a134544c1cc64875f7e11a5af2629",
+    "source_diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "passkey_revision": "b3ecfa40c8f626903f36d6065640236ac87fe472"
+  },
+  {
+    "name": "http-configuration",
+    "command": [
+      "cargo",
+      "test",
+      "-p",
+      "nazoauth",
+      "--lib",
+      "config"
+    ],
+    "exit_code": 0,
+    "passed": 23,
+    "failed": 0,
+    "ignored": 0,
+    "seconds": 2.032,
+    "log": "/workspace/scratch/f7903e352d2d/nazo-http-configuration-36.log",
+    "source_head": "c002858a138a134544c1cc64875f7e11a5af2629",
+    "source_diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "passkey_revision": "b3ecfa40c8f626903f36d6065640236ac87fe472"
+  },
+  {
+    "name": "server-passkey",
+    "command": [
+      "cargo",
+      "test",
+      "-p",
+      "nazo-server",
+      "--lib",
+      "passkey"
+    ],
+    "exit_code": 0,
+    "passed": 38,
+    "failed": 0,
+    "ignored": 0,
+    "seconds": 402.169,
+    "log": "/workspace/scratch/f7903e352d2d/nazo-server-passkey-37.log",
+    "source_head": "c002858a138a134544c1cc64875f7e11a5af2629",
+    "source_diff_sha256": "ef7c92cdc02da82e77b0324179daaa25c5ba2782e8f011c9fa6ca0683dc62e30",
+    "passkey_revision": "8260480634fac09e1151ca2b1a9eaa1c02af6f67"
+  }
+]

@@ -27,6 +27,9 @@ always uses dalek's strict verifier. There is no locally implemented
 cryptographic primitive. See
 [validation](docs/validation.md) for the exact builds actually run and
 [performance](docs/performance.md) for measured results and their limits.
+The [NazoAuth integration record](docs/nazo-integration.md) traces legacy JSONB,
+tenant/account binding, live PostgreSQL/Valkey tests, UV/MFA decisions and the
+remaining application dependency gate to their original execution evidence.
 
 Challenges take 32 bytes directly from the platform CSPRNG through
 `getrandom 0.4`: operating-system randomness on native targets, WASI randomness on WASI,
@@ -119,12 +122,12 @@ initial exact 1.18.2 constraint would have forced a consumer downgrade; integrat
 review blocked it before merging or deployment and the constraint was corrected.
 
 The [final performance comparison](docs/performance.md) uses AWS-LC **1.19.0**
-and measures production commit `b3ecfa40c8f626903f36d6065640236ac87fe472` against the exact pinned baseline.
+and measures production commit `8260480634fac09e1151ca2b1a9eaa1c02af6f67` against the exact pinned baseline.
 In its five-round native comparison, complete ES256 authentication finish P50
-fell from **419.884 to 86.491 µs (79.4%)** with the feature enabled.
+fell from **415.448 to 79.050 µs (81.0%)** with the feature enabled.
 Ed25519 still uses dalek: its authentication P50 changed from
-**56.315 to 62.384 µs (+10.8%)**, and registration finish from
-**4.517 to 9.184 µs (+103.3%)**.
+**53.310 to 67.101 µs (+25.9%)**, and registration finish from
+**4.107 to 9.084 µs (+121.2%)**.
 The additional key-validity and strict-verification work remains enabled.
 These figures are medians of per-round P50s on the recorded Linux host with
 one concurrent operation, not application or multi-user capacity measurements.

@@ -1,0 +1,119 @@
+[
+  {
+    "name": "fmt",
+    "command": [
+      "cargo",
+      "fmt",
+      "--all",
+      "--",
+      "--check"
+    ],
+    "exit_code": 0,
+    "seconds": 0.24886201700064703,
+    "source_commit": "6972f1edfda75bdaa916110b817518d602881d95",
+    "source_tree": "5a36536e1b0a67db1f90e6e870fcff7664a44095",
+    "log": "/workspace/scratch/f7903e352d2d/evidence/packed-final-fmt.log",
+    "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "check",
+    "command": [
+      "cargo",
+      "check",
+      "--locked",
+      "--all-targets",
+      "--no-default-features"
+    ],
+    "exit_code": 0,
+    "seconds": 4.812738734000959,
+    "source_commit": "6972f1edfda75bdaa916110b817518d602881d95",
+    "source_tree": "5a36536e1b0a67db1f90e6e870fcff7664a44095",
+    "log": "/workspace/scratch/f7903e352d2d/evidence/packed-final-check.log",
+    "log_sha256": "48b59a47bf6e134ed4eab21ae2f061bbd78a390012ce5dde3177818d2c0c5432"
+  },
+  {
+    "name": "clippy",
+    "command": [
+      "cargo",
+      "clippy",
+      "--locked",
+      "--all-targets",
+      "--all-features",
+      "--",
+      "-D",
+      "warnings"
+    ],
+    "exit_code": 0,
+    "seconds": 2.6326222530005907,
+    "source_commit": "6972f1edfda75bdaa916110b817518d602881d95",
+    "source_tree": "5a36536e1b0a67db1f90e6e870fcff7664a44095",
+    "log": "/workspace/scratch/f7903e352d2d/evidence/packed-final-clippy.log",
+    "log_sha256": "fc90b00eadcee603ec18d1115ccebde819c887f1c7dcb060d2546840e6c6df23"
+  },
+  {
+    "name": "tests-default",
+    "command": [
+      "cargo",
+      "test",
+      "--locked",
+      "--all-targets",
+      "--no-default-features"
+    ],
+    "exit_code": 0,
+    "seconds": 46.40306284399958,
+    "source_commit": "6972f1edfda75bdaa916110b817518d602881d95",
+    "source_tree": "5a36536e1b0a67db1f90e6e870fcff7664a44095",
+    "log": "/workspace/scratch/f7903e352d2d/evidence/packed-final-tests-default.log",
+    "log_sha256": "334acd1308efd576153ddc636164477c581dad460da89de4c060885381ca0fc8"
+  },
+  {
+    "name": "tests-aws",
+    "command": [
+      "cargo",
+      "test",
+      "--locked",
+      "--all-targets",
+      "--features",
+      "aws-lc"
+    ],
+    "exit_code": 0,
+    "seconds": 39.05924073999995,
+    "source_commit": "6972f1edfda75bdaa916110b817518d602881d95",
+    "source_tree": "5a36536e1b0a67db1f90e6e870fcff7664a44095",
+    "log": "/workspace/scratch/f7903e352d2d/evidence/packed-final-tests-aws.log",
+    "log_sha256": "95f7ccb206e65e8c163b92acb37695d8155e5c8451ca9a25fc869ce4c59a93bd"
+  },
+  {
+    "name": "doc-default",
+    "command": [
+      "cargo",
+      "test",
+      "--locked",
+      "--doc",
+      "--no-default-features"
+    ],
+    "exit_code": 0,
+    "seconds": 2.1549551260013686,
+    "source_commit": "6972f1edfda75bdaa916110b817518d602881d95",
+    "source_tree": "5a36536e1b0a67db1f90e6e870fcff7664a44095",
+    "log": "/workspace/scratch/f7903e352d2d/evidence/packed-final-doc-default.log",
+    "log_sha256": "0a6f95a7aaacdd9ef7e16ec817f42a7549798f138b08161755b38ba8ea66f610"
+  },
+  {
+    "name": "doc-aws",
+    "command": [
+      "cargo",
+      "test",
+      "--locked",
+      "--doc",
+      "--features",
+      "aws-lc"
+    ],
+    "exit_code": 0,
+    "seconds": 1.6514219559994672,
+    "source_commit": "6972f1edfda75bdaa916110b817518d602881d95",
+    "source_tree": "5a36536e1b0a67db1f90e6e870fcff7664a44095",
+    "log": "/workspace/scratch/f7903e352d2d/evidence/packed-final-doc-aws.log",
+    "log_sha256": "53ebb630e0c13b7f93397651db958d1c69358153fdd0e0d8887c3abc29fb14ea"
+  }
+]

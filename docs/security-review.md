@@ -7,8 +7,16 @@ Library baseline:
 `nazoauth/patched-rustcrypto`, package `passkey-auth 0.1.3`.
 NazoAuth integration baseline:
 `9560ea04bbc01a2da7b002eeeeb0ebe2e7dffbe9`.
-Final production revision:
-`b3ecfa40c8f626903f36d6065640236ac87fe472` (crate 0.2.0).
+Current production revision:
+`8260480634fac09e1151ca2b1a9eaa1c02af6f67` (crate 0.2.0), source tree
+`5a36536e1b0a67db1f90e6e870fcff7664a44095`.
+It includes the late packed-certificate follow-up in S-20 and exclusion/audit
+ordering correction in S-21. Complete local gates and all 12 hosted CI jobs
+pass on this source tree. NazoAuth's new 2d5c335 consumer pin passes its 38-test
+local passkey regression. Its final hosted CI passes 3,960 native tests and
+71 WASM tests, but the Chrono dependency-policy gate fails and the dependent
+real HTTP security matrix is skipped. The integration is not green.
+Existing b3ecfa4/c002858a CI results are retained as historical checkpoints.
 
 This review examines the complete library verification path, its tests and
 examples, and the NazoAuth integration contract. It introduces code changes,
@@ -205,7 +213,8 @@ credential and the credential stored by the verifier could disagree. Original
 exclusion information was also not retained in pending state for an RP check.
 
 **Revision:** strict/bounded decode applies to the outer ID, which must match the
-attested ID. Retained exclusion IDs are checked. The 1–1,023-byte local policy
+attested ID. Retained exclusion IDs are checked after statement/profile
+verification, as corrected in S-21. The 1–1,023-byte local policy
 matches the ordinary supported credential range. RP-wide uniqueness is still
 an atomic database check; state exclusion alone cannot prevent two ceremonies
 that started concurrently. See `CE::registration_outer_id_and_exclusion_are_enforced`
@@ -218,11 +227,13 @@ NazoAuth's existing duplicate-registration response is HTTP 409. Revision
 response/attested IDs still return `CredentialIdMismatch` first; only a matching
 ID in the server-issued exclusion list returns `CredentialExcluded`. NazoAuth
 maps the latter to `AlreadyRegistered` and its existing conflict response.
-The accepted input set and check order do not change. The existing regression
-now asserts both exact errors, including an inconsistent outer ID that is also
-excluded, which must remain an ID mismatch. This distinction is an application
-error contract, not a new claim that an excluded credential's attestation
-signature has been verified.
+That split-only checkpoint preserved the accepted input set and check order
+of its predecessor. The existing regression asserts both exact errors,
+including an inconsistent outer ID that is also excluded, which must remain
+an ID mismatch. A subsequent intersection review found that the early
+exclusion check could mask invalid attestation and change required audit
+behavior. S-21 records the separate ordering correction; the earlier
+split-only claim does not describe that later change.
 
 ### S-08 — Certificate parsing did not establish the required supported profile
 
@@ -236,8 +247,9 @@ inferring a curve from length. Packed checks v3, a non-CA basicConstraints value
 required C/O/OU/CN and specified ASN.1 string tags, exact OU, and correctly encoded
 noncritical AAGUID when present. Duplicate extensions reject. U2F has exactly one
 certificate and the prescribed signature input. The certificate subject's country
-field is checked syntactically, not against a current geopolitical registry;
-subject/vendor statements are untrusted in this library. Profile, curve, critical
+field is checked syntactically, not for current ISO 3166 assignment or the
+vendor's actual place of incorporation; ATT-05 is therefore PARTIAL.
+Subject/vendor statements are untrusted in this library. Profile, curve, critical
 AAGUID, duplicate-extension and chain-length negatives supplement real-signature
 positive cases. See matrix ATT-03 through ATT-09.
 
@@ -449,6 +461,87 @@ a vulnerability-free-and-warning-free application. Replacing time types across
 the application is outside this protocol change. The integration evidence in
 the validation record identifies both application audit runs.
 
+### S-20 — Packed certificate firmware and enterprise extensions were not checked
+
+**Discovery and affected scope:** the final line-by-line review found two
+requirements omitted in both the baseline and the b3ecfa4 checkpoint. An
+otherwise valid packed x5c statement could carry an invalid firmware-version
+extension or a device serial-number extension prohibited for ordinary
+attestation. These are certificate-profile and privacy-boundary defects.
+They do not bypass the attestation or credential signature, and they never
+established trusted manufacturer identity: successful x5c verification still
+returns `UntrustedCertificate`.
+
+[WebAuthn Level 3 §8.2.1](https://www.w3.org/TR/2026/REC-webauthn-3-20260825/#sctn-packed-attestation-cert-requirements)
+defines firmware OID `1.3.6.1.4.1.45724.1.1.5` as a nonnegative INTEGER and
+prohibits a critical marking.
+[Section 8.2.2](https://www.w3.org/TR/2026/REC-webauthn-3-20260825/#sctn-enterprise-packed-attestation-cert-requirements)
+prohibits serial-number OID `1.3.6.1.4.1.45724.1.1.2` in non-enterprise
+attestation. The library has no enterprise-attestation request or policy.
+
+**Follow-up:** the existing packed-certificate parser validates the entire
+firmware DER value through borrowed `UintRef`, accepts zero and wider-than-u64
+positive integers, and rejects negative, malformed, trailing or critical
+values. It rejects the enterprise serial OID whenever packed mode is active.
+This adds no dependency, allocation, trust root, firmware-policy decision or
+enterprise feature, and does not add the packed profile to U2F. Four new test
+functions exercise 22 signed registration cases: six valid firmware values,
+ten malformed/negative DER values, two critical/duplicate cases, and four
+ordinary-attestation serial cases. Targeted `attestation_e2e` and
+`official_vectors` runs pass on both backends: **19 + 1 tests each**, with no
+failures or ignored tests. Formatting also passes. Subsequent complete local
+gates pass on the source tree published as 8260480: 109 default and 110 AWS-LC
+tests, plus one doctest for each. Hosted outcomes remain separately tracked;
+existing b3ecfa4 CI is not reused as their passing evidence.
+Matrix ATT-14/15 track the two requirements separately. ATT-05 also remains
+PARTIAL because checking country-code syntax does not verify ISO assignment
+or incorporation facts.
+
+### S-21 — Early exclusion changed invalid-attestation auditing
+
+**Integration regression:** at the b3ecfa4 checkpoint, an outer ID matching the
+attested ID and the retained exclusion list returned `CredentialExcluded`
+before statement verification. A request with that ID and a bad packed
+signature or certificate profile therefore became NazoAuth HTTP 409 without
+its required InvalidAttestation audit. The baseline returned the attestation
+failure, HTTP 400, and the required event. The invalid request remained
+rejected, but its audit contract regressed. This was discovered in the
+unmerged review branch; it is not represented as a deployed exploit or a
+signature acceptance bypass.
+
+**Correction:** `finish_registration` checks response/attested ID consistency
+early, then validates the supported key and attestation statement/profile,
+and only then returns `CredentialExcluded` for the state exclusion list.
+Valid duplicate enrollment retains HTTP 409; invalid signed/profile data
+retains its verification error and NazoAuth's required HTTP 400 audit path.
+This is a deliberate change to failure precedence after the split-only b3
+checkpoint. It follows the registration verification sequence in
+[WebAuthn Level 3 §7.1](https://www.w3.org/TR/2026/REC-webauthn-3-20260825/#sctn-registering-a-new-credential).
+Transactional uniqueness still handles registration races. Signed but
+untrusted certificates remain `UntrustedCertificate`.
+
+`AE::excluded_registration_still_verifies_packed_signature_and_certificate`
+checks the exact results for a valid statement, a real signature over the
+wrong transcript, and a valid signature with a prohibited critical firmware
+extension. After this correction, both backends pass **20 attestation + 20
+ceremony + 1 official-vector driver tests**, with no failures, ignores or
+filtered tests; formatting also passes.
+NazoAuth's `excluded_credential_with_invalid_packed_signature_is_rejected_and_audited`
+adds a real required-audit-row check for the invalid excluded registration and
+confirms no extra credential row and one-time ceremony consumption. Complete
+library local and hosted gates now pass on the published 8260480 source tree.
+The NazoAuth test also passes in the **38-test** local passkey suite, with zero
+failures or ignores; 1,367 unrelated server tests were filtered out by the
+selected scope. [Its provenance](evidence/nazo-826-source-provenance.json)
+preserves local c8214e5 and published 2d5c335 as distinct commits with the same
+tree f01983bb and the same 8260480 dependency. The same regression also
+passes in shard 6 of the final 3,960-test hosted native suite, as recorded in
+[the final integration CI evidence](evidence/nazo-final-ci.json). The failed
+Chrono dependency gate and skipped real HTTP matrix remain separate outcomes;
+the earlier b3/c002 results do not validate this correction.
+Matrix REG-10/11 keeps ID mismatch precedence separate from duplicate
+classification.
+
 ## Persistence and integration contract
 
 The 0.2.0 credential adds optional metadata through serde defaults; the
@@ -536,24 +629,25 @@ relaxed and the lockfiles updated to preserve 1.19.0; no NazoAuth production
 downgrade was merged or deployed. This distinction also applies to benchmark
 provenance: the earlier measurements do not describe 1.19.0.
 
-All three complete-API comparisons were repeated for the final
-**b3ecfa40c8f626903f36d6065640236ac87fe472** implementation after the error-contract
-correction; the earlier fa0f0c measurements remain historical checkpoints.
+All three complete-API comparisons were repeated for the
+**8260480634fac09e1151ca2b1a9eaa1c02af6f67** implementation after the packed
+extension and exclusion-order corrections; earlier fa0f0c and b3ecfa4
+measurements remain separately named historical checkpoints.
 In the [five-round native AWS-LC 1.19.0 comparison](evidence/performance-final-native-aws-lc.json),
-complete ES256 authentication finish P50 changed from **419.884 to 86.491 µs**,
-a **79.4%** reduction (about **4.85 times** the inverse latency). All five
-per-round P50 comparisons improved by 78.95%–80.08%. This includes decoding,
+complete ES256 authentication finish P50 changed from **415.448 to 79.050 µs**,
+an **81.0%** reduction (about **5.26 times** the inverse latency). All five
+per-round P50 comparisons improved by 79.47%–84.93%. This includes decoding,
 policy checks, COSE parsing and real signature verification. In that same
-comparison window, strict Ed25519 authentication changed from **56.315 to
-62.384 µs (+10.8%)**, and registration finish from **4.517 to 9.184 µs (+103.3%)**.
+comparison window, strict Ed25519 authentication changed from **53.310 to
+67.101 µs (+25.9%)**, and registration finish from **4.107 to 9.084 µs (+121.2%)**.
 The separate portable window measured Ed25519 authentication / registration
-costs of +17.4% / +140.2%, using its own baseline. None-attestation registration now
+costs of +12.4% / +104.7%, using its own baseline. None-attestation registration now
 checks the point, and authentication applies canonical/weak-key checks and
 dalek strict verification. The slower paths retain those security checks.
 The experiment does not isolate an exact cost for each individual check.
 
 The [separate native allocation measurement](evidence/allocations-native.json)
-was also repeated for b3ecfa4 across all 30 cases. It includes C-side requests
+was also repeated for 8260480 across all 30 cases. It includes C-side requests
 observed through glibc, as well as Rust allocations:
 AWS-LC ES256 authentication uses **23 requests / 1,327 bytes** per operation
 against baseline **16 / 1,363**. Its Rust-only **6 / 324** count is not a total;
@@ -562,11 +656,11 @@ requests, not peak memory, and mechanisms bypassing the glibc hooks remain
 outside that experiment. The linked benchmark artifact also grows. Timing
 measurements run without the allocation tracer.
 
-Portable ES256 authentication P50 changed from **424.581 to 415.778 µs (-2.1%)**,
-but paired rounds ranged from -8.4% to +37.0%. This does not establish a stable
+Portable ES256 authentication P50 changed from **417.170 to 425.743 µs (+2.1%)**,
+with paired rounds ranging from -1.2% to +2.2%. This does not establish a stable
 latency improvement. WASI has no AWS-LC backend and shows no general latency
-win: ES256 authentication changed by -0.6%, Ed25519 authentication by +7.1%,
-and Ed25519 registration by +135.1%.
+win: ES256 authentication changed by +0.2%, Ed25519 authentication by +11.3%,
+and Ed25519 registration by +143.3%.
 All rounds, separate comparison windows, tails, throughput, CPU, artifact
 sizes and limitations remain in [performance.md](performance.md). The displayed
 quantiles are medians of five per-round quantiles, not pooled percentiles;
@@ -659,7 +753,40 @@ backend or build configuration not run is listed as unmeasured.
 
 ## Validation snapshot
 
-The final b3ecfa4 implementation has **104 passing native RustCrypto tests and
+Current revision **8260480634fac09e1151ca2b1a9eaa1c02af6f67** has complete local
+validation on its exact source tree: **109 RustCrypto tests, 110 AWS-LC tests,
+and one doctest per backend**, all passing with no failures or ignored tests.
+Formatting, all-target check and all-feature Clippy also pass. The
+[current local record](evidence/packed-final-local-gates.json) preserves the
+actual local commit 6972f1e and tree 5a36536e, identical to the published tree;
+it does not substitute a different commit hash into the execution record.
+Hosted [run 44079890019](https://github.com/nazozero/passkey-auth-rs/actions/runs/44079890019)
+now has **12 successful jobs**. Its first attempt failed Windows AWS-LC NASM
+installation because Chocolatey's feed returned HTTP 504; that attempt's
+test steps did not execute. Attempt 2 reran only Windows AWS-LC and passed
+110 all-target tests plus one doctest. The other 11 successes retain their
+first-attempt execution times. [The final snapshot](evidence/ci-final-validation.json)
+records both attempts, all platform results, exact merge/tree identities and
+13 raw-log digests; the [first failure](evidence/ci-validation-8260480-attempt1.json)
+is retained separately.
+
+NazoAuth's final source head **2d5c335fc6563e874d8626a5067b4fa8df89bacc** pins
+8260480 and passes its **38-test local passkey suite**. Final hosted CI also
+passes **3,960 native tests, six workspace doctests and 71 WASM tests**, including
+the new invalid-attestation/duplicate required-audit regression. All eight
+workflows reached a terminal state: seven succeeded and one failed; their
+29 jobs comprise 22 successes, one failure and six skips. The existing
+Chrono unmaintained-policy error blocks `conformance-security` and its
+separate real HTTP security matrix. CodeQL analysis and SARIF upload finish,
+but one Rust file has a macro-extraction error (1,193 extract without error),
+and the existing action-revision warning remains. No complete-extraction,
+zero-alert or all-green integration claim is made. The
+[final integration CI record](evidence/nazo-final-ci.json) preserves the exact
+merge identity, outcomes and all 18 raw-log digests; the
+[integration report](nazo-integration.md) explains the remaining gate and
+local service evidence. Earlier passing runs below are retained as checkpoints.
+
+The b3ecfa4 checkpoint has **104 passing native RustCrypto tests and
 105 passing native AWS-LC tests**, plus one all-feature documentation test in
 the local rerun. These supersede the earlier 97-test portable checkpoint.
 Formatting, check, Clippy and rustdoc gates passed. The implementation CI at
@@ -681,7 +808,7 @@ fuzz also passed. The [historical CI evidence](evidence/ci-validation-787a717.js
 records PR head `787a717ce7e3daeeb578a69a4b5c3dd8f9236024` separately from the
 Actions-tested synthetic merge `51cd42793469ca7dc17ca1112bc637bd706060b3`.
 This historical run predates the final `CredentialExcluded` error-contract
-correction. The final b3ecfa4 revision independently passed local formatting,
+correction. The b3ecfa4 checkpoint independently passed local formatting,
 all-feature Clippy, 104 default-backend tests, 105 AWS-LC tests and one
 all-feature documentation test; the [local gate record](evidence/credential-excluded-local-validation.json)
 preserves commands and log digests. Its own hosted
@@ -690,7 +817,7 @@ then completed with **all 12 jobs successful**. Both backends passed on Linux
 x86-64/ARM64, Windows x86-64 and macOS Intel, alongside quality, audit, WASM and
 fuzz. The Mac logs confirm 104 / 105 all-target tests respectively and one
 doctest per backend, with no failures or ignored tests. The
-[final snapshot](evidence/ci-final-validation.json) records the actual tested
+[b3ecfa4 checkpoint snapshot](evidence/ci-validation-b3ecfa4.json) records the actual tested
 synthetic merge `961270ed1c4eecd555575e6ad422935fe580aad7` separately from PR
 head `b3ecfa40c8f626903f36d6065640236ac87fe472`. Mac ARM64 remains unverified.
 Library results do not cover NazoAuth's
@@ -713,11 +840,19 @@ preserved in the implementation CI snapshot. This later success does not erase
 the local LeakSanitizer failure or expand finite fuzzing into an exhaustive
 parser proof.
 
-The final b3ecfa4 CI independently completed **1,321,531 RustCrypto fuzz
+The b3ecfa4 checkpoint CI independently completed **1,321,531 RustCrypto fuzz
 executions and 1,634,909 AWS-LC fuzz executions**, each in 61 seconds, with both
 CI steps successful and no local leak-detection override. Its complete log
-digest and completion excerpts are in the final snapshot. Earlier successful
+digest and completion excerpts are in the b3ecfa4 checkpoint snapshot. Earlier successful
 campaigns and the failed local LeakSanitizer run remain separate evidence.
+
+The current 8260480 run subsequently completed **1,221,758 RustCrypto fuzz
+executions and 1,474,536 AWS-LC executions**, each in 61 seconds, with both
+steps successful and no local leak-detection override. These first-attempt
+successes were retained through the Windows-only retry; they were not run
+twice. [The final CI evidence](evidence/ci-final-validation.json) preserves the
+actual counts and complete log digest. These bounded campaigns are not a
+formal proof or a controlled throughput comparison.
 
 ### Windows AWS-LC build failure and correction
 

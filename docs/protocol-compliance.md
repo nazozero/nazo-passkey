@@ -3,9 +3,14 @@
 Review date: **2026-11-17**. Baseline: NazoAuth's actual
 `nazoauth/patched-rustcrypto` revision
 `d59b317998e56f4a16a69133d7a854c5c34f795b` (`passkey-auth 0.1.3`).
-The revised column describes production commit
-`b3ecfa40c8f626903f36d6065640236ac87fe472` (crate **0.2.0**). It does not describe the
-older upstream `main` or the crates.io package merely sharing that version.
+The revised column describes production revision
+`8260480634fac09e1151ca2b1a9eaa1c02af6f67` (crate **0.2.0**), including the
+packed-certificate follow-up in ATT-14/15 and the exclusion/audit ordering
+correction in REG-11. Its source tree is
+`5a36536e1b0a67db1f90e6e870fcff7664a44095`. It does not describe the older
+upstream `main`, the earlier b3ecfa4 checkpoint, or the crates.io package
+sharing that version. Actual local and hosted gate outcomes remain separately
+recorded in the validation report.
 
 ## References and interpretation
 
@@ -31,7 +36,7 @@ Where later levels intentionally change a rule (for example unsolicited
 extensions), this implementation follows Level 3 while retaining usable Level
 1/2 credentials; it does not claim to simulate every historical rule at once.
 
-The 109 rows identify the applicable rule by section and, where useful, algorithm step.
+The 111 rows identify the applicable rule by section and, where useful, algorithm step.
 `MUST` includes an obligatory verification step under the RP conformance rule.
 `POLICY` identifies an implementation choice or integration obligation and does
 not promote a recommendation into a normative requirement.
@@ -49,8 +54,8 @@ recorded separately in [validation.md](validation.md). Performance conclusions
 belong in [performance.md](performance.md). No certification claim follows from
 this matrix.
 
-The revised primary assessments are **80 PASS, 17 PARTIAL and 12 NOT APPLICABLE**,
-for 109 rows in total. A row with both implemented and outstanding obligations
+The revised primary assessments are **81 PASS, 18 PARTIAL and 12 NOT APPLICABLE**,
+for 111 rows in total. A row with both implemented and outstanding obligations
 is classified PARTIAL; its completed scope is stated separately. Even a PASS
 applies only to that row's declared scope, not every optional Level 3 feature.
 
@@ -115,7 +120,7 @@ applies only to that row's declared scope, not every optional Level 3 feature.
 | REG-08 | [W3] §7.1 s20 · MUST | Credential algorithm | PASS | PASS | Enforced against advertised algorithms; binary parser additionally proves kty/alg/crv consistency. `BR::algorithm_and_label_integer_overflow_cannot_alias_negative_values`. |
 | REG-09 | [W1] §7.1 s13–14; [W3] §7.1 s21–22 · MUST | Exact format / statement | PARTIAL | PASS within scope | Case-sensitive dispatch; unknown format / ECDAA is an explicit error. See attestation rows. |
 | REG-10 | [W3] §7.1 s25 · SHOULD; type consistency · POLICY | Credential ID bound | FAIL | PASS | Response `id` must equal attested ID; new ID limited to 1–1,023 bytes. `CredentialIdMismatch` takes precedence even if the inconsistent outer ID is excluded. `CE::registration_outer_id_and_exclusion_are_enforced`; long-ID W3 vector. |
-| REG-11 | [W3] §7.1 s26 · SHOULD · RP account store | Duplicate ID rejection | PARTIAL, caller | PARTIAL, caller | Library rejects a matching ID in the state exclusion list with `CredentialExcluded`; NazoAuth maps that outcome to its existing AlreadyRegistered / HTTP 409 contract. Global / RP account uniqueness remains transactional. The CE regression checks the distinct exclusion error and mismatch precedence; database uniqueness and insert-time checks remain mandatory. |
+| REG-11 | [W3] §7.1 s22–26 · ordered verification / SHOULD · RP account store | Duplicate ID rejection | PARTIAL, caller | PARTIAL, caller | After successful attestation-statement/profile verification, a matching state exclusion ID returns `CredentialExcluded`, mapped by NazoAuth to AlreadyRegistered / HTTP 409. Invalid statements retain their verification error for HTTP 400 and required InvalidAttestation audit. Mismatched outer IDs remain earlier errors. `AE::excluded_registration_still_verifies_packed_signature_and_certificate` passes on both backends; NazoAuth's `excluded_credential_with_invalid_packed_signature_is_rejected_and_audited` passes in its 38-test local regression and final hosted 3,960-test native suite on the source tree published as 2d5c335. The separate Chrono-blocked real HTTP matrix is not counted as executed. Global/RP uniqueness remains transactional. See S-21. |
 | REG-12 | [W3] §7.1 s27 · MUST | Record metadata | FAIL for new L3 fields | PASS | Whole record includes user handle, uv_initialized, BE/BS and explicit attestation evidence. `CE::registration_attestation_evidence_is_explicit`, `uv_fact_and_factor_eligibility_are_distinct_and_legacy_json_is_readable`. |
 | REG-13 | [W3] §7.1 s28–29 · MUST / POLICY | Store only on success | PARTIAL, caller | PARTIAL, caller | Verifier has no side effects and returns only after checks. Authorization, transaction and session state remain caller-owned. Example double-pending signup regression proves insertion-time check. |
 
@@ -170,7 +175,7 @@ applies only to that row's declared scope, not every optional Level 3 feature.
 | ATT-02 | [W2] §8.2 · MUST · packed self | Algorithm / signature | PASS | PASS | Statement alg equals credential alg; signed input exact; ES256 and Ed25519 supported. Real self-signature tests / W3 self vector. |
 | ATT-03 | [W2] §8.2 · MUST · packed x5c | Leaf signature | PASS within ES256 scope | PASS within ES256 scope | Nonempty bounded chain; leaf key used for attestation signature. Unsupported certificate algorithms reject explicitly. `AE::packed_x5c_happy_path`, `packed_x5c_bad_signature_rejected`. |
 | ATT-04 | [W2] §8.2.1 · MUST · packed leaf | Version / constraints | FAIL | PASS | v3 and present basicConstraints CA=false; no pathLen constraint for a non-CA leaf. `AE::packed_certificate_subject_version_and_constraints_are_checked`. |
-| ATT-05 | [W2] §8.2.1 · MUST · packed leaf | Required subject fields | FAIL | PASS for structural profile | C/O/OU/CN presence, required ASN.1 tags and exact OU checked. Country syntax is checked, not vendor nationality or trust. `AE::packed_certificate_subject_version_and_constraints_are_checked`; see security review. |
+| ATT-05 | [W2] / [W3] §8.2.1 · MUST · packed leaf | Required subject fields | FAIL | PARTIAL | C/O/OU/CN presence, required ASN.1 tags and exact OU checked. C is limited to two uppercase ASCII letters, but ISO 3166 assignment and the vendor's actual place of incorporation are not verified. Vendor legal identity is untrusted. `AE::packed_certificate_subject_version_and_constraints_are_checked`; see security review. |
 | ATT-06 | [W2] §8.2.1 · MUST / MUST NOT · AAGUID present | AAGUID DER / criticality | PARTIAL | PASS | Double OCTET structure, 16-byte content, noncritical, equal authData AAGUID; duplicate extensions reject. `AE::packed_x5c_aaguid_mismatch_rejected`, `packed_x5c_malformed_aaguid_rejected`, `packed_aaguid_extension_cannot_be_critical_or_duplicated`. |
 | ATT-07 | [W2] §8.2 / §8.6; [COSE-A] §2.1 · MUST · ES256 leaf | Certificate key / curve | PARTIAL | PASS | EC algorithm OID, named P-256 OID, uncompressed key and real point verification. No guessing curve from byte length. `AE::certificate_named_curve_is_checked_independently_of_point_length`. |
 | ATT-08 | [W2] §8.6 · MUST · U2F | Exactly one certificate | FAIL | PASS | x5c cardinality must be exactly one. `AE::chain_length_and_intermediate_der_are_checked`. |
@@ -179,6 +184,8 @@ applies only to that row's declared scope, not every optional Level 3 feature.
 | ATT-11 | [W1] §7.1 s15–16, s19; [W3] §7.1 s23–24 · policy-dependent | Trust assessment | PARTIAL (docs only) | PASS for explicit untrusted policy | Successful certificate signature returns `UntrustedCertificate`; no chain-root, lifetime, revocation or device-model claim. `AE::checked_attestation_signature_does_not_claim_certificate_trust`; `CE::registration_attestation_evidence_is_explicit`. |
 | ATT-12 | [W3] §13.4.5 · SHOULD · trusted attestation policy | Root / status validation | NOT APPLICABLE to declared untrusted acceptance | NOT APPLICABLE | No trust store / MDS / pinned-root validation configured. Enterprise trusted-manufacturer use case remains unsupported, not silently passed. |
 | ATT-13 | [W2] §8.2; [W3] §8 · unsupported option | ECDAA / other formats | NOT APPLICABLE | NOT APPLICABLE | Unsupported statement members / formats fail explicitly. Never downgrade an unrecognized packed scheme to self-attestation. |
+| ATT-14 | [W3] §8.2.1 · MUST NOT / value schema · firmware extension present | Firmware version DER / criticality | FAIL | PASS | b3ecfa4 also ignored OID `1.3.6.1.4.1.45724.1.1.5`. `src/x509.rs::AttestationCert::from_der` now checks a noncritical, complete DER INTEGER with a nonnegative value using borrowed `UintRef`; no machine-width cap or trusted firmware claim. `AE::packed_firmware_version_accepts_nonnegative_der_integers`, `packed_firmware_version_rejects_invalid_der`, `packed_firmware_version_cannot_be_critical_or_duplicated`; both complete local backend suites pass on the published source tree. |
+| ATT-15 | [W3] §8.2.2 · MUST NOT · non-enterprise packed | Enterprise serial-number exclusion | FAIL | PASS | b3ecfa4 also ignored OID `1.3.6.1.4.1.45724.1.1.2`. Its presence now rejects for this non-enterprise API, including noncritical encodings; no enterprise feature is added. `AE::ordinary_packed_attestation_rejects_enterprise_serial_numbers` passes in both complete local backend suites on the published source tree. |
 
 ## 6. Optional features, integration, and compatibility
 

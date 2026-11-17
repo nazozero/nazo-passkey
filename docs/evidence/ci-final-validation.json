@@ -1,80 +1,67 @@
 {
   "repository": "nazozero/passkey-auth-rs",
-  "run_id": 44074112339,
-  "run_number": 7,
+  "run_id": 44079890019,
+  "run_number": 9,
   "workflow": "CI",
-  "run_url": "https://github.com/nazozero/passkey-auth-rs/actions/runs/44074112339",
-  "head_sha": "b3ecfa40c8f626903f36d6065640236ac87fe472",
-  "source_tree": "720707ed776e82db5ba6acc3f82c1437834cdddb",
-  "tested_pull_request_merge_sha": "961270ed1c4eecd555575e6ad422935fe580aad7",
+  "run_url": "https://github.com/nazozero/passkey-auth-rs/actions/runs/44079890019",
+  "head_sha": "8260480634fac09e1151ca2b1a9eaa1c02af6f67",
+  "source_tree": "5a36536e1b0a67db1f90e6e870fcff7664a44095",
+  "tested_pull_request_merge_sha": "7350282ce619314dd7eca1aeb6cd983810f2d881",
+  "tested_merge_tree": "5a36536e1b0a67db1f90e6e870fcff7664a44095",
   "base_sha": "d59b317998e56f4a16a69133d7a854c5c34f795b",
-  "production_implementation_sha": "b3ecfa40c8f626903f36d6065640236ac87fe472",
-  "observed_at": "2026-11-17 11:32:07 UTC",
+  "production_implementation_sha": "8260480634fac09e1151ca2b1a9eaa1c02af6f67",
+  "observed_at": "2026-11-17 12:17:46 UTC",
   "status": "completed",
   "conclusion": "success",
+  "run_attempt": 2,
   "jobs_total": 12,
+  "attempt_semantics": "Attempt 1 completed with 11 successful jobs and a Windows AWS-LC NASM-installation failure caused by HTTP 504. Attempt 2 actually reran only Windows AWS-LC. The other 11 latest-view successes preserve attempt 1 execution timestamps; their new job IDs do not mean another test execution.",
+  "first_attempt": {
+    "status": "completed",
+    "conclusion": "failure",
+    "successes": 11,
+    "failures": 1,
+    "evidence": "ci-validation-8260480-attempt1.json",
+    "failed_job": 134027409154
+  },
+  "successful_retry": {
+    "job_id": 134030090837,
+    "started_at": "2026-11-17T12:10:32Z",
+    "completed_at": "2026-11-17T12:13:24Z",
+    "source_or_dependency_changes": false,
+    "observed_result": "Pinned NASM 3.02 installed; 110 all-target tests and one doctest pass."
+  },
   "jobs": [
     {
-      "id": 134007579287,
-      "name": "wasm",
-      "url": "https://github.com/nazozero/passkey-auth-rs/actions/runs/44074112339/job/134007579287",
-      "status": "completed",
-      "conclusion": "success",
-      "steps": [
-        {
-          "number": 4,
-          "name": "Run cargo check --locked --lib --target wasm32-unknown-unknown --no-default-features",
-          "status": "completed",
-          "conclusion": "success"
-        },
-        {
-          "number": 5,
-          "name": "Run cargo check --locked --lib --target wasm32-unknown-unknown --all-features",
-          "status": "completed",
-          "conclusion": "success"
-        },
-        {
-          "number": 6,
-          "name": "Run cargo build --locked --release --manifest-path perf/Cargo.toml --target wasm32-wasip1 --all-features",
-          "status": "completed",
-          "conclusion": "success"
-        },
-        {
-          "number": 7,
-          "name": "Run node perf/wasi.mjs perf/target/wasm32-wasip1/release/ceremony-bench.wasm",
-          "status": "completed",
-          "conclusion": "success"
-        }
-      ]
-    },
-    {
-      "id": 134007579529,
-      "name": "audit",
-      "url": "https://github.com/nazozero/passkey-auth-rs/actions/runs/44074112339/job/134007579529",
-      "status": "completed",
-      "conclusion": "success",
-      "steps": [
-        {
-          "number": 4,
-          "name": "Run cargo install cargo-audit --version 0.23.0 --locked",
-          "status": "completed",
-          "conclusion": "success"
-        },
-        {
-          "number": 5,
-          "name": "Run cargo audit",
-          "status": "completed",
-          "conclusion": "success"
-        }
-      ]
-    },
-    {
-      "id": 134007579642,
+      "id": 134030090700,
       "name": "quality",
-      "url": "https://github.com/nazozero/passkey-auth-rs/actions/runs/44074112339/job/134007579642",
+      "url": "https://github.com/nazozero/passkey-auth-rs/actions/runs/44079890019/job/134030090700",
       "status": "completed",
       "conclusion": "success",
+      "started_at": "2026-11-17T12:05:32Z",
+      "completed_at": "2026-11-17T12:05:54Z",
+      "actual_execution_attempt": 1,
+      "retained_prior_success": true,
+      "original_attempt1_job_id": 134027408824,
       "steps": [
+        {
+          "number": 1,
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 2,
+          "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 3,
+          "name": "Run actions-rust-lang/setup-rust-toolchain@a188e68d0fd2bd36ad51dccb2b07ba6e75105f30",
+          "status": "completed",
+          "conclusion": "success"
+        },
         {
           "number": 4,
           "name": "Run cargo fmt --all -- --check",
@@ -98,43 +85,57 @@
           "name": "Run cargo doc --locked --no-deps",
           "status": "completed",
           "conclusion": "success"
-        }
-      ]
-    },
-    {
-      "id": 134007579701,
-      "name": "test (ubuntu-24.04, rustcrypto)",
-      "url": "https://github.com/nazozero/passkey-auth-rs/actions/runs/44074112339/job/134007579701",
-      "status": "completed",
-      "conclusion": "success",
-      "steps": [
-        {
-          "number": 4,
-          "name": "Install NASM for native AWS-LC",
-          "status": "completed",
-          "conclusion": "skipped"
         },
         {
-          "number": 5,
-          "name": "Run cargo test --locked --all-targets --no-default-features",
+          "number": 13,
+          "name": "Post Run actions-rust-lang/setup-rust-toolchain@a188e68d0fd2bd36ad51dccb2b07ba6e75105f30",
           "status": "completed",
           "conclusion": "success"
         },
         {
-          "number": 6,
-          "name": "Run cargo test --locked --doc --no-default-features",
+          "number": 14,
+          "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 15,
+          "name": "Complete job",
           "status": "completed",
           "conclusion": "success"
         }
       ]
     },
     {
-      "id": 134007579796,
+      "id": 134030090837,
       "name": "test (windows-2022, aws-lc)",
-      "url": "https://github.com/nazozero/passkey-auth-rs/actions/runs/44074112339/job/134007579796",
+      "url": "https://github.com/nazozero/passkey-auth-rs/actions/runs/44079890019/job/134030090837",
       "status": "completed",
       "conclusion": "success",
+      "started_at": "2026-11-17T12:10:32Z",
+      "completed_at": "2026-11-17T12:13:24Z",
+      "actual_execution_attempt": 2,
+      "retained_prior_success": false,
+      "original_attempt1_job_id": 134027409154,
       "steps": [
+        {
+          "number": 1,
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 2,
+          "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 3,
+          "name": "Run actions-rust-lang/setup-rust-toolchain@a188e68d0fd2bd36ad51dccb2b07ba6e75105f30",
+          "status": "completed",
+          "conclusion": "success"
+        },
         {
           "number": 4,
           "name": "Install NASM for native AWS-LC",
@@ -152,16 +153,601 @@
           "name": "Run cargo test --locked --doc --features aws-lc",
           "status": "completed",
           "conclusion": "success"
+        },
+        {
+          "number": 11,
+          "name": "Post Run actions-rust-lang/setup-rust-toolchain@a188e68d0fd2bd36ad51dccb2b07ba6e75105f30",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 12,
+          "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 13,
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success"
         }
       ]
     },
     {
-      "id": 134007579798,
-      "name": "fuzz",
-      "url": "https://github.com/nazozero/passkey-auth-rs/actions/runs/44074112339/job/134007579798",
+      "id": 134030091338,
+      "name": "wasm",
+      "url": "https://github.com/nazozero/passkey-auth-rs/actions/runs/44079890019/job/134030091338",
       "status": "completed",
       "conclusion": "success",
+      "started_at": "2026-11-17T12:05:32Z",
+      "completed_at": "2026-11-17T12:06:26Z",
+      "actual_execution_attempt": 1,
+      "retained_prior_success": true,
+      "original_attempt1_job_id": 134027408809,
       "steps": [
+        {
+          "number": 1,
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 2,
+          "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 3,
+          "name": "Run actions-rust-lang/setup-rust-toolchain@a188e68d0fd2bd36ad51dccb2b07ba6e75105f30",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 4,
+          "name": "Run cargo check --locked --lib --target wasm32-unknown-unknown --no-default-features",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 5,
+          "name": "Run cargo check --locked --lib --target wasm32-unknown-unknown --all-features",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 6,
+          "name": "Run cargo build --locked --release --manifest-path perf/Cargo.toml --target wasm32-wasip1 --all-features",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 7,
+          "name": "Run node perf/wasi.mjs perf/target/wasm32-wasip1/release/ceremony-bench.wasm",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 13,
+          "name": "Post Run actions-rust-lang/setup-rust-toolchain@a188e68d0fd2bd36ad51dccb2b07ba6e75105f30",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 14,
+          "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 15,
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "id": 134030091962,
+      "name": "audit",
+      "url": "https://github.com/nazozero/passkey-auth-rs/actions/runs/44079890019/job/134030091962",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-11-17T12:05:31Z",
+      "completed_at": "2026-11-17T12:05:48Z",
+      "actual_execution_attempt": 1,
+      "retained_prior_success": true,
+      "original_attempt1_job_id": 134027408160,
+      "steps": [
+        {
+          "number": 1,
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 2,
+          "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 3,
+          "name": "Run actions-rust-lang/setup-rust-toolchain@a188e68d0fd2bd36ad51dccb2b07ba6e75105f30",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 4,
+          "name": "Run cargo install cargo-audit --version 0.23.0 --locked",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 5,
+          "name": "Run cargo audit",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 9,
+          "name": "Post Run actions-rust-lang/setup-rust-toolchain@a188e68d0fd2bd36ad51dccb2b07ba6e75105f30",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 10,
+          "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 11,
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "id": 134030092215,
+      "name": "test (ubuntu-24.04-arm, aws-lc)",
+      "url": "https://github.com/nazozero/passkey-auth-rs/actions/runs/44079890019/job/134030092215",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-11-17T12:05:34Z",
+      "completed_at": "2026-11-17T12:06:29Z",
+      "actual_execution_attempt": 1,
+      "retained_prior_success": true,
+      "original_attempt1_job_id": 134027408700,
+      "steps": [
+        {
+          "number": 1,
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 2,
+          "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 3,
+          "name": "Run actions-rust-lang/setup-rust-toolchain@a188e68d0fd2bd36ad51dccb2b07ba6e75105f30",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 4,
+          "name": "Install NASM for native AWS-LC",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "number": 5,
+          "name": "Run cargo test --locked --all-targets --features aws-lc",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 6,
+          "name": "Run cargo test --locked --doc --features aws-lc",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 11,
+          "name": "Post Run actions-rust-lang/setup-rust-toolchain@a188e68d0fd2bd36ad51dccb2b07ba6e75105f30",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 12,
+          "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 13,
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "id": 134030092889,
+      "name": "test (macos-15-intel, aws-lc)",
+      "url": "https://github.com/nazozero/passkey-auth-rs/actions/runs/44079890019/job/134030092889",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-11-17T12:05:33Z",
+      "completed_at": "2026-11-17T12:08:24Z",
+      "actual_execution_attempt": 1,
+      "retained_prior_success": true,
+      "original_attempt1_job_id": 134027408694,
+      "steps": [
+        {
+          "number": 1,
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 2,
+          "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 3,
+          "name": "Run actions-rust-lang/setup-rust-toolchain@a188e68d0fd2bd36ad51dccb2b07ba6e75105f30",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 4,
+          "name": "Install NASM for native AWS-LC",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "number": 5,
+          "name": "Run cargo test --locked --all-targets --features aws-lc",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 6,
+          "name": "Run cargo test --locked --doc --features aws-lc",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 11,
+          "name": "Post Run actions-rust-lang/setup-rust-toolchain@a188e68d0fd2bd36ad51dccb2b07ba6e75105f30",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 12,
+          "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 13,
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "id": 134030093293,
+      "name": "test (macos-15-intel, rustcrypto)",
+      "url": "https://github.com/nazozero/passkey-auth-rs/actions/runs/44079890019/job/134030093293",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-11-17T12:05:33Z",
+      "completed_at": "2026-11-17T12:07:36Z",
+      "actual_execution_attempt": 1,
+      "retained_prior_success": true,
+      "original_attempt1_job_id": 134027408893,
+      "steps": [
+        {
+          "number": 1,
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 2,
+          "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 3,
+          "name": "Run actions-rust-lang/setup-rust-toolchain@a188e68d0fd2bd36ad51dccb2b07ba6e75105f30",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 4,
+          "name": "Install NASM for native AWS-LC",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "number": 5,
+          "name": "Run cargo test --locked --all-targets --no-default-features",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 6,
+          "name": "Run cargo test --locked --doc --no-default-features",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 11,
+          "name": "Post Run actions-rust-lang/setup-rust-toolchain@a188e68d0fd2bd36ad51dccb2b07ba6e75105f30",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 12,
+          "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 13,
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "id": 134030093344,
+      "name": "test (windows-2022, rustcrypto)",
+      "url": "https://github.com/nazozero/passkey-auth-rs/actions/runs/44079890019/job/134030093344",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-11-17T12:05:31Z",
+      "completed_at": "2026-11-17T12:08:43Z",
+      "actual_execution_attempt": 1,
+      "retained_prior_success": true,
+      "original_attempt1_job_id": 134027408859,
+      "steps": [
+        {
+          "number": 1,
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 2,
+          "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 3,
+          "name": "Run actions-rust-lang/setup-rust-toolchain@a188e68d0fd2bd36ad51dccb2b07ba6e75105f30",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 4,
+          "name": "Install NASM for native AWS-LC",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "number": 5,
+          "name": "Run cargo test --locked --all-targets --no-default-features",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 6,
+          "name": "Run cargo test --locked --doc --no-default-features",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 11,
+          "name": "Post Run actions-rust-lang/setup-rust-toolchain@a188e68d0fd2bd36ad51dccb2b07ba6e75105f30",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 12,
+          "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 13,
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "id": 134030152777,
+      "name": "test (ubuntu-24.04, aws-lc)",
+      "url": "https://github.com/nazozero/passkey-auth-rs/actions/runs/44079890019/job/134030152777",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-11-17T12:05:33Z",
+      "completed_at": "2026-11-17T12:07:02Z",
+      "actual_execution_attempt": 1,
+      "retained_prior_success": true,
+      "original_attempt1_job_id": 134027408937,
+      "steps": [
+        {
+          "number": 1,
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 2,
+          "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 3,
+          "name": "Run actions-rust-lang/setup-rust-toolchain@a188e68d0fd2bd36ad51dccb2b07ba6e75105f30",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 4,
+          "name": "Install NASM for native AWS-LC",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "number": 5,
+          "name": "Run cargo test --locked --all-targets --features aws-lc",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 6,
+          "name": "Run cargo test --locked --doc --features aws-lc",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 11,
+          "name": "Post Run actions-rust-lang/setup-rust-toolchain@a188e68d0fd2bd36ad51dccb2b07ba6e75105f30",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 12,
+          "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 13,
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "id": 134030175534,
+      "name": "test (ubuntu-24.04, rustcrypto)",
+      "url": "https://github.com/nazozero/passkey-auth-rs/actions/runs/44079890019/job/134030175534",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-11-17T12:05:31Z",
+      "completed_at": "2026-11-17T12:06:06Z",
+      "actual_execution_attempt": 1,
+      "retained_prior_success": true,
+      "original_attempt1_job_id": 134027408549,
+      "steps": [
+        {
+          "number": 1,
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 2,
+          "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 3,
+          "name": "Run actions-rust-lang/setup-rust-toolchain@a188e68d0fd2bd36ad51dccb2b07ba6e75105f30",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 4,
+          "name": "Install NASM for native AWS-LC",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "number": 5,
+          "name": "Run cargo test --locked --all-targets --no-default-features",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 6,
+          "name": "Run cargo test --locked --doc --no-default-features",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 11,
+          "name": "Post Run actions-rust-lang/setup-rust-toolchain@a188e68d0fd2bd36ad51dccb2b07ba6e75105f30",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 12,
+          "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 13,
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "id": 134030178943,
+      "name": "fuzz",
+      "url": "https://github.com/nazozero/passkey-auth-rs/actions/runs/44079890019/job/134030178943",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-11-17T12:05:32Z",
+      "completed_at": "2026-11-17T12:09:56Z",
+      "actual_execution_attempt": 1,
+      "retained_prior_success": true,
+      "original_attempt1_job_id": 134027408747,
+      "steps": [
+        {
+          "number": 1,
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 2,
+          "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 3,
+          "name": "Run actions-rust-lang/setup-rust-toolchain@a188e68d0fd2bd36ad51dccb2b07ba6e75105f30",
+          "status": "completed",
+          "conclusion": "success"
+        },
         {
           "number": 4,
           "name": "Run cargo +nightly-2026-11-17 install cargo-fuzz --version 0.13.2 --locked",
@@ -179,70 +765,57 @@
           "name": "Run cargo +nightly-2026-11-17 fuzz run ceremonies --features aws-lc -- -max_total_time=60 -rss_limit_mb=1024 -max_len=65540",
           "status": "completed",
           "conclusion": "success"
-        }
-      ]
-    },
-    {
-      "id": 134007579811,
-      "name": "test (windows-2022, rustcrypto)",
-      "url": "https://github.com/nazozero/passkey-auth-rs/actions/runs/44074112339/job/134007579811",
-      "status": "completed",
-      "conclusion": "success",
-      "steps": [
-        {
-          "number": 4,
-          "name": "Install NASM for native AWS-LC",
-          "status": "completed",
-          "conclusion": "skipped"
         },
         {
-          "number": 5,
-          "name": "Run cargo test --locked --all-targets --no-default-features",
+          "number": 11,
+          "name": "Post Run actions-rust-lang/setup-rust-toolchain@a188e68d0fd2bd36ad51dccb2b07ba6e75105f30",
           "status": "completed",
           "conclusion": "success"
         },
         {
-          "number": 6,
-          "name": "Run cargo test --locked --doc --no-default-features",
+          "number": 12,
+          "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 13,
+          "name": "Complete job",
           "status": "completed",
           "conclusion": "success"
         }
       ]
     },
     {
-      "id": 134007579816,
-      "name": "test (ubuntu-24.04, aws-lc)",
-      "url": "https://github.com/nazozero/passkey-auth-rs/actions/runs/44074112339/job/134007579816",
-      "status": "completed",
-      "conclusion": "success",
-      "steps": [
-        {
-          "number": 4,
-          "name": "Install NASM for native AWS-LC",
-          "status": "completed",
-          "conclusion": "skipped"
-        },
-        {
-          "number": 5,
-          "name": "Run cargo test --locked --all-targets --features aws-lc",
-          "status": "completed",
-          "conclusion": "success"
-        },
-        {
-          "number": 6,
-          "name": "Run cargo test --locked --doc --features aws-lc",
-          "status": "completed",
-          "conclusion": "success"
-        }
-      ]
-    },
-    {
-      "id": 134007579995,
+      "id": 134030179731,
       "name": "test (ubuntu-24.04-arm, rustcrypto)",
-      "url": "https://github.com/nazozero/passkey-auth-rs/actions/runs/44074112339/job/134007579995",
+      "url": "https://github.com/nazozero/passkey-auth-rs/actions/runs/44079890019/job/134030179731",
       "status": "completed",
       "conclusion": "success",
+      "started_at": "2026-11-17T12:05:34Z",
+      "completed_at": "2026-11-17T12:05:57Z",
+      "actual_execution_attempt": 1,
+      "retained_prior_success": true,
+      "original_attempt1_job_id": 134027408733,
       "steps": [
+        {
+          "number": 1,
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 2,
+          "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 3,
+          "name": "Run actions-rust-lang/setup-rust-toolchain@a188e68d0fd2bd36ad51dccb2b07ba6e75105f30",
+          "status": "completed",
+          "conclusion": "success"
+        },
         {
           "number": 4,
           "name": "Install NASM for native AWS-LC",
@@ -260,163 +833,911 @@
           "name": "Run cargo test --locked --doc --no-default-features",
           "status": "completed",
           "conclusion": "success"
-        }
-      ]
-    },
-    {
-      "id": 134007580167,
-      "name": "test (macos-15-intel, rustcrypto)",
-      "url": "https://github.com/nazozero/passkey-auth-rs/actions/runs/44074112339/job/134007580167",
-      "status": "completed",
-      "conclusion": "success",
-      "steps": [
-        {
-          "number": 4,
-          "name": "Install NASM for native AWS-LC",
-          "status": "completed",
-          "conclusion": "skipped"
         },
         {
-          "number": 5,
-          "name": "Run cargo test --locked --all-targets --no-default-features",
+          "number": 11,
+          "name": "Post Run actions-rust-lang/setup-rust-toolchain@a188e68d0fd2bd36ad51dccb2b07ba6e75105f30",
           "status": "completed",
           "conclusion": "success"
         },
         {
-          "number": 6,
-          "name": "Run cargo test --locked --doc --no-default-features",
-          "status": "completed",
-          "conclusion": "success"
-        }
-      ]
-    },
-    {
-      "id": 134007580178,
-      "name": "test (macos-15-intel, aws-lc)",
-      "url": "https://github.com/nazozero/passkey-auth-rs/actions/runs/44074112339/job/134007580178",
-      "status": "completed",
-      "conclusion": "success",
-      "steps": [
-        {
-          "number": 4,
-          "name": "Install NASM for native AWS-LC",
-          "status": "completed",
-          "conclusion": "skipped"
-        },
-        {
-          "number": 5,
-          "name": "Run cargo test --locked --all-targets --features aws-lc",
+          "number": 12,
+          "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
           "status": "completed",
           "conclusion": "success"
         },
         {
-          "number": 6,
-          "name": "Run cargo test --locked --doc --features aws-lc",
-          "status": "completed",
-          "conclusion": "success"
-        }
-      ]
-    },
-    {
-      "id": 134007580201,
-      "name": "test (ubuntu-24.04-arm, aws-lc)",
-      "url": "https://github.com/nazozero/passkey-auth-rs/actions/runs/44074112339/job/134007580201",
-      "status": "completed",
-      "conclusion": "success",
-      "steps": [
-        {
-          "number": 4,
-          "name": "Install NASM for native AWS-LC",
-          "status": "completed",
-          "conclusion": "skipped"
-        },
-        {
-          "number": 5,
-          "name": "Run cargo test --locked --all-targets --features aws-lc",
-          "status": "completed",
-          "conclusion": "success"
-        },
-        {
-          "number": 6,
-          "name": "Run cargo test --locked --doc --features aws-lc",
+          "number": 13,
+          "name": "Complete job",
           "status": "completed",
           "conclusion": "success"
         }
       ]
     }
   ],
-  "log_evidence": {
-    "macos-rustcrypto": {
-      "job_id": 134007580167,
-      "log_file": "ci-b3ecfa4-macos-rustcrypto-job-134007580167.log",
-      "log_normalization": "CRLF converted to LF; one trailing newline",
-      "all_targets": {
-        "passed": 104,
-        "failed": 0,
-        "ignored": 0
-      },
-      "doc_tests": {
-        "passed": 1,
-        "failed": 0,
-        "ignored": 0
-      },
-      "log_bytes": 60822,
-      "log_sha256": "068bccda43ed84b75e0bcfc09b4be5bdbfc85f46b7b38369d44057a554eb7c47"
+  "log_evidence": [
+    {
+      "job_id": 134027408160,
+      "file": "library826-ci-audit-134027408160.log",
+      "bytes": 41743,
+      "sha256": "f05ed19405c06a66210986280826be3cb9c81f2af2ef3c11984fe57de770cc37",
+      "sha_scope": "Exact saved file bytes; owned Linux logs normalize CRLF to LF and one final newline, independently collected native/fuzz logs retain returned UTF-8 bytes.",
+      "excerpts": [
+        "2026-11-17T12:05:34.9627628Z HEAD is now at 7350282 Merge 8260480634fac09e1151ca2b1a9eaa1c02af6f67 into d59b317998e56f4a16a69133d7a854c5c34f795b",
+        "2026-11-17T12:05:44.7952446Z ##[group]Run cargo audit",
+        "2026-11-17T12:05:46.5152528Z       Loaded 1527 security advisories (from /home/runner/.cargo/advisory-db)",
+        "2026-11-17T12:05:46.5251914Z     Scanning Cargo.lock for vulnerabilities (321 crate dependencies)"
+      ]
     },
-    "macos-aws-lc": {
-      "job_id": 134007580178,
-      "log_file": "ci-b3ecfa4-macos-aws-lc-job-134007580178.log",
-      "log_normalization": "CRLF converted to LF; one trailing newline",
-      "all_targets": {
-        "passed": 105,
-        "failed": 0,
-        "ignored": 0
-      },
-      "doc_tests": {
-        "passed": 1,
-        "failed": 0,
-        "ignored": 0
-      },
-      "log_bytes": 63787,
-      "log_sha256": "b28a31db39251b1105483571f1056785c6437dd6816ede404036d3b21e83e6cf"
+    {
+      "job_id": 134030178943,
+      "file": "library826-ci-fuzz-134030178943.log",
+      "bytes": 2919881,
+      "sha256": "30acbb124c0a202d86faada0bfa6b47ad210404b935a48df332b6cf1c20fe7d7",
+      "sha_scope": "Exact saved file bytes; owned Linux logs normalize CRLF to LF and one final newline, independently collected native/fuzz logs retain returned UTF-8 bytes.",
+      "excerpts": [
+        "2026-11-17T12:05:40.9489509Z HEAD is now at 7350282 Merge 8260480634fac09e1151ca2b1a9eaa1c02af6f67 into d59b317998e56f4a16a69133d7a854c5c34f795b",
+        "2026-11-17T12:07:02.8293589Z #16461\tNEW    cov: 4491 ft: 9708 corp: 504/146Kb lim: 1566 exec/s: 16461 rss: 137Mb L: 712/1566 MS: 4 ShuffleBytes-CopyPart-ChangeBinInt-InsertByte-",
+        "2026-11-17T12:07:02.8296011Z #16463\tREDUCE cov: 4491 ft: 9708 corp: 504/146Kb lim: 1566 exec/s: 16463 rss: 137Mb L: 21/1566 MS: 2 ShuffleBytes-EraseBytes-",
+        "2026-11-17T12:07:02.8298156Z #16464\tREDUCE cov: 4491 ft: 9708 corp: 504/146Kb lim: 1566 exec/s: 16464 rss: 138Mb L: 62/1566 MS: 1 EraseBytes-",
+        "2026-11-17T12:07:03.5045161Z #27108\tREDUCE cov: 4721 ft: 10243 corp: 622/180Kb lim: 1566 exec/s: 13554 rss: 191Mb L: 504/1566 MS: 2 InsertByte-CrossOver-",
+        "2026-11-17T12:07:24.5256641Z #419383\tREDUCE cov: 5859 ft: 13715 corp: 1940/381Kb lim: 1566 exec/s: 18234 rss: 513Mb L: 504/1566 MS: 1 EraseBytes-",
+        "2026-11-17T12:07:33.5345517Z #601402\tREDUCE cov: 5989 ft: 14237 corp: 2232/425Kb lim: 1566 exec/s: 18793 rss: 513Mb L: 504/1566 MS: 3 CrossOver-PersAutoDict-EraseBytes- DE: \"\\000\\000\\000\\000\\000\\000\\000/\"-",
+        "2026-11-17T12:08:02.2956562Z Done 1221758 runs in 61 second(s)",
+        "2026-11-17T12:09:52.3598395Z Done 1474536 runs in 61 second(s)"
+      ]
     },
-    "fuzz": {
-      "job_id": 134007579798,
-      "log_file": "ci-b3ecfa4-fuzz-job-134007579798.log",
-      "log_normalization": "CRLF converted to LF; one trailing newline",
-      "campaigns": [
-        {
-          "backend": "RustCrypto",
-          "requested_seconds": 60,
-          "executions": 1321531,
-          "observed_seconds": 61,
-          "outcome": "success"
-        },
-        {
-          "backend": "AWS-LC 1.19.0",
-          "requested_seconds": 60,
-          "executions": 1634909,
-          "observed_seconds": 61,
-          "outcome": "success"
-        }
-      ],
-      "log_excerpt": [
-        "2026-11-17T11:27:13.8348011Z HEAD is now at 961270e Merge b3ecfa40c8f626903f36d6065640236ac87fe472 into d59b317998e56f4a16a69133d7a854c5c34f795b",
-        "2026-11-17T11:27:30.0426699Z ##[group]Run cargo +nightly-2026-11-17 fuzz run ceremonies -- -max_total_time=60 -rss_limit_mb=1024 -max_len=65540",
-        "2026-11-17T11:28:38.9614600Z INFO: Seed: 3803286177",
-        "2026-11-17T11:29:39.9816806Z Done 1321531 runs in 61 second(s)",
-        "2026-11-17T11:29:40.0961911Z ##[group]Run cargo +nightly-2026-11-17 fuzz run ceremonies --features aws-lc -- -max_total_time=60 -rss_limit_mb=1024 -max_len=65540",
-        "2026-11-17T11:30:26.9689749Z INFO: Seed: 142413913",
-        "2026-11-17T11:31:27.9807238Z Done 1634909 runs in 61 second(s)"
-      ],
-      "log_bytes": 3116142,
-      "log_sha256": "b5e2c8f84f8926f0b2d93d7600fc2f86f506d8ef1df3c89c0cf055d40ea028ab"
+    {
+      "job_id": 134027408700,
+      "file": "library826-ci-linux-arm-aws-134027408700.log",
+      "bytes": 62178,
+      "sha256": "a5b354e3be7b18c04833dd48709e50c46ff00a1621b67532ab6b12af17bfb03a",
+      "sha_scope": "Exact saved file bytes; owned Linux logs normalize CRLF to LF and one final newline, independently collected native/fuzz logs retain returned UTF-8 bytes.",
+      "excerpts": [
+        "2026-11-17T12:05:37.8464274Z HEAD is now at 7350282 Merge 8260480634fac09e1151ca2b1a9eaa1c02af6f67 into d59b317998e56f4a16a69133d7a854c5c34f795b",
+        "2026-11-17T12:05:49.0552591Z ##[group]Run cargo test --locked --all-targets --features aws-lc",
+        "2026-11-17T12:06:23.8487507Z test result: ok. 57 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.63s",
+        "2026-11-17T12:06:23.9497829Z test result: ok. 20 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.10s",
+        "2026-11-17T12:06:23.9648079Z test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s",
+        "2026-11-17T12:06:23.9746981Z test result: ok. 20 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s",
+        "2026-11-17T12:06:23.9940580Z test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s",
+        "2026-11-17T12:06:25.2546072Z test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s",
+        "2026-11-17T12:06:25.2559966Z test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s",
+        "2026-11-17T12:06:25.2706119Z test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s",
+        "2026-11-17T12:06:25.2718110Z test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s",
+        "2026-11-17T12:06:25.2726766Z test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s",
+        "2026-11-17T12:06:25.2824706Z ##[group]Run cargo test --locked --doc --features aws-lc",
+        "2026-11-17T12:06:25.9376603Z test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s"
+      ]
+    },
+    {
+      "job_id": 134027408733,
+      "file": "library826-ci-linux-arm-rust-134027408733.log",
+      "bytes": 59243,
+      "sha256": "75461bda9a75a8ac432dcd03f1da3117dd0ed0b28de344f13ebe5fc09a766c3b",
+      "sha_scope": "Exact saved file bytes; owned Linux logs normalize CRLF to LF and one final newline, independently collected native/fuzz logs retain returned UTF-8 bytes.",
+      "excerpts": [
+        "2026-11-17T12:05:37.0355899Z HEAD is now at 7350282 Merge 8260480634fac09e1151ca2b1a9eaa1c02af6f67 into d59b317998e56f4a16a69133d7a854c5c34f795b",
+        "2026-11-17T12:05:45.3516903Z ##[group]Run cargo test --locked --all-targets --no-default-features",
+        "2026-11-17T12:05:51.8197332Z test result: ok. 56 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.62s",
+        "2026-11-17T12:05:51.9209711Z test result: ok. 20 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.10s",
+        "2026-11-17T12:05:51.9384531Z test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s",
+        "2026-11-17T12:05:51.9500552Z test result: ok. 20 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s",
+        "2026-11-17T12:05:52.0164708Z test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.07s",
+        "2026-11-17T12:05:54.2023530Z test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s",
+        "2026-11-17T12:05:54.2037696Z test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s",
+        "2026-11-17T12:05:54.2427124Z test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s",
+        "2026-11-17T12:05:54.2440340Z test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s",
+        "2026-11-17T12:05:54.2450370Z test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s",
+        "2026-11-17T12:05:54.2541871Z ##[group]Run cargo test --locked --doc --no-default-features",
+        "2026-11-17T12:05:54.9058662Z test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s"
+      ]
+    },
+    {
+      "job_id": 134027408937,
+      "file": "library826-ci-linux-x86-aws-134027408937.log",
+      "bytes": 62800,
+      "sha256": "344a9d19a1f0dcc2c803dcbdb7eaf2e5c3d6f43e4539772aa22d8d4bbc0e524a",
+      "sha_scope": "Exact saved file bytes; owned Linux logs normalize CRLF to LF and one final newline, independently collected native/fuzz logs retain returned UTF-8 bytes.",
+      "excerpts": [
+        "2026-11-17T12:05:45.8524595Z HEAD is now at 7350282 Merge 8260480634fac09e1151ca2b1a9eaa1c02af6f67 into d59b317998e56f4a16a69133d7a854c5c34f795b",
+        "2026-11-17T12:06:12.5222457Z ##[group]Run cargo test --locked --all-targets --features aws-lc",
+        "2026-11-17T12:06:53.8543909Z test result: ok. 57 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 4.61s",
+        "2026-11-17T12:06:53.9349167Z test result: ok. 20 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.08s",
+        "2026-11-17T12:06:53.9451742Z test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s",
+        "2026-11-17T12:06:53.9953215Z test result: ok. 20 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s",
+        "2026-11-17T12:06:54.0259962Z test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s",
+        "2026-11-17T12:06:58.6967528Z test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s",
+        "2026-11-17T12:06:58.6979347Z test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s",
+        "2026-11-17T12:06:58.7045107Z test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s",
+        "2026-11-17T12:06:58.7054542Z test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s",
+        "2026-11-17T12:06:58.7062474Z test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s",
+        "2026-11-17T12:06:58.7141672Z ##[group]Run cargo test --locked --doc --features aws-lc",
+        "2026-11-17T12:06:59.0219002Z test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s"
+      ]
+    },
+    {
+      "job_id": 134027408549,
+      "file": "library826-ci-linux-x86-rust-134027408549.log",
+      "bytes": 59110,
+      "sha256": "3cb710df42e51860ee1aa4b21cb5bfeedc73294c2cf0aec121bcf6afffa15a18",
+      "sha_scope": "Exact saved file bytes; owned Linux logs normalize CRLF to LF and one final newline, independently collected native/fuzz logs retain returned UTF-8 bytes.",
+      "excerpts": [
+        "2026-11-17T12:05:34.8332944Z HEAD is now at 7350282 Merge 8260480634fac09e1151ca2b1a9eaa1c02af6f67 into d59b317998e56f4a16a69133d7a854c5c34f795b",
+        "2026-11-17T12:05:45.3737723Z ##[group]Run cargo test --locked --all-targets --no-default-features",
+        "2026-11-17T12:05:55.6773334Z test result: ok. 56 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 6.36s",
+        "2026-11-17T12:05:55.7829138Z test result: ok. 20 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.10s",
+        "2026-11-17T12:05:55.7958285Z test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s",
+        "2026-11-17T12:05:55.8594397Z test result: ok. 20 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s",
+        "2026-11-17T12:05:55.9292553Z test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.07s",
+        "2026-11-17T12:06:02.8830731Z test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s",
+        "2026-11-17T12:06:02.8843212Z test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s",
+        "2026-11-17T12:06:03.6134349Z test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.73s",
+        "2026-11-17T12:06:03.6148908Z test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s",
+        "2026-11-17T12:06:03.6160886Z test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s",
+        "2026-11-17T12:06:03.6253908Z ##[group]Run cargo test --locked --doc --no-default-features",
+        "2026-11-17T12:06:03.9769057Z test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s"
+      ]
+    },
+    {
+      "job_id": 134030092889,
+      "file": "library826-ci-macos-aws-lc-134030092889.log",
+      "bytes": 64345,
+      "sha256": "e46f3009a3d1cc1f1a8d0a0de430402794af5f14c18ec690a2d3353d82470675",
+      "sha_scope": "Exact saved file bytes; owned Linux logs normalize CRLF to LF and one final newline, independently collected native/fuzz logs retain returned UTF-8 bytes.",
+      "excerpts": [
+        "2026-11-17T12:05:42.7316700Z HEAD is now at 7350282 Merge 8260480634fac09e1151ca2b1a9eaa1c02af6f67 into d59b317998e56f4a16a69133d7a854c5c34f795b",
+        "2026-11-17T12:06:39.3733250Z ##[group]Run cargo test --locked --all-targets --features aws-lc",
+        "2026-11-17T12:08:12.9417570Z test result: ok. 57 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 5.71s",
+        "2026-11-17T12:08:13.0523910Z test result: ok. 20 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.10s",
+        "2026-11-17T12:08:13.0756510Z test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s",
+        "2026-11-17T12:08:13.1360360Z test result: ok. 20 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s",
+        "2026-11-17T12:08:13.1841130Z test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s",
+        "2026-11-17T12:08:19.1108350Z test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s",
+        "2026-11-17T12:08:19.1242200Z test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s",
+        "2026-11-17T12:08:19.1399970Z test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s",
+        "2026-11-17T12:08:19.1554410Z test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s",
+        "2026-11-17T12:08:19.1645690Z test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s",
+        "2026-11-17T12:08:19.1804540Z ##[group]Run cargo test --locked --doc --features aws-lc",
+        "2026-11-17T12:08:20.5337320Z test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s"
+      ]
+    },
+    {
+      "job_id": 134030093293,
+      "file": "library826-ci-macos-rustcrypto-134030093293.log",
+      "bytes": 61245,
+      "sha256": "b19ced00ac6c4a27f2f73a7a74538418cdce0f132a91f4faa1c43d404fe7fcee",
+      "sha_scope": "Exact saved file bytes; owned Linux logs normalize CRLF to LF and one final newline, independently collected native/fuzz logs retain returned UTF-8 bytes.",
+      "excerpts": [
+        "2026-11-17T12:05:41.8745780Z HEAD is now at 7350282 Merge 8260480634fac09e1151ca2b1a9eaa1c02af6f67 into d59b317998e56f4a16a69133d7a854c5c34f795b",
+        "2026-11-17T12:06:42.7824430Z ##[group]Run cargo test --locked --all-targets --no-default-features",
+        "2026-11-17T12:07:13.6842600Z test result: ok. 56 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 7.42s",
+        "2026-11-17T12:07:14.0008420Z test result: ok. 20 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.15s",
+        "2026-11-17T12:07:14.0361350Z test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.10s",
+        "2026-11-17T12:07:14.1763820Z test result: ok. 20 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s",
+        "2026-11-17T12:07:14.3327680Z test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.14s",
+        "2026-11-17T12:07:24.0880490Z test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s",
+        "2026-11-17T12:07:24.0990810Z test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s",
+        "2026-11-17T12:07:24.1589330Z test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s",
+        "2026-11-17T12:07:24.1758370Z test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s",
+        "2026-11-17T12:07:24.1762150Z test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s",
+        "2026-11-17T12:07:24.3445400Z ##[group]Run cargo test --locked --doc --no-default-features",
+        "2026-11-17T12:07:31.0382590Z test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s"
+      ]
+    },
+    {
+      "job_id": 134027408824,
+      "file": "library826-ci-quality-134027408824.log",
+      "bytes": 43946,
+      "sha256": "47e05c30aefea3fcf71d3aa741c7a411143923af50078255bd397c11eb9ba6b5",
+      "sha_scope": "Exact saved file bytes; owned Linux logs normalize CRLF to LF and one final newline, independently collected native/fuzz logs retain returned UTF-8 bytes.",
+      "excerpts": [
+        "2026-11-17T12:05:36.2251515Z HEAD is now at 7350282 Merge 8260480634fac09e1151ca2b1a9eaa1c02af6f67 into d59b317998e56f4a16a69133d7a854c5c34f795b",
+        "2026-11-17T12:05:48.0782078Z ##[group]Run cargo fmt --all -- --check",
+        "2026-11-17T12:05:48.2066221Z ##[group]Run cargo check --locked --all-targets --no-default-features",
+        "2026-11-17T12:05:50.2423844Z ##[group]Run cargo clippy --locked --all-targets --all-features -- -D warnings",
+        "2026-11-17T12:05:51.4058658Z ##[group]Run cargo doc --locked --no-deps"
+      ]
+    },
+    {
+      "job_id": 134027408809,
+      "file": "library826-ci-wasm-134027408809.log",
+      "bytes": 54681,
+      "sha256": "8c6d03a0940af9c079bc7dd77e5e73f1dc86b9fa298019502cfa13c32ec6e90b",
+      "sha_scope": "Exact saved file bytes; owned Linux logs normalize CRLF to LF and one final newline, independently collected native/fuzz logs retain returned UTF-8 bytes.",
+      "excerpts": [
+        "2026-11-17T12:05:40.1056541Z HEAD is now at 7350282 Merge 8260480634fac09e1151ca2b1a9eaa1c02af6f67 into d59b317998e56f4a16a69133d7a854c5c34f795b",
+        "2026-11-17T12:05:56.6861128Z ##[group]Run cargo check --locked --lib --target wasm32-unknown-unknown --no-default-features",
+        "2026-11-17T12:05:57.2438576Z ##[group]Run cargo check --locked --lib --target wasm32-unknown-unknown --all-features",
+        "2026-11-17T12:05:57.6128765Z ##[group]Run cargo build --locked --release --manifest-path perf/Cargo.toml --target wasm32-wasip1 --all-features",
+        "2026-11-17T12:06:21.3096359Z ##[group]Run node perf/wasi.mjs perf/target/wasm32-wasip1/release/ceremony-bench.wasm"
+      ]
+    },
+    {
+      "job_id": 134027409154,
+      "file": "library826-ci-windows-aws-lc-134027409154.log",
+      "bytes": 43312,
+      "sha256": "436e11a32f3c8b3d8d0f0990663dc4a6131660889cbca3acabb77e142d10769a",
+      "sha_scope": "Exact saved file bytes; owned Linux logs normalize CRLF to LF and one final newline, independently collected native/fuzz logs retain returned UTF-8 bytes.",
+      "excerpts": [
+        "2026-11-17T12:05:40.6450838Z HEAD is now at 7350282 Merge 8260480634fac09e1151ca2b1a9eaa1c02af6f67 into d59b317998e56f4a16a69133d7a854c5c34f795b",
+        "2026-11-17T12:06:44.5535795Z  Failed to fetch results from V2 feed at 'https://community.chocolatey.org/api/v2/Packages(Id='nasm',Version='3.2.0')' with following message : Response status code does not indicate success: 504 (Gateway Timeout).",
+        "2026-11-17T12:06:44.6197762Z ##[error]Process completed with exit code 1."
+      ]
+    },
+    {
+      "job_id": 134030090837,
+      "file": "library826-ci-windows-aws-lc-134030090837.log",
+      "bytes": 68936,
+      "sha256": "f22a4a37386e7e5e842e2e5549358a4e4afa22f36d2619dfe90e71b3ac55af2c",
+      "sha_scope": "Exact saved file bytes; owned Linux logs normalize CRLF to LF and one final newline, independently collected native/fuzz logs retain returned UTF-8 bytes.",
+      "excerpts": [
+        "2026-11-17T12:10:38.6342202Z HEAD is now at 7350282 Merge 8260480634fac09e1151ca2b1a9eaa1c02af6f67 into d59b317998e56f4a16a69133d7a854c5c34f795b",
+        "2026-11-17T12:11:19.3496682Z NASM version 3.02 compiled on Jun 28 2026",
+        "2026-11-17T12:11:19.3817000Z ##[group]Run cargo test --locked --all-targets --features aws-lc",
+        "2026-11-17T12:13:11.7512534Z test result: ok. 57 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 6.91s",
+        "2026-11-17T12:13:11.8892769Z test result: ok. 20 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.13s",
+        "2026-11-17T12:13:11.9168939Z test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s",
+        "2026-11-17T12:13:12.0008352Z test result: ok. 20 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.07s",
+        "2026-11-17T12:13:12.0572021Z test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s",
+        "2026-11-17T12:13:19.0300048Z test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s",
+        "2026-11-17T12:13:19.0384938Z test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s",
+        "2026-11-17T12:13:19.1948471Z test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.15s",
+        "2026-11-17T12:13:19.2041060Z test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s",
+        "2026-11-17T12:13:19.2122025Z test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s",
+        "2026-11-17T12:13:19.3236371Z ##[group]Run cargo test --locked --doc --features aws-lc",
+        "2026-11-17T12:13:20.5464240Z test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s"
+      ]
+    },
+    {
+      "job_id": 134030093344,
+      "file": "library826-ci-windows-rustcrypto-134030093344.log",
+      "bytes": 67686,
+      "sha256": "49f2962cbb985546e351c679497931afd8292f6ac9b39f009ff8fd0b70952a0f",
+      "sha_scope": "Exact saved file bytes; owned Linux logs normalize CRLF to LF and one final newline, independently collected native/fuzz logs retain returned UTF-8 bytes.",
+      "excerpts": [
+        "2026-11-17T12:05:38.4726898Z HEAD is now at 7350282 Merge 8260480634fac09e1151ca2b1a9eaa1c02af6f67 into d59b317998e56f4a16a69133d7a854c5c34f795b",
+        "2026-11-17T12:06:49.4738185Z ##[group]Run cargo test --locked --all-targets --no-default-features",
+        "2026-11-17T12:08:31.9077178Z test result: ok. 56 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 6.75s",
+        "2026-11-17T12:08:32.0199931Z test result: ok. 20 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.10s",
+        "2026-11-17T12:08:32.0418202Z test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s",
+        "2026-11-17T12:08:32.1153358Z test result: ok. 20 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.07s",
+        "2026-11-17T12:08:32.1949316Z test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.07s",
+        "2026-11-17T12:08:39.5402576Z test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s",
+        "2026-11-17T12:08:39.5467704Z test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s",
+        "2026-11-17T12:08:39.6501692Z test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.10s",
+        "2026-11-17T12:08:39.6577110Z test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s",
+        "2026-11-17T12:08:39.6641217Z test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s",
+        "2026-11-17T12:08:39.7620711Z ##[group]Run cargo test --locked --doc --no-default-features",
+        "2026-11-17T12:08:40.7316884Z test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s"
+      ]
     }
+  ],
+  "native_test_counts": {
+    "rustcrypto": {
+      "all_target": 109,
+      "doctests": 1,
+      "failed": 0,
+      "ignored": 0
+    },
+    "aws_lc": {
+      "all_target": 110,
+      "doctests": 1,
+      "failed": 0,
+      "ignored": 0
+    },
+    "targets": [
+      "Linux x86_64",
+      "Linux ARM64",
+      "Windows x86_64",
+      "macOS Intel"
+    ]
   },
-  "historical_complete_ci": "ci-validation-787a717.json",
+  "fuzz": {
+    "actual_execution_attempt": 1,
+    "rustcrypto": {
+      "runs": 1221758,
+      "seconds": 61
+    },
+    "aws_lc": {
+      "runs": 1474536,
+      "seconds": 61
+    },
+    "local_leak_detection_override": false
+  },
+  "local_validation_provenance": {
+    "record": "packed-final-local-gates.json",
+    "actual_local_commit": "6972f1edfda75bdaa916110b817518d602881d95",
+    "published_commit": "8260480634fac09e1151ca2b1a9eaa1c02af6f67",
+    "identical_tree": "5a36536e1b0a67db1f90e6e870fcff7664a44095",
+    "note": "Every local log hash verified; the local execution's original commit identity is retained."
+  },
+  "historical_complete_ci": [
+    "ci-validation-787a717.json",
+    "ci-validation-b3ecfa4.json",
+    "ci-evidence-head-validation.json"
+  ],
   "scope_limits": [
-    "macOS x86_64 ran on macos-15-intel; macOS ARM64 did not execute due to runner capacity and remains unverified.",
-    "Earlier complete 787a717 CI, Windows NASM build failure, macOS ARM64 runner failure and local LeakSanitizer failure remain recorded separately.",
-    "This is the library workflow result; NazoAuth has a separate dependency gate and integration CI result."
-  ]
+    "macOS ARM64 remains unverified; the earlier capacity failure is preserved separately. Both backends execute on macOS Intel.",
+    "No FIDO certification, real hardware/browser interoperability or certificate-root trust validation is implied.",
+    "CI WASI execution is a smoke check and is not the controlled before/after performance experiment.",
+    "The successful library workflow does not imply that the separate NazoAuth dependency policy or real HTTP security matrix passed.",
+    "The first attempt's Windows setup failure and skipped tests remain failures/skips even after the later successful retry."
+  ],
+  "independent_binary_review": {
+    "run_id": 44079890019,
+    "latest_attempt": 2,
+    "latest_conclusion": "success",
+    "source_head": "8260480634fac09e1151ca2b1a9eaa1c02af6f67",
+    "source_tree": "5a36536e1b0a67db1f90e6e870fcff7664a44095",
+    "checkout_merge": "7350282ce619314dd7eca1aeb6cd983810f2d881",
+    "attempt_semantics": "Windows AWS executed anew in attempt 2. Four other reviewed successful logs retain attempt 1 execution timestamps despite receiving new IDs in latest view.",
+    "jobs": [
+      {
+        "metadata": "/workspace/scratch/f7903e352d2d/evidence/library826-ci-fuzz-134030178943-metadata.json",
+        "job_id": 134030178943,
+        "name": "fuzz",
+        "conclusion": "success",
+        "log": {
+          "path": "/workspace/scratch/f7903e352d2d/evidence/library826-ci-fuzz-134030178943.log",
+          "bytes": 2919881,
+          "sha256": "30acbb124c0a202d86faada0bfa6b47ad210404b935a48df332b6cf1c20fe7d7",
+          "utf8_bom_preserved": true,
+          "crlf_count": 0,
+          "lf_count": 18965
+        },
+        "execution_review": {
+          "execution_origin": "retained successful attempt 1 execution in latest attempt 2 view",
+          "original_attempt1_job_id": 134027408747,
+          "actual_executed_attempt": 1,
+          "timestamp_identity_with_prior_job": true,
+          "source_head": "8260480634fac09e1151ca2b1a9eaa1c02af6f67",
+          "source_tree": "5a36536e1b0a67db1f90e6e870fcff7664a44095",
+          "checkout_merge": "7350282ce619314dd7eca1aeb6cd983810f2d881",
+          "checkout_evidence": "2026-11-17T12:05:40.9489509Z HEAD is now at 7350282 Merge 8260480634fac09e1151ca2b1a9eaa1c02af6f67 into d59b317998e56f4a16a69133d7a854c5c34f795b",
+          "commands": [
+            "cargo +nightly-2026-11-17 fuzz run ceremonies -- -max_total_time=60 -rss_limit_mb=1024 -max_len=65540",
+            "cargo +nightly-2026-11-17 fuzz run ceremonies --features aws-lc -- -max_total_time=60 -rss_limit_mb=1024 -max_len=65540"
+          ],
+          "compiler_warnings": [],
+          "key_tests": [],
+          "fuzz_sessions": [
+            {
+              "backend": "rustcrypto",
+              "runs": 1221758,
+              "seconds": 61
+            },
+            {
+              "backend": "aws-lc",
+              "runs": 1474536,
+              "seconds": 61
+            }
+          ],
+          "fuzz_total_runs": 2696294,
+          "fuzzer_done_lines": [
+            "2026-11-17T12:08:02.2824843Z #1221758\tDONE   cov: 6268 ft: 15345 corp: 2806/476Kb lim: 1626 exec/s: 20028 rss: 513Mb",
+            "2026-11-17T12:09:52.3561406Z #1474536\tDONE   cov: 6505 ft: 16429 corp: 2870/474Kb lim: 3321 exec/s: 24172 rss: 446Mb"
+          ],
+          "seed_corpus_lines": [
+            "2026-11-17T12:07:01.2850387Z INFO: seed corpus: files: 47 min: 10b max: 1566b total: 15556b rss: 36Mb",
+            "2026-11-17T12:08:51.3647082Z INFO: seed corpus: files: 2880 min: 1b max: 1566b total: 507979b rss: 44Mb"
+          ],
+          "sanitizer": {
+            "selection": "cargo-fuzz default address sanitizer (no --sanitizer override in actual commands)",
+            "runtime_log_explicitly_names_sanitizer": false,
+            "diagnostics": []
+          }
+        }
+      },
+      {
+        "metadata": "/workspace/scratch/f7903e352d2d/evidence/library826-ci-macos-aws-lc-134030092889-metadata.json",
+        "job_id": 134030092889,
+        "name": "test (macos-15-intel, aws-lc)",
+        "conclusion": "success",
+        "log": {
+          "path": "/workspace/scratch/f7903e352d2d/evidence/library826-ci-macos-aws-lc-134030092889.log",
+          "bytes": 64345,
+          "sha256": "e46f3009a3d1cc1f1a8d0a0de430402794af5f14c18ec690a2d3353d82470675",
+          "utf8_bom_preserved": true,
+          "crlf_count": 0,
+          "lf_count": 785
+        },
+        "execution_review": {
+          "execution_origin": "retained successful attempt 1 execution in latest attempt 2 view",
+          "original_attempt1_job_id": 134027408694,
+          "actual_executed_attempt": 1,
+          "timestamp_identity_with_prior_job": true,
+          "source_head": "8260480634fac09e1151ca2b1a9eaa1c02af6f67",
+          "source_tree": "5a36536e1b0a67db1f90e6e870fcff7664a44095",
+          "checkout_merge": "7350282ce619314dd7eca1aeb6cd983810f2d881",
+          "checkout_evidence": "2026-11-17T12:05:42.7316700Z HEAD is now at 7350282 Merge 8260480634fac09e1151ca2b1a9eaa1c02af6f67 into d59b317998e56f4a16a69133d7a854c5c34f795b",
+          "commands": [
+            "cargo test --locked --all-targets --features aws-lc",
+            "cargo test --locked --doc --features aws-lc"
+          ],
+          "compiler_warnings": [],
+          "key_tests": [
+            "2026-11-17T12:08:13.0342570Z test excluded_registration_still_verifies_packed_signature_and_certificate ... ok",
+            "2026-11-17T12:08:13.0406330Z test ordinary_packed_attestation_rejects_enterprise_serial_numbers ... ok",
+            "2026-11-17T12:08:13.0407960Z test packed_firmware_version_cannot_be_critical_or_duplicated ... ok",
+            "2026-11-17T12:08:13.0417770Z test packed_firmware_version_accepts_nonnegative_der_integers ... ok",
+            "2026-11-17T12:08:13.0522160Z test packed_firmware_version_rejects_invalid_der ... ok"
+          ],
+          "test_results": [
+            {
+              "passed": 57,
+              "failed": 0,
+              "ignored": 0,
+              "measured": 0,
+              "filtered": 0
+            },
+            {
+              "passed": 20,
+              "failed": 0,
+              "ignored": 0,
+              "measured": 0,
+              "filtered": 0
+            },
+            {
+              "passed": 8,
+              "failed": 0,
+              "ignored": 0,
+              "measured": 0,
+              "filtered": 0
+            },
+            {
+              "passed": 20,
+              "failed": 0,
+              "ignored": 0,
+              "measured": 0,
+              "filtered": 0
+            },
+            {
+              "passed": 1,
+              "failed": 0,
+              "ignored": 0,
+              "measured": 0,
+              "filtered": 0
+            },
+            {
+              "passed": 1,
+              "failed": 0,
+              "ignored": 0,
+              "measured": 0,
+              "filtered": 0
+            },
+            {
+              "passed": 0,
+              "failed": 0,
+              "ignored": 0,
+              "measured": 0,
+              "filtered": 0
+            },
+            {
+              "passed": 3,
+              "failed": 0,
+              "ignored": 0,
+              "measured": 0,
+              "filtered": 0
+            },
+            {
+              "passed": 0,
+              "failed": 0,
+              "ignored": 0,
+              "measured": 0,
+              "filtered": 0
+            },
+            {
+              "passed": 0,
+              "failed": 0,
+              "ignored": 0,
+              "measured": 0,
+              "filtered": 0
+            },
+            {
+              "passed": 1,
+              "failed": 0,
+              "ignored": 0,
+              "measured": 0,
+              "filtered": 0
+            }
+          ],
+          "all_targets_passed": 110,
+          "doc_passed": 1,
+          "failed": 0,
+          "ignored": 0,
+          "filtered": 0
+        }
+      },
+      {
+        "metadata": "/workspace/scratch/f7903e352d2d/evidence/library826-ci-macos-rustcrypto-134030093293-metadata.json",
+        "job_id": 134030093293,
+        "name": "test (macos-15-intel, rustcrypto)",
+        "conclusion": "success",
+        "log": {
+          "path": "/workspace/scratch/f7903e352d2d/evidence/library826-ci-macos-rustcrypto-134030093293.log",
+          "bytes": 61245,
+          "sha256": "b19ced00ac6c4a27f2f73a7a74538418cdce0f132a91f4faa1c43d404fe7fcee",
+          "utf8_bom_preserved": true,
+          "crlf_count": 0,
+          "lf_count": 742
+        },
+        "execution_review": {
+          "execution_origin": "retained successful attempt 1 execution in latest attempt 2 view",
+          "original_attempt1_job_id": 134027408893,
+          "actual_executed_attempt": 1,
+          "timestamp_identity_with_prior_job": true,
+          "source_head": "8260480634fac09e1151ca2b1a9eaa1c02af6f67",
+          "source_tree": "5a36536e1b0a67db1f90e6e870fcff7664a44095",
+          "checkout_merge": "7350282ce619314dd7eca1aeb6cd983810f2d881",
+          "checkout_evidence": "2026-11-17T12:05:41.8745780Z HEAD is now at 7350282 Merge 8260480634fac09e1151ca2b1a9eaa1c02af6f67 into d59b317998e56f4a16a69133d7a854c5c34f795b",
+          "commands": [
+            "cargo test --locked --all-targets --no-default-features",
+            "cargo test --locked --doc --no-default-features"
+          ],
+          "compiler_warnings": [],
+          "key_tests": [
+            "2026-11-17T12:07:13.8560360Z test excluded_registration_still_verifies_packed_signature_and_certificate ... ok",
+            "2026-11-17T12:07:13.9604500Z test ordinary_packed_attestation_rejects_enterprise_serial_numbers ... ok",
+            "2026-11-17T12:07:13.9801450Z test packed_firmware_version_cannot_be_critical_or_duplicated ... ok",
+            "2026-11-17T12:07:13.9951360Z test packed_firmware_version_accepts_nonnegative_der_integers ... ok",
+            "2026-11-17T12:07:14.0002630Z test packed_firmware_version_rejects_invalid_der ... ok"
+          ],
+          "test_results": [
+            {
+              "passed": 56,
+              "failed": 0,
+              "ignored": 0,
+              "measured": 0,
+              "filtered": 0
+            },
+            {
+              "passed": 20,
+              "failed": 0,
+              "ignored": 0,
+              "measured": 0,
+              "filtered": 0
+            },
+            {
+              "passed": 8,
+              "failed": 0,
+              "ignored": 0,
+              "measured": 0,
+              "filtered": 0
+            },
+            {
+              "passed": 20,
+              "failed": 0,
+              "ignored": 0,
+              "measured": 0,
+              "filtered": 0
+            },
+            {
+              "passed": 1,
+              "failed": 0,
+              "ignored": 0,
+              "measured": 0,
+              "filtered": 0
+            },
+            {
+              "passed": 1,
+              "failed": 0,
+              "ignored": 0,
+              "measured": 0,
+              "filtered": 0
+            },
+            {
+              "passed": 0,
+              "failed": 0,
+              "ignored": 0,
+              "measured": 0,
+              "filtered": 0
+            },
+            {
+              "passed": 3,
+              "failed": 0,
+              "ignored": 0,
+              "measured": 0,
+              "filtered": 0
+            },
+            {
+              "passed": 0,
+              "failed": 0,
+              "ignored": 0,
+              "measured": 0,
+              "filtered": 0
+            },
+            {
+              "passed": 0,
+              "failed": 0,
+              "ignored": 0,
+              "measured": 0,
+              "filtered": 0
+            },
+            {
+              "passed": 1,
+              "failed": 0,
+              "ignored": 0,
+              "measured": 0,
+              "filtered": 0
+            }
+          ],
+          "all_targets_passed": 109,
+          "doc_passed": 1,
+          "failed": 0,
+          "ignored": 0,
+          "filtered": 0
+        }
+      },
+      {
+        "metadata": "/workspace/scratch/f7903e352d2d/evidence/library826-ci-windows-aws-lc-134027409154-metadata.json",
+        "job_id": 134027409154,
+        "name": "test (windows-2022, aws-lc)",
+        "conclusion": "failure",
+        "log": {
+          "path": "/workspace/scratch/f7903e352d2d/evidence/library826-ci-windows-aws-lc-134027409154.log",
+          "bytes": 43312,
+          "sha256": "436e11a32f3c8b3d8d0f0990663dc4a6131660889cbca3acabb77e142d10769a",
+          "utf8_bom_preserved": true,
+          "crlf_count": 537,
+          "lf_count": 537
+        },
+        "execution_review": {
+          "classification": "CI environment download failure before Cargo test",
+          "failed_command": "choco install nasm --version=3.2.0 --yes --no-progress",
+          "http_status": 504,
+          "error": "Gateway Timeout",
+          "url": "https://community.chocolatey.org/api/v2/Packages(Id='nasm',Version='3.2.0')",
+          "cargo_all_targets_executed": false,
+          "cargo_doc_executed": false,
+          "followup": "Attempt 2 retried only this failed execution; replacement job 134030090837 succeeded."
+        }
+      },
+      {
+        "metadata": "/workspace/scratch/f7903e352d2d/evidence/library826-ci-windows-aws-lc-134030090837-metadata.json",
+        "job_id": 134030090837,
+        "name": "test (windows-2022, aws-lc)",
+        "conclusion": "success",
+        "log": {
+          "path": "/workspace/scratch/f7903e352d2d/evidence/library826-ci-windows-aws-lc-134030090837.log",
+          "bytes": 68936,
+          "sha256": "f22a4a37386e7e5e842e2e5549358a4e4afa22f36d2619dfe90e71b3ac55af2c",
+          "utf8_bom_preserved": true,
+          "crlf_count": 838,
+          "lf_count": 838
+        },
+        "execution_review": {
+          "execution_origin": "executed during retry attempt 2",
+          "original_attempt1_job_id": 134027409154,
+          "actual_executed_attempt": 2,
+          "timestamp_identity_with_prior_job": false,
+          "source_head": "8260480634fac09e1151ca2b1a9eaa1c02af6f67",
+          "source_tree": "5a36536e1b0a67db1f90e6e870fcff7664a44095",
+          "checkout_merge": "7350282ce619314dd7eca1aeb6cd983810f2d881",
+          "checkout_evidence": "2026-11-17T12:10:38.6342202Z HEAD is now at 7350282 Merge 8260480634fac09e1151ca2b1a9eaa1c02af6f67 into d59b317998e56f4a16a69133d7a854c5c34f795b",
+          "commands": [
+            "cargo test --locked --all-targets --features aws-lc",
+            "cargo test --locked --doc --features aws-lc"
+          ],
+          "compiler_warnings": [],
+          "key_tests": [
+            "2026-11-17T12:13:11.7992517Z test excluded_registration_still_verifies_packed_signature_and_certificate ... ok",
+            "2026-11-17T12:13:11.8311207Z test ordinary_packed_attestation_rejects_enterprise_serial_numbers ... ok",
+            "2026-11-17T12:13:11.8367279Z test packed_firmware_version_cannot_be_critical_or_duplicated ... ok",
+            "2026-11-17T12:13:11.8814657Z test packed_firmware_version_accepts_nonnegative_der_integers ... ok",
+            "2026-11-17T12:13:11.8892099Z test packed_firmware_version_rejects_invalid_der ... ok"
+          ],
+          "test_results": [
+            {
+              "passed": 57,
+              "failed": 0,
+              "ignored": 0,
+              "measured": 0,
+              "filtered": 0
+            },
+            {
+              "passed": 20,
+              "failed": 0,
+              "ignored": 0,
+              "measured": 0,
+              "filtered": 0
+            },
+            {
+              "passed": 8,
+              "failed": 0,
+              "ignored": 0,
+              "measured": 0,
+              "filtered": 0
+            },
+            {
+              "passed": 20,
+              "failed": 0,
+              "ignored": 0,
+              "measured": 0,
+              "filtered": 0
+            },
+            {
+              "passed": 1,
+              "failed": 0,
+              "ignored": 0,
+              "measured": 0,
+              "filtered": 0
+            },
+            {
+              "passed": 1,
+              "failed": 0,
+              "ignored": 0,
+              "measured": 0,
+              "filtered": 0
+            },
+            {
+              "passed": 0,
+              "failed": 0,
+              "ignored": 0,
+              "measured": 0,
+              "filtered": 0
+            },
+            {
+              "passed": 3,
+              "failed": 0,
+              "ignored": 0,
+              "measured": 0,
+              "filtered": 0
+            },
+            {
+              "passed": 0,
+              "failed": 0,
+              "ignored": 0,
+              "measured": 0,
+              "filtered": 0
+            },
+            {
+              "passed": 0,
+              "failed": 0,
+              "ignored": 0,
+              "measured": 0,
+              "filtered": 0
+            },
+            {
+              "passed": 1,
+              "failed": 0,
+              "ignored": 0,
+              "measured": 0,
+              "filtered": 0
+            }
+          ],
+          "all_targets_passed": 110,
+          "doc_passed": 1,
+          "failed": 0,
+          "ignored": 0,
+          "filtered": 0,
+          "nasm_evidence": [
+            "2026-11-17T12:11:13.8677703Z nasm v3.2.0 [Approved]",
+            "2026-11-17T12:11:19.1823373Z Chocolatey installed 1/1 packages. ",
+            "2026-11-17T12:11:19.3496682Z NASM version 3.02 compiled on Jun 28 2026"
+          ]
+        }
+      },
+      {
+        "metadata": "/workspace/scratch/f7903e352d2d/evidence/library826-ci-windows-rustcrypto-134030093344-metadata.json",
+        "job_id": 134030093344,
+        "name": "test (windows-2022, rustcrypto)",
+        "conclusion": "success",
+        "log": {
+          "path": "/workspace/scratch/f7903e352d2d/evidence/library826-ci-windows-rustcrypto-134030093344.log",
+          "bytes": 67686,
+          "sha256": "49f2962cbb985546e351c679497931afd8292f6ac9b39f009ff8fd0b70952a0f",
+          "utf8_bom_preserved": true,
+          "crlf_count": 819,
+          "lf_count": 819
+        },
+        "execution_review": {
+          "execution_origin": "retained successful attempt 1 execution in latest attempt 2 view",
+          "original_attempt1_job_id": 134027408859,
+          "actual_executed_attempt": 1,
+          "timestamp_identity_with_prior_job": true,
+          "source_head": "8260480634fac09e1151ca2b1a9eaa1c02af6f67",
+          "source_tree": "5a36536e1b0a67db1f90e6e870fcff7664a44095",
+          "checkout_merge": "7350282ce619314dd7eca1aeb6cd983810f2d881",
+          "checkout_evidence": "2026-11-17T12:05:38.4726898Z HEAD is now at 7350282 Merge 8260480634fac09e1151ca2b1a9eaa1c02af6f67 into d59b317998e56f4a16a69133d7a854c5c34f795b",
+          "commands": [
+            "cargo test --locked --all-targets --no-default-features",
+            "cargo test --locked --doc --no-default-features"
+          ],
+          "compiler_warnings": [],
+          "key_tests": [
+            "2026-11-17T12:08:31.9437586Z test excluded_registration_still_verifies_packed_signature_and_certificate ... ok",
+            "2026-11-17T12:08:31.9722297Z test ordinary_packed_attestation_rejects_enterprise_serial_numbers ... ok",
+            "2026-11-17T12:08:31.9751579Z test packed_firmware_version_cannot_be_critical_or_duplicated ... ok",
+            "2026-11-17T12:08:32.0075557Z test packed_firmware_version_accepts_nonnegative_der_integers ... ok",
+            "2026-11-17T12:08:32.0199178Z test packed_firmware_version_rejects_invalid_der ... ok"
+          ],
+          "test_results": [
+            {
+              "passed": 56,
+              "failed": 0,
+              "ignored": 0,
+              "measured": 0,
+              "filtered": 0
+            },
+            {
+              "passed": 20,
+              "failed": 0,
+              "ignored": 0,
+              "measured": 0,
+              "filtered": 0
+            },
+            {
+              "passed": 8,
+              "failed": 0,
+              "ignored": 0,
+              "measured": 0,
+              "filtered": 0
+            },
+            {
+              "passed": 20,
+              "failed": 0,
+              "ignored": 0,
+              "measured": 0,
+              "filtered": 0
+            },
+            {
+              "passed": 1,
+              "failed": 0,
+              "ignored": 0,
+              "measured": 0,
+              "filtered": 0
+            },
+            {
+              "passed": 1,
+              "failed": 0,
+              "ignored": 0,
+              "measured": 0,
+              "filtered": 0
+            },
+            {
+              "passed": 0,
+              "failed": 0,
+              "ignored": 0,
+              "measured": 0,
+              "filtered": 0
+            },
+            {
+              "passed": 3,
+              "failed": 0,
+              "ignored": 0,
+              "measured": 0,
+              "filtered": 0
+            },
+            {
+              "passed": 0,
+              "failed": 0,
+              "ignored": 0,
+              "measured": 0,
+              "filtered": 0
+            },
+            {
+              "passed": 0,
+              "failed": 0,
+              "ignored": 0,
+              "measured": 0,
+              "filtered": 0
+            },
+            {
+              "passed": 1,
+              "failed": 0,
+              "ignored": 0,
+              "measured": 0,
+              "filtered": 0
+            }
+          ],
+          "all_targets_passed": 109,
+          "doc_passed": 1,
+          "failed": 0,
+          "ignored": 0,
+          "filtered": 0
+        }
+      }
+    ]
+  }
 }

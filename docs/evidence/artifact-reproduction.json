@@ -15,7 +15,7 @@
     "rebuilt_sha256": "a69284f615374ec9ef67deddfdd50f610fdc1ba397dde496d931dbf1e37b36b1",
     "byte_identical": true,
     "implementation_commit": "fa0f0c869b88c8609fbd6097a8ecfefacff2a6b3",
-    "status": "historical checkpoint; not the final b3ecfa4 artifact"
+    "status": "historical checkpoint; not the final 8260480 artifact"
   },
   {
     "backend": "wasi",
@@ -35,6 +35,6 @@
     "rebuilt_sha256": "53570d17532dcdb4dbc0aa7e5edb3ad7b85671c04312f68d7b6ac2826e083fee",
     "byte_identical": true,
     "implementation_commit": "fa0f0c869b88c8609fbd6097a8ecfefacff2a6b3",
-    "status": "historical checkpoint; not the final b3ecfa4 artifact"
+    "status": "historical checkpoint; not the final 8260480 artifact"
   }
 ]

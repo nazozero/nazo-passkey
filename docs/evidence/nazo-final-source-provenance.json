@@ -1,0 +1,9 @@
+{
+  "local_commit": "2712efa463afcb949c78ce6a799ec7265ded247f",
+  "remote_commit": "c002858a138a134544c1cc64875f7e11a5af2629",
+  "identical_tree": "57efaec4d1d485679dd5b6608c5223cb27e7ca82",
+  "tested_base": "500c550200a22cb15b12b593227bbb19f06ecceb",
+  "tested_worktree_diff_sha256": "3a28a07598d93e1a47e54bbc0761958d3370c67917b13a38cb8f77513e9b3a8a",
+  "remote_diff_sha256": "3a28a07598d93e1a47e54bbc0761958d3370c67917b13a38cb8f77513e9b3a8a",
+  "worktree_clean": true
+}

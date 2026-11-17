@@ -1,14 +1,14 @@
 # Performance methodology and measured results
 
-All figures below were measured, including regressions. The production baseline is NazoAuth's exact pinned revision **d59b317998e56f4a16a69133d7a854c5c34f795b**. The candidate implementation is **b3ecfa40c8f626903f36d6065640236ac87fe472**. Native AWS results use **aws-lc-rs 1.19.0 / aws-lc-sys 0.47.0**, matching the NazoAuth lock. All three full-API comparisons were repeated after the final registration-error compatibility fix; the previous fa0f0c results remain clearly labeled checkpoints.
+All figures below were measured, including regressions. The production baseline is NazoAuth's exact pinned revision **d59b317998e56f4a16a69133d7a854c5c34f795b**. The candidate implementation is **8260480634fac09e1151ca2b1a9eaa1c02af6f67**. Native AWS results use **aws-lc-rs 1.19.0 / aws-lc-sys 0.47.0**, matching the NazoAuth lock. All three full-API comparisons were repeated after the final packed certificate extension checks and rejection-order fix; the previous fa0f0c and b3ecfa4 results remain clearly labeled checkpoints.
 
 ## Findings
 
-- In its own five-round native comparison, AWS-LC reduced ES256 **complete authentication finish** P50 from **419.884 to 86.491 microseconds**, a **79.4%** reduction (about **4.85x** the inverse latency). All five per-round P50 comparisons improve, by **78.95%–80.08%**. This includes decoding, policy checks, COSE parsing and real signature verification, not only a primitive call.
+- In its own five-round native comparison, AWS-LC reduced ES256 **complete authentication finish** P50 from **415.448 to 79.050 microseconds**, a **81.0%** reduction (about **5.26x** the inverse latency). All five per-round P50 comparisons improve, by **79.47%–84.93%**. This includes decoding, policy checks, COSE parsing and real signature verification, not only a primitive call.
 - This is a tradeoff: ES256 native allocation requests are **23 / 1,327 bytes** with AWS-LC, versus **16 / 1,363 bytes** at baseline. The Rust-only allocator sees just **6 / 324 bytes** and misses 17 C-side allocation requests. The benchmark executable is larger with AWS-LC.
-- Portable RustCrypto removes substantial allocation and parser overhead. Its complete ES256 authentication P50 changes by **-2.1%**, with paired-round changes from **-8.4% to +37.0%**. Scheduling variation and long tails mean this small median change does **not** establish a stable attributable verification speedup.
-- Ed25519 becomes stricter and has a latency cost. In the AWS comparison window (Ed still uses dalek), authentication P50 is **56.315 to 62.384 microseconds (+10.8%)**; registration finish is **4.517 to 9.184 microseconds (+103.3%)**. The separate portable window reports **+17.4% / +140.2%** respectively. None-attestation registration now validates the public point, while authentication now uses dalek strict verification and canonical/weak-key checks. These are security costs; they were not removed to improve a chart. The experiment does not isolate an exact time for each individual new check.
-- WASI has no AWS backend and shows no general latency improvement. Its ES256 authentication P50 changes by **-0.6%** and Ed25519 authentication by **+7.1%**; Ed25519 registration changes by **+135.1%**. Native numbers must not be extrapolated to browser or WASI performance.
+- Portable RustCrypto removes substantial allocation and parser overhead. Its complete ES256 authentication P50 changes by **+2.1%**, with paired-round changes from **-1.2% to +2.2%**. Scheduling variation and long tails mean this small median change does **not** establish a stable attributable verification speedup.
+- Ed25519 becomes stricter and has a latency cost. In the AWS comparison window (Ed still uses dalek), authentication P50 is **53.310 to 67.101 microseconds (+25.9%)**; registration finish is **4.107 to 9.084 microseconds (+121.2%)**. The separate portable window reports **+12.4% / +104.7%** respectively. None-attestation registration now validates the public point, while authentication now uses dalek strict verification and canonical/weak-key checks. These are security costs; they were not removed to improve a chart. The experiment does not isolate an exact time for each individual new check.
+- WASI has no AWS backend and shows no general latency improvement. Its ES256 authentication P50 changes by **+0.2%** and Ed25519 authentication by **+11.3%**; Ed25519 registration changes by **+143.3%**. Native numbers must not be extrapolated to browser or WASI performance.
 
 ## Controlled inputs and boundaries
 
@@ -24,7 +24,12 @@ Public registration/authentication begin/finish methods are measured through suc
 
 Each displayed P50/P95/P99 is the **median of the five per-round quantiles**, not a pooled percentile of 25,000 samples. Throughput is likewise the median of per-round throughput; it includes the timing loop/sample bookkeeping and need not equal 1/P50. All rounds and tails remain in the raw records, including unusually slow runs. The portable and AWS native experiments have separate baseline windows: each percentage uses its own paired experiment, never a baseline selected from the other window.
 
-Host variability is material. The portable experiment's unchanged ES256 primitive P50 differs by **-0.87%** between revisions, but its paired-round changes range from **-3.60% to +24.63%**. The AWS experiment's unchanged ES256 control differs by **+0.49%** overall. Large P95/P99 spikes and process-duration variation prevent strong low-tail-latency or small-speedup claims. The unchanged Ed control uses strict verification with a cached key on both sides, whereas baseline production Ed verification used ordinary verify; equal control times do not mean equal production security work.
+An [independent numerical review](evidence/performance-final-826-independent-qa.json)
+recomputed the tables, percentages, allocation totals and artifact identities
+from the retained records. It checks reporting consistency; it does not remove
+the experimental limitations or constitute another timing run.
+
+Host variability is material. The portable experiment's unchanged ES256 primitive P50 differs by **-1.28%** between revisions, but its paired-round changes range from **-3.29% to +3.84%**. The AWS experiment's unchanged ES256 control differs by **+1.26%** overall. Large P95/P99 spikes and process-duration variation prevent strong low-tail-latency or small-speedup claims. The unchanged Ed control uses strict verification with a cached key on both sides, whereas baseline production Ed verification used ordinary verify; equal control times do not mean equal production security work.
 
 ## Complete API latency and throughput
 
@@ -36,16 +41,16 @@ Each cell is **baseline → candidate**. Latencies are microseconds; throughput 
 
 | Scenario | P50 µs | P95 µs | P99 µs | Throughput /s |
 |---|---:|---:|---:|---:|
-| ed25519.authentication_begin | 0.421 → 0.411 | 0.531 → 0.651 | 0.591 → 0.681 | 1,999,900 → 1,825,220 |
-| ed25519.authentication_finish | 54.983 → 64.528 | 141.864 → 117.598 | 599.966 → 273.373 | 12,167 → 11,878 |
-| ed25519.registration_begin | 0.360 → 0.401 | 0.471 → 0.651 | 0.511 → 0.701 | 2,259,058 → 1,856,654 |
-| ed25519.registration_finish | 4.216 → 10.125 | 4.787 → 11.307 | 19.048 → 47.191 | 205,351 → 87,607 |
-| es256.authentication_begin | 0.411 → 0.401 | 0.531 → 0.661 | 0.580 → 0.691 | 1,980,534 → 1,634,121 |
-| es256.authentication_finish | 424.581 → 415.778 | 606.326 → 778.295 | 1939.188 → 1975.685 | 2,128 → 2,039 |
-| es256.registration_begin | 0.351 → 0.391 | 0.480 → 0.641 | 0.530 → 0.701 | 2,178,500 → 1,895,640 |
-| es256.registration_finish | 5.379 → 2.393 | 5.939 → 2.784 | 6.500 → 5.037 | 170,803 → 376,075 |
-| control: ed25519_strict | 54.312 → 53.160 | 96.266 → 91.569 | 344.650 → 191.189 | 14,602 → 12,886 |
-| control: es256 | 412.603 → 409.018 | 682.300 → 520.416 | 2681.879 → 2381.846 | 1,988 → 2,092 |
+| ed25519.authentication_begin | 0.421 → 0.390 | 0.531 → 0.641 | 0.571 → 0.681 | 2,018,073 → 1,958,631 |
+| ed25519.authentication_finish | 59.060 → 66.360 | 100.001 → 104.278 | 169.245 → 173.662 | 11,525 → 12,969 |
+| ed25519.registration_begin | 0.350 → 0.381 | 0.471 → 0.651 | 0.511 → 0.701 | 2,186,382 → 1,869,747 |
+| ed25519.registration_finish | 4.487 → 9.184 | 4.917 → 11.136 | 5.739 → 42.654 | 192,643 → 89,933 |
+| es256.authentication_begin | 0.421 → 0.390 | 0.541 → 0.641 | 0.601 → 0.732 | 2,014,587 → 1,716,645 |
+| es256.authentication_finish | 417.170 → 425.743 | 550.361 → 1222.486 | 1462.759 → 3557.742 | 2,127 → 1,616 |
+| es256.registration_begin | 0.370 → 0.360 | 0.481 → 0.621 | 0.531 → 0.702 | 2,227,739 → 1,469,072 |
+| es256.registration_finish | 5.328 → 2.313 | 5.769 → 2.664 | 25.168 → 3.696 | 151,389 → 293,210 |
+| control: ed25519_strict | 52.530 → 53.020 | 92.339 → 87.722 | 276.557 → 635.449 | 15,309 → 13,550 |
+| control: es256 | 409.218 → 403.960 | 1251.049 → 611.333 | 3541.627 → 3172.421 | 1,654 → 2,004 |
 
 ### Native, AWS-LC feature
 
@@ -53,16 +58,16 @@ Each cell is **baseline → candidate**. Latencies are microseconds; throughput 
 
 | Scenario | P50 µs | P95 µs | P99 µs | Throughput /s |
 |---|---:|---:|---:|---:|
-| ed25519.authentication_begin | 0.431 → 0.380 | 0.550 → 0.641 | 0.581 → 0.711 | 1,972,124 → 1,816,904 |
-| ed25519.authentication_finish | 56.315 → 62.384 | 93.110 → 101.383 | 145.600 → 121.363 | 15,437 → 14,104 |
-| ed25519.registration_begin | 0.371 → 0.371 | 0.481 → 0.611 | 0.511 → 0.661 | 2,272,870 → 1,882,579 |
-| ed25519.registration_finish | 4.517 → 9.184 | 4.887 → 11.448 | 6.701 → 41.513 | 188,727 → 87,160 |
-| es256.authentication_begin | 0.431 → 0.401 | 0.541 → 0.641 | 0.580 → 0.681 | 1,973,970 → 1,865,772 |
-| es256.authentication_finish | 419.884 → 86.491 | 531.312 → 127.623 | 3207.093 → 324.280 | 1,999 → 9,465 |
-| es256.registration_begin | 0.361 → 0.390 | 0.481 → 0.641 | 0.520 → 0.671 | 2,038,351 → 1,808,695 |
-| es256.registration_finish | 5.318 → 2.434 | 5.829 → 2.874 | 16.755 → 3.025 | 160,058 → 361,710 |
-| control: ed25519_strict | 55.094 → 55.985 | 94.503 → 91.548 | 116.666 → 181.875 | 15,736 → 15,256 |
-| control: es256 | 403.580 → 405.542 | 476.910 → 713.258 | 953.380 → 2907.529 | 2,289 → 2,067 |
+| ed25519.authentication_begin | 0.380 → 0.390 | 0.501 → 0.641 | 0.621 → 0.681 | 1,952,648 → 1,908,707 |
+| ed25519.authentication_finish | 53.310 → 67.101 | 85.579 → 103.907 | 148.034 → 121.804 | 14,573 → 14,241 |
+| ed25519.registration_begin | 0.330 → 0.361 | 0.431 → 0.631 | 0.520 → 0.671 | 2,400,977 → 1,912,999 |
+| ed25519.registration_finish | 4.107 → 9.084 | 4.937 → 11.418 | 5.429 → 39.170 | 211,708 → 96,515 |
+| es256.authentication_begin | 0.380 → 0.381 | 0.490 → 0.651 | 0.581 → 0.691 | 2,144,523 → 1,809,291 |
+| es256.authentication_finish | 415.448 → 79.050 | 507.456 → 122.625 | 1042.474 → 180.813 | 2,299 → 11,012 |
+| es256.registration_begin | 0.331 → 0.371 | 0.461 → 0.631 | 0.611 → 0.661 | 2,081,940 → 1,873,129 |
+| es256.registration_finish | 4.807 → 2.124 | 6.099 → 2.574 | 6.750 → 3.015 | 162,692 → 366,778 |
+| control: ed25519_strict | 51.528 → 53.961 | 82.594 → 86.020 | 182.766 → 239.762 | 13,411 → 16,272 |
+| control: es256 | 395.348 → 400.314 | 487.086 → 479.234 | 767.299 → 697.563 | 2,379 → 2,375 |
 
 ### WASI preview1, Node v24.22.1, RustCrypto
 
@@ -70,16 +75,16 @@ Each cell is **baseline → candidate**. Latencies are microseconds; throughput 
 
 | Scenario | P50 µs | P95 µs | P99 µs | Throughput /s |
 |---|---:|---:|---:|---:|
-| ed25519.authentication_begin | 0.902 → 1.212 | 1.883 → 1.522 | 2.594 → 3.125 | 491,065 → 483,593 |
-| ed25519.authentication_finish | 179.511 → 192.230 | 227.553 → 257.819 | 293.022 → 1662.510 | 5,034 → 4,311 |
-| ed25519.registration_begin | 0.781 → 1.353 | 1.802 → 1.582 | 2.754 → 3.636 | 663,697 → 498,219 |
-| ed25519.registration_finish | 7.502 → 17.637 | 8.663 → 21.622 | 38.458 → 56.204 | 116,331 → 43,834 |
-| es256.authentication_begin | 1.112 → 1.432 | 2.083 → 1.773 | 2.404 → 2.113 | 295,428 → 219,885 |
-| es256.authentication_finish | 1153.071 → 1146.691 | 1387.305 → 2305.291 | 2876.714 → 7842.041 | 804 → 647 |
-| es256.registration_begin | 1.252 → 1.663 | 3.225 → 2.204 | 6.100 → 4.406 | 167,993 → 171,473 |
-| es256.registration_finish | 9.124 → 7.041 | 24.998 → 16.706 | 50.556 → 38.298 | 30,006 → 32,227 |
-| control: ed25519_strict | 171.549 → 169.986 | 225.070 → 211.399 | 333.884 → 276.508 | 5,089 → 5,543 |
-| control: es256 | 1159.030 → 1075.324 | 1889.383 → 1234.704 | 4184.268 → 2027.752 | 766 → 862 |
+| ed25519.authentication_begin | 0.931 → 1.422 | 1.933 → 1.652 | 2.504 → 2.263 | 484,197 → 465,693 |
+| ed25519.authentication_finish | 177.568 → 197.618 | 244.028 → 244.649 | 457.510 → 333.553 | 4,979 → 4,635 |
+| ed25519.registration_begin | 0.811 → 1.402 | 1.833 → 1.633 | 2.854 → 3.585 | 577,472 → 504,642 |
+| ed25519.registration_finish | 7.662 → 18.638 | 8.903 → 21.432 | 39.880 → 60.472 | 116,545 → 46,158 |
+| es256.authentication_begin | 1.181 → 1.622 | 2.234 → 1.883 | 2.674 → 2.163 | 236,131 → 225,518 |
+| es256.authentication_finish | 1157.808 → 1159.658 | 1418.582 → 1333.133 | 3041.843 → 3195.095 | 803 → 808 |
+| es256.registration_begin | 1.362 → 1.683 | 5.828 → 2.163 | 6.349 → 4.487 | 165,602 → 167,180 |
+| es256.registration_finish | 9.154 → 7.091 | 25.949 → 11.787 | 55.564 → 50.797 | 27,194 → 33,802 |
+| control: ed25519_strict | 169.637 → 171.028 | 246.922 → 228.675 | 463.410 → 361.847 | 4,795 → 5,330 |
+| control: es256 | 1128.915 → 1135.264 | 1439.093 → 1682.441 | 2305.741 → 7226.751 | 829 → 719 |
 
 ## Allocation requests and bytes
 
@@ -125,18 +130,18 @@ These are whole benchmark child processes (all ten cases, warm-up, fixture creat
 
 | Comparison | Revision | Wall seconds | CPU seconds | One-core CPU % | Artifact bytes |
 |---|---|---:|---:|---:|---:|
-| native-rustcrypto | baseline | 5.861 | 5.734 | 97.8% | 1,012,496 |
-| native-rustcrypto | candidate | 6.419 | 6.214 | 96.8% | 1,237,976 |
-| native-aws-lc | baseline | 6.184 | 6.144 | 98.9% | 1,012,496 |
-| native-aws-lc | candidate | 4.500 | 4.357 | 97.0% | 3,833,808 |
-| wasi | baseline | 16.631 | 16.377 | 98.5% | 735,591 |
-| wasi | candidate | 16.840 | 16.672 | 98.0% | 952,662 |
+| native-rustcrypto | baseline | 6.706 | 6.558 | 97.8% | 1,012,496 |
+| native-rustcrypto | candidate | 6.867 | 6.767 | 97.8% | 1,239,496 |
+| native-aws-lc | baseline | 5.516 | 5.305 | 96.2% | 1,012,496 |
+| native-aws-lc | candidate | 3.572 | 3.477 | 97.5% | 3,835,088 |
+| wasi | baseline | 16.296 | 15.885 | 97.6% | 735,591 |
+| wasi | candidate | 17.102 | 16.705 | 97.7% | 954,507 |
 
 Artifacts are the same benchmark app linked with each revision, not the crate's standalone text section or an entire NazoAuth deployment. The harness directly depends on P-256 signing, CBOR and fixture-generation tools; Cargo feature unification enables some features that a production consumer may omit. These sizes therefore cannot establish NazoAuth's incremental binary growth or the size benefit of removing production PEM support. AWS native build time and a larger linked artifact remain costs. No multi-core throughput/capacity or application CPU-utilization claim is made.
 
 ## Backend experiment and security boundary
 
-The [final five-round parsed-key experiment](evidence/performance-final-backends.json) uses the same host and AWS-LC 1.19.0, with 5,000 samples/case and one pinned CPU. It is explanatory evidence, separate from the full API comparisons above. This standalone program does not link passkey-auth, and neither its source nor its lock changed in the final registration-error fix; the recorded five-round 1.19.0 backend experiment is retained without relabeling it as a new full-library run.
+The [final five-round parsed-key experiment](evidence/performance-final-backends.json) uses the same host and AWS-LC 1.19.0, with 5,000 samples/case and one pinned CPU. It is explanatory evidence, separate from the full API comparisons above. This standalone program does not link passkey-auth, and neither its source nor its lock changed in the final certificate and rejection-order fixes; the recorded five-round 1.19.0 backend experiment is retained without relabeling it as a new full-library run.
 
 | Parsed-key verification | P50 µs | P95 µs | P99 µs |
 |---|---:|---:|---:|
@@ -149,7 +154,7 @@ The AWS Ed25519 probe accepted a deliberately weak/small-order public-key fixtur
 
 Initial pre-optimization measurements are retained in performance-native-initial.json, performance-wasi-initial.json and performance-backends.json. The latter uses **AWS-LC 1.18.2**, and those exploratory values are not substituted for final results. An early Ed25519 decompress/recompress implementation was removed after measurement identified redundant inversion work; its equivalent canonical-byte check is covered by differential properties and explicit edge cases. The remaining strict verification and registration-point checks stay in place.
 
-The three `performance-checkpoint-fa0f0c-*.json` API records and the separately named allocation JSON/archive preserve the preceding implementation measurements. They are historical observations, not additional rounds in the final comparison. The final raw RustCrypto record also discloses a corrected metadata-wrapper path error after its benchmark process had completed successfully; all original samples were preserved.
+The `performance-checkpoint-fa0f0c-*.json` and `performance-checkpoint-b3ecfa4-*.json` API records and their separately named allocation JSON/archives preserve the preceding implementation measurements. They are historical observations, not additional rounds in the final comparison. The historical b3ecfa4 raw RustCrypto record also discloses a corrected metadata-wrapper path error after that benchmark process had completed successfully; all original samples were preserved.
 
 ## Reproducing the experiment
 

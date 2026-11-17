@@ -1,0 +1,1028 @@
+{
+  "repository": "nazozero/passkey-auth-rs",
+  "run_id": 44079890019,
+  "run_number": 9,
+  "run_attempt": 1,
+  "run_url": "https://github.com/nazozero/passkey-auth-rs/actions/runs/44079890019",
+  "head_sha": "8260480634fac09e1151ca2b1a9eaa1c02af6f67",
+  "source_tree": "5a36536e1b0a67db1f90e6e870fcff7664a44095",
+  "tested_pull_request_merge_sha": "7350282ce619314dd7eca1aeb6cd983810f2d881",
+  "status": "completed",
+  "conclusion": "failure",
+  "observed_at": "2026-11-17 12:13:37 UTC",
+  "jobs_total": 12,
+  "jobs": [
+    {
+      "id": 134027408160,
+      "name": "audit",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-11-17T12:05:31Z",
+      "completed_at": "2026-11-17T12:05:48Z",
+      "steps": [
+        {
+          "number": 1,
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-17T12:05:32Z",
+          "completed_at": "2026-11-17T12:05:33Z"
+        },
+        {
+          "number": 2,
+          "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-17T12:05:33Z",
+          "completed_at": "2026-11-17T12:05:34Z"
+        },
+        {
+          "number": 3,
+          "name": "Run actions-rust-lang/setup-rust-toolchain@a188e68d0fd2bd36ad51dccb2b07ba6e75105f30",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-17T12:05:34Z",
+          "completed_at": "2026-11-17T12:05:44Z"
+        },
+        {
+          "number": 4,
+          "name": "Run cargo install cargo-audit --version 0.23.0 --locked",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-17T12:05:44Z",
+          "completed_at": "2026-11-17T12:05:44Z"
+        },
+        {
+          "number": 5,
+          "name": "Run cargo audit",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-17T12:05:44Z",
+          "completed_at": "2026-11-17T12:05:46Z"
+        },
+        {
+          "number": 9,
+          "name": "Post Run actions-rust-lang/setup-rust-toolchain@a188e68d0fd2bd36ad51dccb2b07ba6e75105f30",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-17T12:05:46Z",
+          "completed_at": "2026-11-17T12:05:46Z"
+        },
+        {
+          "number": 10,
+          "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-17T12:05:46Z",
+          "completed_at": "2026-11-17T12:05:47Z"
+        },
+        {
+          "number": 11,
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-17T12:05:47Z",
+          "completed_at": "2026-11-17T12:05:47Z"
+        }
+      ]
+    },
+    {
+      "id": 134027408549,
+      "name": "test (ubuntu-24.04, rustcrypto)",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-11-17T12:05:31Z",
+      "completed_at": "2026-11-17T12:06:06Z",
+      "steps": [
+        {
+          "number": 1,
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-17T12:05:32Z",
+          "completed_at": "2026-11-17T12:05:33Z"
+        },
+        {
+          "number": 2,
+          "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-17T12:05:33Z",
+          "completed_at": "2026-11-17T12:05:34Z"
+        },
+        {
+          "number": 3,
+          "name": "Run actions-rust-lang/setup-rust-toolchain@a188e68d0fd2bd36ad51dccb2b07ba6e75105f30",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-17T12:05:34Z",
+          "completed_at": "2026-11-17T12:05:45Z"
+        },
+        {
+          "number": 4,
+          "name": "Install NASM for native AWS-LC",
+          "status": "completed",
+          "conclusion": "skipped",
+          "started_at": "2026-11-17T12:05:45Z",
+          "completed_at": "2026-11-17T12:05:45Z"
+        },
+        {
+          "number": 5,
+          "name": "Run cargo test --locked --all-targets --no-default-features",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-17T12:05:45Z",
+          "completed_at": "2026-11-17T12:06:03Z"
+        },
+        {
+          "number": 6,
+          "name": "Run cargo test --locked --doc --no-default-features",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-17T12:06:03Z",
+          "completed_at": "2026-11-17T12:06:03Z"
+        },
+        {
+          "number": 11,
+          "name": "Post Run actions-rust-lang/setup-rust-toolchain@a188e68d0fd2bd36ad51dccb2b07ba6e75105f30",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-17T12:06:03Z",
+          "completed_at": "2026-11-17T12:06:04Z"
+        },
+        {
+          "number": 12,
+          "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-17T12:06:04Z",
+          "completed_at": "2026-11-17T12:06:04Z"
+        },
+        {
+          "number": 13,
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-17T12:06:04Z",
+          "completed_at": "2026-11-17T12:06:04Z"
+        }
+      ]
+    },
+    {
+      "id": 134027408694,
+      "name": "test (macos-15-intel, aws-lc)",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-11-17T12:05:33Z",
+      "completed_at": "2026-11-17T12:08:24Z",
+      "steps": [
+        {
+          "number": 1,
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-17T12:05:37Z",
+          "completed_at": "2026-11-17T12:05:40Z"
+        },
+        {
+          "number": 2,
+          "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-17T12:05:40Z",
+          "completed_at": "2026-11-17T12:05:42Z"
+        },
+        {
+          "number": 3,
+          "name": "Run actions-rust-lang/setup-rust-toolchain@a188e68d0fd2bd36ad51dccb2b07ba6e75105f30",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-17T12:05:42Z",
+          "completed_at": "2026-11-17T12:06:39Z"
+        },
+        {
+          "number": 4,
+          "name": "Install NASM for native AWS-LC",
+          "status": "completed",
+          "conclusion": "skipped",
+          "started_at": "2026-11-17T12:06:39Z",
+          "completed_at": "2026-11-17T12:06:39Z"
+        },
+        {
+          "number": 5,
+          "name": "Run cargo test --locked --all-targets --features aws-lc",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-17T12:06:39Z",
+          "completed_at": "2026-11-17T12:08:19Z"
+        },
+        {
+          "number": 6,
+          "name": "Run cargo test --locked --doc --features aws-lc",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-17T12:08:19Z",
+          "completed_at": "2026-11-17T12:08:20Z"
+        },
+        {
+          "number": 11,
+          "name": "Post Run actions-rust-lang/setup-rust-toolchain@a188e68d0fd2bd36ad51dccb2b07ba6e75105f30",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-17T12:08:20Z",
+          "completed_at": "2026-11-17T12:08:20Z"
+        },
+        {
+          "number": 12,
+          "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-17T12:08:20Z",
+          "completed_at": "2026-11-17T12:08:21Z"
+        },
+        {
+          "number": 13,
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-17T12:08:21Z",
+          "completed_at": "2026-11-17T12:08:22Z"
+        }
+      ]
+    },
+    {
+      "id": 134027408700,
+      "name": "test (ubuntu-24.04-arm, aws-lc)",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-11-17T12:05:34Z",
+      "completed_at": "2026-11-17T12:06:29Z",
+      "steps": [
+        {
+          "number": 1,
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-17T12:05:35Z",
+          "completed_at": "2026-11-17T12:05:37Z"
+        },
+        {
+          "number": 2,
+          "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-17T12:05:37Z",
+          "completed_at": "2026-11-17T12:05:37Z"
+        },
+        {
+          "number": 3,
+          "name": "Run actions-rust-lang/setup-rust-toolchain@a188e68d0fd2bd36ad51dccb2b07ba6e75105f30",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-17T12:05:37Z",
+          "completed_at": "2026-11-17T12:05:48Z"
+        },
+        {
+          "number": 4,
+          "name": "Install NASM for native AWS-LC",
+          "status": "completed",
+          "conclusion": "skipped",
+          "started_at": "2026-11-17T12:05:48Z",
+          "completed_at": "2026-11-17T12:05:48Z"
+        },
+        {
+          "number": 5,
+          "name": "Run cargo test --locked --all-targets --features aws-lc",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-17T12:05:48Z",
+          "completed_at": "2026-11-17T12:06:25Z"
+        },
+        {
+          "number": 6,
+          "name": "Run cargo test --locked --doc --features aws-lc",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-17T12:06:25Z",
+          "completed_at": "2026-11-17T12:06:25Z"
+        },
+        {
+          "number": 11,
+          "name": "Post Run actions-rust-lang/setup-rust-toolchain@a188e68d0fd2bd36ad51dccb2b07ba6e75105f30",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-17T12:06:25Z",
+          "completed_at": "2026-11-17T12:06:26Z"
+        },
+        {
+          "number": 12,
+          "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-17T12:06:26Z",
+          "completed_at": "2026-11-17T12:06:26Z"
+        },
+        {
+          "number": 13,
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-17T12:06:26Z",
+          "completed_at": "2026-11-17T12:06:26Z"
+        }
+      ]
+    },
+    {
+      "id": 134027408733,
+      "name": "test (ubuntu-24.04-arm, rustcrypto)",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-11-17T12:05:34Z",
+      "completed_at": "2026-11-17T12:05:57Z",
+      "steps": [
+        {
+          "number": 1,
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-17T12:05:35Z",
+          "completed_at": "2026-11-17T12:05:36Z"
+        },
+        {
+          "number": 2,
+          "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-17T12:05:36Z",
+          "completed_at": "2026-11-17T12:05:37Z"
+        },
+        {
+          "number": 3,
+          "name": "Run actions-rust-lang/setup-rust-toolchain@a188e68d0fd2bd36ad51dccb2b07ba6e75105f30",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-17T12:05:37Z",
+          "completed_at": "2026-11-17T12:05:45Z"
+        },
+        {
+          "number": 4,
+          "name": "Install NASM for native AWS-LC",
+          "status": "completed",
+          "conclusion": "skipped",
+          "started_at": "2026-11-17T12:05:45Z",
+          "completed_at": "2026-11-17T12:05:45Z"
+        },
+        {
+          "number": 5,
+          "name": "Run cargo test --locked --all-targets --no-default-features",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-17T12:05:45Z",
+          "completed_at": "2026-11-17T12:05:54Z"
+        },
+        {
+          "number": 6,
+          "name": "Run cargo test --locked --doc --no-default-features",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-17T12:05:54Z",
+          "completed_at": "2026-11-17T12:05:54Z"
+        },
+        {
+          "number": 11,
+          "name": "Post Run actions-rust-lang/setup-rust-toolchain@a188e68d0fd2bd36ad51dccb2b07ba6e75105f30",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-17T12:05:54Z",
+          "completed_at": "2026-11-17T12:05:55Z"
+        },
+        {
+          "number": 12,
+          "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-17T12:05:55Z",
+          "completed_at": "2026-11-17T12:05:55Z"
+        },
+        {
+          "number": 13,
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-17T12:05:55Z",
+          "completed_at": "2026-11-17T12:05:55Z"
+        }
+      ]
+    },
+    {
+      "id": 134027408747,
+      "name": "fuzz",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-11-17T12:05:32Z",
+      "completed_at": "2026-11-17T12:09:56Z",
+      "steps": [
+        {
+          "number": 1,
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-17T12:05:33Z",
+          "completed_at": "2026-11-17T12:05:37Z"
+        },
+        {
+          "number": 2,
+          "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-17T12:05:37Z",
+          "completed_at": "2026-11-17T12:05:40Z"
+        },
+        {
+          "number": 3,
+          "name": "Run actions-rust-lang/setup-rust-toolchain@a188e68d0fd2bd36ad51dccb2b07ba6e75105f30",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-17T12:05:40Z",
+          "completed_at": "2026-11-17T12:05:55Z"
+        },
+        {
+          "number": 4,
+          "name": "Run cargo +nightly-2026-11-17 install cargo-fuzz --version 0.13.2 --locked",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-17T12:05:55Z",
+          "completed_at": "2026-11-17T12:05:55Z"
+        },
+        {
+          "number": 5,
+          "name": "Run cargo +nightly-2026-11-17 fuzz run ceremonies -- -max_total_time=60 -rss_limit_mb=1024 -max_len=65540",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-17T12:05:55Z",
+          "completed_at": "2026-11-17T12:08:02Z"
+        },
+        {
+          "number": 6,
+          "name": "Run cargo +nightly-2026-11-17 fuzz run ceremonies --features aws-lc -- -max_total_time=60 -rss_limit_mb=1024 -max_len=65540",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-17T12:08:02Z",
+          "completed_at": "2026-11-17T12:09:52Z"
+        },
+        {
+          "number": 11,
+          "name": "Post Run actions-rust-lang/setup-rust-toolchain@a188e68d0fd2bd36ad51dccb2b07ba6e75105f30",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-17T12:09:52Z",
+          "completed_at": "2026-11-17T12:09:52Z"
+        },
+        {
+          "number": 12,
+          "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-17T12:09:52Z",
+          "completed_at": "2026-11-17T12:09:52Z"
+        },
+        {
+          "number": 13,
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-17T12:09:52Z",
+          "completed_at": "2026-11-17T12:09:52Z"
+        }
+      ]
+    },
+    {
+      "id": 134027408809,
+      "name": "wasm",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-11-17T12:05:32Z",
+      "completed_at": "2026-11-17T12:06:26Z",
+      "steps": [
+        {
+          "number": 1,
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-17T12:05:32Z",
+          "completed_at": "2026-11-17T12:05:35Z"
+        },
+        {
+          "number": 2,
+          "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-17T12:05:35Z",
+          "completed_at": "2026-11-17T12:05:40Z"
+        },
+        {
+          "number": 3,
+          "name": "Run actions-rust-lang/setup-rust-toolchain@a188e68d0fd2bd36ad51dccb2b07ba6e75105f30",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-17T12:05:40Z",
+          "completed_at": "2026-11-17T12:05:56Z"
+        },
+        {
+          "number": 4,
+          "name": "Run cargo check --locked --lib --target wasm32-unknown-unknown --no-default-features",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-17T12:05:56Z",
+          "completed_at": "2026-11-17T12:05:57Z"
+        },
+        {
+          "number": 5,
+          "name": "Run cargo check --locked --lib --target wasm32-unknown-unknown --all-features",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-17T12:05:57Z",
+          "completed_at": "2026-11-17T12:05:57Z"
+        },
+        {
+          "number": 6,
+          "name": "Run cargo build --locked --release --manifest-path perf/Cargo.toml --target wasm32-wasip1 --all-features",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-17T12:05:57Z",
+          "completed_at": "2026-11-17T12:06:21Z"
+        },
+        {
+          "number": 7,
+          "name": "Run node perf/wasi.mjs perf/target/wasm32-wasip1/release/ceremony-bench.wasm",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-17T12:06:21Z",
+          "completed_at": "2026-11-17T12:06:25Z"
+        },
+        {
+          "number": 13,
+          "name": "Post Run actions-rust-lang/setup-rust-toolchain@a188e68d0fd2bd36ad51dccb2b07ba6e75105f30",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-17T12:06:25Z",
+          "completed_at": "2026-11-17T12:06:25Z"
+        },
+        {
+          "number": 14,
+          "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-17T12:06:25Z",
+          "completed_at": "2026-11-17T12:06:25Z"
+        },
+        {
+          "number": 15,
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-17T12:06:25Z",
+          "completed_at": "2026-11-17T12:06:25Z"
+        }
+      ]
+    },
+    {
+      "id": 134027408824,
+      "name": "quality",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-11-17T12:05:32Z",
+      "completed_at": "2026-11-17T12:05:54Z",
+      "steps": [
+        {
+          "number": 1,
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-17T12:05:33Z",
+          "completed_at": "2026-11-17T12:05:35Z"
+        },
+        {
+          "number": 2,
+          "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-17T12:05:35Z",
+          "completed_at": "2026-11-17T12:05:36Z"
+        },
+        {
+          "number": 3,
+          "name": "Run actions-rust-lang/setup-rust-toolchain@a188e68d0fd2bd36ad51dccb2b07ba6e75105f30",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-17T12:05:36Z",
+          "completed_at": "2026-11-17T12:05:48Z"
+        },
+        {
+          "number": 4,
+          "name": "Run cargo fmt --all -- --check",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-17T12:05:48Z",
+          "completed_at": "2026-11-17T12:05:48Z"
+        },
+        {
+          "number": 5,
+          "name": "Run cargo check --locked --all-targets --no-default-features",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-17T12:05:48Z",
+          "completed_at": "2026-11-17T12:05:50Z"
+        },
+        {
+          "number": 6,
+          "name": "Run cargo clippy --locked --all-targets --all-features -- -D warnings",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-17T12:05:50Z",
+          "completed_at": "2026-11-17T12:05:51Z"
+        },
+        {
+          "number": 7,
+          "name": "Run cargo doc --locked --no-deps",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-17T12:05:51Z",
+          "completed_at": "2026-11-17T12:05:51Z"
+        },
+        {
+          "number": 13,
+          "name": "Post Run actions-rust-lang/setup-rust-toolchain@a188e68d0fd2bd36ad51dccb2b07ba6e75105f30",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-17T12:05:51Z",
+          "completed_at": "2026-11-17T12:05:51Z"
+        },
+        {
+          "number": 14,
+          "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-17T12:05:51Z",
+          "completed_at": "2026-11-17T12:05:52Z"
+        },
+        {
+          "number": 15,
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-17T12:05:52Z",
+          "completed_at": "2026-11-17T12:05:52Z"
+        }
+      ]
+    },
+    {
+      "id": 134027408859,
+      "name": "test (windows-2022, rustcrypto)",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-11-17T12:05:31Z",
+      "completed_at": "2026-11-17T12:08:43Z",
+      "steps": [
+        {
+          "number": 1,
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-17T12:05:32Z",
+          "completed_at": "2026-11-17T12:05:33Z"
+        },
+        {
+          "number": 2,
+          "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-17T12:05:33Z",
+          "completed_at": "2026-11-17T12:05:38Z"
+        },
+        {
+          "number": 3,
+          "name": "Run actions-rust-lang/setup-rust-toolchain@a188e68d0fd2bd36ad51dccb2b07ba6e75105f30",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-17T12:05:38Z",
+          "completed_at": "2026-11-17T12:06:49Z"
+        },
+        {
+          "number": 4,
+          "name": "Install NASM for native AWS-LC",
+          "status": "completed",
+          "conclusion": "skipped",
+          "started_at": "2026-11-17T12:06:49Z",
+          "completed_at": "2026-11-17T12:06:49Z"
+        },
+        {
+          "number": 5,
+          "name": "Run cargo test --locked --all-targets --no-default-features",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-17T12:06:49Z",
+          "completed_at": "2026-11-17T12:08:39Z"
+        },
+        {
+          "number": 6,
+          "name": "Run cargo test --locked --doc --no-default-features",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-17T12:08:39Z",
+          "completed_at": "2026-11-17T12:08:40Z"
+        },
+        {
+          "number": 11,
+          "name": "Post Run actions-rust-lang/setup-rust-toolchain@a188e68d0fd2bd36ad51dccb2b07ba6e75105f30",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-17T12:08:40Z",
+          "completed_at": "2026-11-17T12:08:40Z"
+        },
+        {
+          "number": 12,
+          "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-17T12:08:40Z",
+          "completed_at": "2026-11-17T12:08:42Z"
+        },
+        {
+          "number": 13,
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-17T12:08:42Z",
+          "completed_at": "2026-11-17T12:08:42Z"
+        }
+      ]
+    },
+    {
+      "id": 134027408893,
+      "name": "test (macos-15-intel, rustcrypto)",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-11-17T12:05:33Z",
+      "completed_at": "2026-11-17T12:07:36Z",
+      "steps": [
+        {
+          "number": 1,
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-17T12:05:34Z",
+          "completed_at": "2026-11-17T12:05:38Z"
+        },
+        {
+          "number": 2,
+          "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-17T12:05:38Z",
+          "completed_at": "2026-11-17T12:05:41Z"
+        },
+        {
+          "number": 3,
+          "name": "Run actions-rust-lang/setup-rust-toolchain@a188e68d0fd2bd36ad51dccb2b07ba6e75105f30",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-17T12:05:41Z",
+          "completed_at": "2026-11-17T12:06:42Z"
+        },
+        {
+          "number": 4,
+          "name": "Install NASM for native AWS-LC",
+          "status": "completed",
+          "conclusion": "skipped",
+          "started_at": "2026-11-17T12:06:42Z",
+          "completed_at": "2026-11-17T12:06:42Z"
+        },
+        {
+          "number": 5,
+          "name": "Run cargo test --locked --all-targets --no-default-features",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-17T12:06:42Z",
+          "completed_at": "2026-11-17T12:07:24Z"
+        },
+        {
+          "number": 6,
+          "name": "Run cargo test --locked --doc --no-default-features",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-17T12:07:24Z",
+          "completed_at": "2026-11-17T12:07:31Z"
+        },
+        {
+          "number": 11,
+          "name": "Post Run actions-rust-lang/setup-rust-toolchain@a188e68d0fd2bd36ad51dccb2b07ba6e75105f30",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-17T12:07:31Z",
+          "completed_at": "2026-11-17T12:07:31Z"
+        },
+        {
+          "number": 12,
+          "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-17T12:07:31Z",
+          "completed_at": "2026-11-17T12:07:33Z"
+        },
+        {
+          "number": 13,
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-17T12:07:33Z",
+          "completed_at": "2026-11-17T12:07:34Z"
+        }
+      ]
+    },
+    {
+      "id": 134027408937,
+      "name": "test (ubuntu-24.04, aws-lc)",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-11-17T12:05:33Z",
+      "completed_at": "2026-11-17T12:07:02Z",
+      "steps": [
+        {
+          "number": 1,
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-17T12:05:34Z",
+          "completed_at": "2026-11-17T12:05:38Z"
+        },
+        {
+          "number": 2,
+          "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-17T12:05:38Z",
+          "completed_at": "2026-11-17T12:05:45Z"
+        },
+        {
+          "number": 3,
+          "name": "Run actions-rust-lang/setup-rust-toolchain@a188e68d0fd2bd36ad51dccb2b07ba6e75105f30",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-17T12:05:45Z",
+          "completed_at": "2026-11-17T12:06:12Z"
+        },
+        {
+          "number": 4,
+          "name": "Install NASM for native AWS-LC",
+          "status": "completed",
+          "conclusion": "skipped",
+          "started_at": "2026-11-17T12:06:12Z",
+          "completed_at": "2026-11-17T12:06:12Z"
+        },
+        {
+          "number": 5,
+          "name": "Run cargo test --locked --all-targets --features aws-lc",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-17T12:06:12Z",
+          "completed_at": "2026-11-17T12:06:58Z"
+        },
+        {
+          "number": 6,
+          "name": "Run cargo test --locked --doc --features aws-lc",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-17T12:06:58Z",
+          "completed_at": "2026-11-17T12:06:59Z"
+        },
+        {
+          "number": 11,
+          "name": "Post Run actions-rust-lang/setup-rust-toolchain@a188e68d0fd2bd36ad51dccb2b07ba6e75105f30",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-17T12:06:59Z",
+          "completed_at": "2026-11-17T12:06:59Z"
+        },
+        {
+          "number": 12,
+          "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-17T12:06:59Z",
+          "completed_at": "2026-11-17T12:06:59Z"
+        },
+        {
+          "number": 13,
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-17T12:06:59Z",
+          "completed_at": "2026-11-17T12:06:59Z"
+        }
+      ]
+    },
+    {
+      "id": 134027409154,
+      "name": "test (windows-2022, aws-lc)",
+      "status": "completed",
+      "conclusion": "failure",
+      "started_at": "2026-11-17T12:05:32Z",
+      "completed_at": "2026-11-17T12:06:48Z",
+      "steps": [
+        {
+          "number": 1,
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-17T12:05:33Z",
+          "completed_at": "2026-11-17T12:05:35Z"
+        },
+        {
+          "number": 2,
+          "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-17T12:05:35Z",
+          "completed_at": "2026-11-17T12:05:40Z"
+        },
+        {
+          "number": 3,
+          "name": "Run actions-rust-lang/setup-rust-toolchain@a188e68d0fd2bd36ad51dccb2b07ba6e75105f30",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-17T12:05:40Z",
+          "completed_at": "2026-11-17T12:06:10Z"
+        },
+        {
+          "number": 4,
+          "name": "Install NASM for native AWS-LC",
+          "status": "completed",
+          "conclusion": "failure",
+          "started_at": "2026-11-17T12:06:10Z",
+          "completed_at": "2026-11-17T12:06:44Z"
+        },
+        {
+          "number": 5,
+          "name": "Run cargo test --locked --all-targets --features aws-lc",
+          "status": "completed",
+          "conclusion": "skipped",
+          "started_at": "2026-11-17T12:06:44Z",
+          "completed_at": "2026-11-17T12:06:44Z"
+        },
+        {
+          "number": 6,
+          "name": "Run cargo test --locked --doc --features aws-lc",
+          "status": "completed",
+          "conclusion": "skipped",
+          "started_at": "2026-11-17T12:06:44Z",
+          "completed_at": "2026-11-17T12:06:44Z"
+        },
+        {
+          "number": 11,
+          "name": "Post Run actions-rust-lang/setup-rust-toolchain@a188e68d0fd2bd36ad51dccb2b07ba6e75105f30",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-17T12:06:44Z",
+          "completed_at": "2026-11-17T12:06:44Z"
+        },
+        {
+          "number": 12,
+          "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-17T12:06:44Z",
+          "completed_at": "2026-11-17T12:06:47Z"
+        },
+        {
+          "number": 13,
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-17T12:06:47Z",
+          "completed_at": "2026-11-17T12:06:47Z"
+        }
+      ]
+    }
+  ],
+  "failure": {
+    "job_id": 134027409154,
+    "stage": "Install pinned NASM",
+    "type": "HTTP 504 from Chocolatey package feed",
+    "test_execution": "All-target and documentation test steps skipped",
+    "claim": "The failure is preserved and does not count as Windows AWS-LC validation.",
+    "log": {
+      "job_id": 134027409154,
+      "file": "library826-ci-windows-aws-lc-134027409154.log",
+      "bytes": 43312,
+      "sha256": "436e11a32f3c8b3d8d0f0990663dc4a6131660889cbca3acabb77e142d10769a",
+      "sha_scope": "Exact saved file bytes; owned Linux logs normalize CRLF to LF and one final newline, independently collected native/fuzz logs retain returned UTF-8 bytes.",
+      "excerpts": [
+        "2026-11-17T12:05:40.6450838Z HEAD is now at 7350282 Merge 8260480634fac09e1151ca2b1a9eaa1c02af6f67 into d59b317998e56f4a16a69133d7a854c5c34f795b",
+        "2026-11-17T12:06:44.5535795Z  Failed to fetch results from V2 feed at 'https://community.chocolatey.org/api/v2/Packages(Id='nasm',Version='3.2.0')' with following message : Response status code does not indicate success: 504 (Gateway Timeout).",
+        "2026-11-17T12:06:44.6197762Z ##[error]Process completed with exit code 1."
+      ]
+    }
+  },
+  "successor": "ci-final-validation.json records attempt 2 success after only Windows AWS-LC was rerun; the first attempt remains a failure."
+}
