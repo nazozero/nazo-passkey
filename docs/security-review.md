@@ -636,7 +636,16 @@ individual job outcomes, including the Windows AWS-LC failure described below
 and the then-queued macOS jobs. Those ARM64 jobs later failed to acquire runners
 because of GitHub capacity constraints, before any code executed. The workflow
 keeps the same tests on macOS Intel instead; [the original annotations](evidence/ci-macos-runner-capacity.json)
-are preserved and macOS ARM64 is not counted as tested. A completed target build or WASI run does not
+are preserved and macOS ARM64 is not counted as tested. The subsequent
+[final library run 44070479207](https://github.com/nazozero/passkey-auth-rs/actions/runs/44070479207)
+completed with **all 12 jobs successful**, including **104 RustCrypto tests +
+one doctest** and **105 AWS-LC tests + one doctest** on macOS Intel, with no
+failures or ignored tests. Linux x86-64/ARM64, Windows, quality, audit, WASM and
+fuzz also passed. The [final CI evidence](evidence/ci-final-validation.json)
+records PR head `787a717ce7e3daeeb578a69a4b5c3dd8f9236024` separately from the
+Actions-tested synthetic merge `51cd42793469ca7dc17ca1112bc637bd706060b3`.
+This result applies to the library workflow; NazoAuth's dependency and
+integration gates remain separate. A completed target build or WASI run does not
 establish real browser/authenticator interoperability. Exact commands, later
 CI outcomes and integration results appear in [validation.md](validation.md).
 
@@ -678,7 +687,10 @@ documentation test**, with zero failures or ignored tests. This resolves the
 observed Windows build blocker. The [failure and remediation evidence](evidence/ci-windows-aws-lc-setup.json)
 preserves both outcomes and their separate log digests. Linux x86-64/ARM64 with
 both backends, Windows RustCrypto, quality, audit, WASM and fuzz also passed in
-that corrected run; the two macOS jobs were still queued at the checkpoint.
+that corrected run. Its macOS ARM64 jobs later failed to acquire runners;
+the final successful macOS Intel run above preserves the same two backends
+and all-target/documentation-test commands. Neither outcome is evidence of
+macOS ARM64 execution.
 
 ## Remaining limitations and operational risks
 
