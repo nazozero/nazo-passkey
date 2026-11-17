@@ -220,6 +220,34 @@ pub(crate) fn decode_b64_bounded(
     Ok(bytes)
 }
 
+/// Decode a short wire field directly into caller-owned storage. The same
+/// encodings and size policy as `decode_b64_bounded` apply; successful decoding
+/// performs no allocation and never exposes bytes beyond the returned length.
+pub(crate) fn decode_b64_into(
+    input: &str,
+    strict: bool,
+    output: &mut [u8],
+    field: &'static str,
+) -> Result<usize> {
+    let limit = output.len();
+    if input.len() > limit.div_ceil(3) * 4 {
+        return Err(Error::InputTooLarge { field, limit });
+    }
+    let mut result = B64URL.decode_slice(input, &mut *output);
+    if !strict && result.is_err() {
+        for engine in [&B64URL_PAD, &B64STD_NO_PAD, &B64STD] {
+            result = engine.decode_slice(input, &mut *output);
+            if result.is_ok() {
+                break;
+            }
+        }
+    }
+    result.map_err(|error| match error {
+        base64::DecodeSliceError::OutputSliceTooSmall => Error::InputTooLarge { field, limit },
+        base64::DecodeSliceError::DecodeError(error) => Error::Base64(error.to_string()),
+    })
+}
+
 // ---------- Wire structs (request bodies) -------------------------------
 
 /// JSON body posted by the client to finish a registration ceremony.
@@ -548,6 +576,36 @@ mod tests {
     #[test]
     fn rejects_garbage() {
         assert!(b64url_decode("!!!not-base64!!!").is_err());
+    }
+
+    #[test]
+    fn stack_base64_decoding_preserves_all_wire_encodings_and_bounds() {
+        for limit in [0, 1, 2, 3, 32, 64, 80] {
+            for length in 0..=limit + 3 {
+                let bytes: Vec<_> = (0..length).map(|i| (i as u8).wrapping_mul(127)).collect();
+                for engine in [&B64URL, &B64URL_PAD, &B64STD_NO_PAD, &B64STD] {
+                    let encoded = engine.encode(&bytes);
+                    for strict in [false, true] {
+                        let expected = decode_b64_bounded(&encoded, strict, limit, "test");
+                        let mut output = vec![0xa5; limit];
+                        let actual = decode_b64_into(&encoded, strict, &mut output, "test");
+                        assert_eq!(actual.is_ok(), expected.is_ok());
+                        if let (Ok(written), Ok(expected)) = (actual, expected) {
+                            assert_eq!(&output[..written], expected);
+                        }
+                    }
+                }
+            }
+        }
+        for invalid in ["!", "A", "Zh", "Zg=", "Zg===", "Zg==\n", "++++____"] {
+            let mut output = [0; 80];
+            for strict in [false, true] {
+                assert_eq!(
+                    decode_b64_into(invalid, strict, &mut output, "test").is_ok(),
+                    decode_b64_bounded(invalid, strict, 80, "test").is_ok()
+                );
+            }
+        }
     }
 
     // ---- RpId ----------------------------------------------------------

@@ -1,417 +1,222 @@
 # passkey-auth
 
 [![CI](https://github.com/nazozero/passkey-auth-rs/actions/workflows/ci.yml/badge.svg)](https://github.com/nazozero/passkey-auth-rs/actions/workflows/ci.yml)
-[![License](https://img.shields.io/crates/l/passkey-auth.svg)](#license)
+[![License](https://img.shields.io/badge/license-MIT%20OR%20Apache--2.0-blue.svg)](#maintainers-and-license)
 
-A synchronous WebAuthn relying party verifier for **ES256 / P-256** and
-**Ed25519** credentials, with a pure Rust default and optional native ES256
-acceleration. It verifies browser registration and authentication
-responses and returns the credential state an application must persist. It does
-not own accounts, sessions, a database, or a challenge store.
+A synchronous Rust WebAuthn relying party library for **ES256 / P-256** and
+**Ed25519** passkeys. It creates ceremony options, verifies browser responses,
+and returns the credential facts an application must persist. Applications own
+accounts, one-time ceremony storage, transactions, sessions, and MFA policy.
 
-This fork is used by [NazoAuth](https://github.com/nazozero/NazoAuth). This work
-starts from its pinned revision
-`d59b317998e56f4a16a69133d7a854c5c34f795b` on `nazoauth/patched-rustcrypto`,
-not the upstream repository's older `main` branch. The revised crate is **0.2.0** because public Rust struct fields changed.
-The migration from the pinned 0.1.3 revision keeps existing credential JSON and
-signing keys usable; users do not need to register their passkeys again.
-The implementation and consumer changes are reviewed in
-[passkey-auth-rs PR #1](https://github.com/nazozero/passkey-auth-rs/pull/1) and
-[NazoAuth PR #287](https://github.com/nazozero/NazoAuth/pull/287).
+This is the NazoZero-maintained fork used by
+[NazoAuth](https://github.com/nazozero/NazoAuth). It targets **Rust 1.100.0,
+edition 2024**. The default cryptographic implementation is RustCrypto;
+optional native AWS-LC verification is available for ES256. The library has no
+network or database dependencies and forbids unsafe Rust in its own code.
 
-**Rust 1.100.0 / edition 2024** is the target toolchain. The default uses
-RustCrypto `p256`, `ed25519-dalek`, and `sha2`. The optional `aws-lc` feature
-selects `aws-lc-rs` for native credential ES256 verification; the manifest permits
-compatible versions from 1.18.2 and the final lockfiles select **1.19.0**. Ed25519
-always uses dalek's strict verifier. There is no locally implemented
-cryptographic primitive. See
-[validation](docs/validation.md) for the exact builds actually run and
-[performance](docs/performance.md) for measured results and their limits.
-The [NazoAuth integration record](docs/nazo-integration.md) traces legacy JSONB,
-tenant/account binding, live PostgreSQL/Valkey tests, UV/MFA decisions and the
-remaining application dependency gate to their original execution evidence.
+The protocol baseline is
+[WebAuthn Level 3](https://www.w3.org/TR/2026/REC-webauthn-3-20260825/), with
+compatibility for the supported Level 1/2 credential and browser behavior.
+The [requirements matrix](docs/protocol-compliance.md) states each checked
+requirement, its scope, and its evidence. This is not a claim of FIDO
+certification or support for every optional WebAuthn feature.
 
-Challenges take 32 bytes directly from the platform CSPRNG through
-`getrandom 0.4`: operating-system randomness on native targets, WASI randomness on WASI,
-and Web Crypto on browser/worker WASM. Failure to obtain secure randomness
-panics; there is no deterministic or weaker fallback. The production library
-does not retain the former `rand 0.8` / ChaCha generator dependency. P-256 enables
-`ecdsa`, `std`, and `precomputed-tables` explicitly; PEM support is confined to
-development builds that construct test certificates.
+## Supported behavior
 
-For `wasm32-unknown-unknown`, the crate explicitly enables `getrandom`'s
-`wasm_js` feature. This target already uses `wasm-bindgen` through `web-time`,
-matching the exception in the [getrandom library guidance](https://docs.rs/getrandom/0.4.3/getrandom/#webassembly-support).
-It is a JavaScript-hosted target contract, not support for arbitrary non-web
-WASM hosts. WASI uses its separate system interface.
+| Area | Contract |
+| --- | --- |
+| Credential keys | ES256: `alg=-7`, EC2, P-256. Ed25519: `alg=-8`, OKP, Ed25519. Key type, algorithm, curve, coordinate encoding, and point validity must agree. |
+| Registration | Validate ceremony state, client type/challenge/origin, RP ID hash, UP/UV, credential ID and exclusions, COSE key, and attestation. |
+| Authentication | Validate account/credential binding, ceremony state, client data, signed flags, backup eligibility, signature, and counter policy. |
+| User verification | `required` rejects missing signed UV. `preferred` permits a valid UP-only assertion. Signed UV and eligibility to count UV as another factor are distinct results. |
+| Login modes | Username-first login, including optional legacy `userHandle`; discoverable login with mandatory account-handle binding. |
+| Attestation | `none`, `packed` self-attestation, and ES256 certificate signatures for `packed` / `fido-u2f`. |
+| Trust result | Explicit `Unknown`, `None`, `SelfAttestation`, or `UntrustedCertificate`. No result claims a trusted manufacturer. |
+| Origins | Exact configured origin. Same-origin ceremonies only; `crossOrigin=true` and any present `topOrigin` reject. |
+| Extensions | Bounded structural validation. No PRF, credProtect, credProps, AppID, or unknown output supplies authentication or MFA evidence. |
+| Stored credentials | Existing 0.1.3 credential JSON remains readable; absent security history stays unknown. No passkey re-registration is required. |
 
-## Scope and security boundary
+RSA, other curves, Ed448, ECDAA, TPM, Android Key/SafetyNet, Apple, compound or
+enterprise attestation, related-origin discovery, and conditional registration
+without UP are outside this implementation's scope. Supporting the `fido-u2f`
+attestation format does not enable the AppID extension.
 
-The primary protocol reference is the
-[WebAuthn Level 3 Recommendation of 25 August 2026](https://www.w3.org/TR/2026/REC-webauthn-3-20260825/).
-The [compliance matrix](docs/protocol-compliance.md) records Level 1/2 compatibility,
-applicable RP requirements, implementation locations, and regression evidence.
-The [security review](docs/security-review.md) describes the baseline defects,
-changes, and remaining application responsibilities. This is an implementation
-review, not FIDO certification or a claim that every optional WebAuthn feature is
-implemented.
-
-| Capability | Behavior |
-|---|---|
-| Credential signatures | ES256 (`alg=-7`, EC2, P-256) and Ed25519 (`alg=-8`, OKP, Ed25519); algorithm, key type, curve, coordinates, and point validity are checked |
-| Registration | Challenge, type, exact origin, RP ID hash, UP, requested UV, returned credential ID, excluded IDs, credential key, and attestation statement are validated |
-| Authentication | Account / credential binding, challenge, type, exact origin, RP ID hash, UP, requested UV, backup flags, signature, and counter policy are validated |
-| Embedded origins | `crossOrigin=true` and any present `topOrigin` are rejected; this implementation is for same-origin ceremonies |
-| Attestation | `none`, `packed` self-attestation with either supported credential algorithm, and ES256 certificate signatures for `packed` / `fido-u2f` |
-| Attestation trust | Certificate signatures and the applicable certificate structure are checked; trusted roots, chain signatures, time validity, revocation, and manufacturer identity are **not verified** |
-| State | Server-created random challenges, expiry checks, and RP / origin / policy binding; the caller provides atomic one-time state consumption |
-| Persistence | Existing credential JSON remains readable; new optional fields preserve known account, UV, and backup metadata without inventing missing history |
-| Extensions | Authenticator extensions receive bounded structural validation; no PRF, credProtect, credProps, AppID, or other extension output is used as authentication evidence |
-
-RSA, other EC curves, Ed448, ECDAA, TPM, Android Key, Android SafetyNet, Apple,
-and compound attestation are not enabled. Related-origin discovery, conditional
-registration without UP, authenticator management, and CTAP transports are not
-implemented by this RP library. Browser conditional UI may still be used for
-an ordinary assertion that meets the verifier's checks.
-
-A valid attestation signature does **not** identify a trusted manufacturer or
-prove that a credential is hardware bound. `Attachment::Platform` and
-`Attachment::CrossPlatform` are browser selection hints, not evidence of key
-protection. An application requiring approved authenticator models needs a
-separate trust policy with pinned roots or another authenticated metadata
-source. FIDO Metadata Service is one possible source, not the only one.
+**A verified attestation signature is not verified manufacturer trust.** The
+library checks the applicable certificate profile and statement signature. It
+does not verify the certificate chain to trusted roots, certificate lifetime,
+revocation, or device provenance. AAGUID and attachment hints do not prove
+hardware protection. An application needing approved authenticator models must
+add an explicit trust policy before admitting the credential.
 
 ## Installation
 
-For the review branch:
+The 0.2.0 migration is currently reviewed on this Git branch:
 
 ```toml
 [dependencies]
 passkey-auth = { git = "https://github.com/nazozero/passkey-auth-rs", branch = "nazoauth/webauthn-protocol-calibration-20261117" }
 ```
 
-Pin the reviewed commit with Cargo's `rev` setting in a production application
-and commit `Cargo.lock`, as NazoAuth does. The previously published crates.io
-`0.1.3` package does not contain this 0.2.0 migration.
+For production, replace `branch` with the reviewed immutable `rev` and commit
+`Cargo.lock`. The older crates.io `0.1.3` package does not contain these changes.
+Add `features = ["aws-lc"]` when selecting the native ES256 backend below.
 
-### Signature backend selection
+## Ceremony integration
 
-The `aws-lc` feature is **disabled by default**. Add `features = ["aws-lc"]` to
-the dependency declaration to select it for native builds.
+Configure the exact serialized origin, without a path or trailing slash:
 
-| Build | Credential ES256 authentication / packed self-attestation | Ed25519 |
-|---|---|---|
-| Native, default features | RustCrypto P-256 | dalek `verify_strict` |
-| Native, `aws-lc` enabled | AWS-LC (`aws-lc-rs 1.19.0` in the final lockfiles) | dalek `verify_strict` |
-| Any WASM target, either feature setting | RustCrypto P-256 | dalek `verify_strict` |
+```rust
+use passkey_auth::Webauthn;
 
-Certificate-attestation verification for packed x5c and FIDO U2F remains on
-RustCrypto in every configuration. The feature changes no COSE schema, signed
-transcript, DER boundary, attestation policy, credential storage shape, or MFA
-decision. Selection happens at compile time, with no application-level runtime
-backend selector or shared-state wrapper. Native builds with the feature acquire an AWS-LC native
-build dependency; WASM does not build it.
-Follow the [AWS-LC build requirements](https://aws.github.io/aws-lc-rs/requirements/)
-for the target. In particular, an x86-64 Windows MSVC build needs the C/C++
-toolchain and NASM on PATH; the CI installs and checks NASM before compiling
-that feature. The default RustCrypto build has no AWS-LC build dependency.
-
-NazoAuth's baseline already locks `aws-lc-rs 1.19.0` / `aws-lc-sys 0.47.0`.
-The library's compatible version requirement preserves that resolution. An
-initial exact 1.18.2 constraint would have forced a consumer downgrade; integration
-review blocked it before merging or deployment and the constraint was corrected.
-
-The [final performance comparison](docs/performance.md) uses AWS-LC **1.19.0**
-and measures production commit `8260480634fac09e1151ca2b1a9eaa1c02af6f67` against the exact pinned baseline.
-In its five-round native comparison, complete ES256 authentication finish P50
-fell from **415.448 to 79.050 µs (81.0%)** with the feature enabled.
-Ed25519 still uses dalek: its authentication P50 changed from
-**53.310 to 67.101 µs (+25.9%)**, and registration finish from
-**4.107 to 9.084 µs (+121.2%)**.
-The additional key-validity and strict-verification work remains enabled.
-These figures are medians of per-round P50s on the recorded Linux host with
-one concurrent operation, not application or multi-user capacity measurements.
-
-The native allocation measurement includes AWS-LC's C allocator requests:
-ES256 authentication uses **23 requests / 1,327 bytes** per operation, compared
-with baseline **16 / 1,363**. Reporting only the Rust allocator's **6 / 324**
-would omit C-side work. Portable RustCrypto reduces parser allocations, but
-host scheduling noise prevents attributing its small ES256 latency change to
-the code. WASI uses RustCrypto and shows no general latency improvement.
-The performance report retains every round, P95/P99, throughput, CPU and
-artifact-size results, along with measurement boundaries and regressions.
-
-The [initial AWS-LC 1.18.2 experiment](docs/evidence/performance-backends.json)
-is retained as exploratory evidence. The final 1.19.0 probe also accepted a
-small-order Ed25519 fixture that dalek's strict policy rejects; this acceptance
-policy difference is why AWS-LC is never selected for Ed25519. Actual tested
-feature/target combinations are recorded in [validation](docs/validation.md).
-
-## Registration and username-first authentication
-
-```rust,ignore
-use passkey_auth::{AuthenticationResponse, RegistrationResponse, Webauthn};
-
-// Validate configuration at startup. This is the origin's exact serialized
-// scheme / host / optional port, with no path or trailing slash.
-let wa = Webauthn::try_new("example.com", "Example", "https://example.com")?
+let webauthn = Webauthn::try_new("example.com", "Example", "https://example.com")?
     .strict_base64(true)
     .require_user_verification(true);
-
-// Generate once when creating the account, then persist this opaque handle.
-// Do not derive it from an email address, username, or other personal data.
-let user_handle = rand::random::<[u8; 32]>();
-let existing_ids = vec![];
-let (options, pending) = wa.try_start_registration(
-    &user_handle, "alice@example.com", "Alice", &existing_ids,
-)?;
-// Store pending under a server-generated ceremony ID with TTL, bound to the
-// current tenant, account, and session. Send options to the browser.
-// At finish, atomically consume the stored pending state before verification.
-let response: RegistrationResponse = todo!();
-let mut credential = wa.finish_registration(&pending, &response)?;
-// Atomically enforce the credential ID's uniqueness in the RP's account store,
-// check registration authorization, and persist the WHOLE credential record.
-
-let (options, pending) = wa.start_authentication_with_creds_for_user(
-    &user_handle, std::slice::from_ref(&credential),
-);
-// Send options; retain and later atomically consume the pending state.
-let response: AuthenticationResponse = todo!();
-// Fetch this credential using the expected tenant and account as well as ID.
-let result = wa.finish_authentication(&pending, &response, &credential)?;
-
-// Keep a snapshot of the previous counter and metadata for CAS.
-credential.counter = result.new_counter;
-credential.backup_eligible = Some(result.backup_eligible);
-credential.backup_state = Some(result.backup_state);
-// Compare-and-swap using the old counter/metadata and account / credential ID.
-// Persist the complete record before issuing or upgrading a session.
-// Do not set credential.uv_initialized=true just because result.user_verified.
-let may_count_uv_as_factor = result.user_verification_eligible;
 ```
 
-The snippet leaves storage and session operations to the application. A valid
-library result is not by itself a committed authentication transaction.
+Use an opaque, stable account handle of 1–64 bytes. Generate and persist it when
+creating the account; a username or email address is not an appropriate handle.
 
-`require_user_verification(true)` requests `userVerification="required"` and
-rejects a response without the signed UV bit. The default requests
-`"preferred"`; a correctly signed UP-only response can authenticate possession
-of the credential under that policy. The application must keep that event
-separate from an authentication event eligible to count UV as another factor.
+| Stage | Library operation | Application operation |
+| --- | --- | --- |
+| Register begin | `try_start_registration` | Authorize enrollment; obtain existing credential IDs; retain the returned state with tenant, account, session, and TTL. |
+| Register finish | `finish_registration` | Atomically consume the retained state; persist the whole returned credential under an atomic uniqueness constraint. |
+| Username-first begin | `start_authentication_with_creds_for_user` | Resolve the account in the tenant and fetch its credentials. |
+| Username-first finish | `finish_authentication` | Consume state once; load the selected credential through the expected account; commit the verified update with CAS before session success. |
+| Discoverable finish | `finish_discoverable_authentication` | Resolve the returned handle within the tenant; load that account's credential; provide its expected handle explicitly. |
 
-`start_authentication_for_user` and
-`start_authentication_with_creds_for_user` bind the expected account handle.
-In these username-first flows, an omitted response `userHandle` remains valid
-by default for older, non-discoverable authenticators. A supplied handle must
-match. `.require_user_handle(true)` adds a local policy requiring it even in
-username-first flows; enable that only when your supported authenticators
-provide it. Handles contain 1 through 64 bytes.
+An empty authentication allow list enables discoverable login. A returned
+`userHandle` must match the expected account. Username-first authentication
+allows an omitted handle by default for older non-discoverable authenticators;
+`.require_user_handle(true)` makes its presence a local requirement.
 
-## Discoverable credentials
+Wire structs are the library's **flat JSON adapter**, not the browser's nested
+`PublicKeyCredential.toJSON()` object. Extract `credential.response` fields and
+encode their bytes as unpadded base64url. The examples include browser adapters.
+Strict Base64 is opt-in for compatibility; controlled production clients should
+enable it. Strict mode accepts only the URL-safe alphabet without padding.
 
-Start with an empty allow list when the user is not known:
+### State and transaction boundaries
 
-```rust,ignore
-let (options, pending) = wa.start_authentication(&[]);
-// The browser must return userHandle. Decode it using your configured wire
-// policy, resolve the account within the current tenant, then find response.id
-// within that account. Consume pending once before the finish operation.
-let expected_handle: &[u8] = todo!();
-let credential = todo!();
-let result = wa.finish_discoverable_authentication(
-    &pending, &response, &credential, expected_handle,
-)?;
-```
+Each challenge contains 32 bytes from the platform CSPRNG through `getrandom`.
+There is no weak randomness fallback. Pending states bind the RP, exact origin,
+and validation policy, reject missing/zero/future issue times, and expire after
+at most 300 seconds. The application's shorter TTL still applies.
 
-The explicit handle also permits existing credentials whose serialized record
-predates `user_handle`. Newly registered credentials carry their account handle,
-so ordinary `finish_authentication` can check that stored binding. A discoverable
-assertion with no resolvable expected handle or with an absent / mismatched
-response handle is rejected. The library cannot identify a tenant or validate
-a database query on the application's behalf.
+State must remain server-owned and be consumed atomically once, for example
+with Valkey `GETDEL`. A context hash or a signed cookie does not provide
+one-time consumption. Do not accept client-supplied serialized ceremony state.
 
-The passwordless example asks the browser for a discoverable credential and
-uses the explicit finish method. A `residentKey` preference alone does not
-prove that a credential is discoverable; browser hints and extensions should
-not replace account binding.
+Authentication success is a verification result. Persist `new_counter`, signed
+`backup_eligible` / `backup_state`, and any separately authorized UV-history
+change in the same account-scoped transaction. Compare the previous counter and
+metadata; a CAS conflict must not issue a successful session. Zero-only counters
+are permitted; otherwise the library rejects non-increasing counters. This
+conservative policy can reject a reordered concurrent assertion and is not
+proof that a credential was cloned.
 
-## UV history and MFA
+### UV and MFA
 
-`AuthSuccess::user_verified` reports the UV bit only after the credential
-signature has been verified. `user_verification_eligible` is true only when
-that assertion has UV **and** the stored credential has
-`uv_initialized == Some(true)`.
+`AuthSuccess::user_verified` is the UV flag authenticated by the signature.
+`user_verification_eligible` is true only when that flag is set **and** the
+stored credential has `uv_initialized == Some(true)`.
 
-This distinction implements the Level 3
-[credential record](https://www.w3.org/TR/2026/REC-webauthn-3-20260825/#credential-record)
-rule. A credential that was enrolled without UV, or one with unknown historical
-UV initialization, must not automatically make a later UV assertion an
-additional factor. Unknown history is represented by `None`, not a fabricated
-`true`. Applications can establish UV initialization through an explicit flow
-with another suitable factor; the library never performs that promotion
-implicitly. That flow must not count the assertion that performs the promotion
-as already eligible based on the new value.
+At registration, the verifier records the observed UV value. An older record
+without UV history remains `None`; a later UV assertion cannot silently promote
+it. An application may establish that history through an explicit flow using
+another suitable factor. The assertion performing the promotion must still be
+evaluated against the old history. Use `user_verification_eligible` for MFA
+decisions, together with the application's AMR and session policy.
 
-For MFA decisions, consume `user_verification_eligible` under the application's
-AMR / session policy. Required UV and MFA eligibility answer different questions:
-a response may meet the requested UV requirement while its old credential
-record still lacks the history needed to count UV as another factor. Such
-credentials remain usable and do not need to be registered again.
+Enrollment/deletion authorization, CSRF, account recovery, rate limits, and
+remembered-MFA evidence belong to the application. See the
+[NazoAuth integration contract and evidence](docs/nazo-integration.md).
 
-The NazoAuth integration applies this rule to new authentication decisions and
-provides a controlled initialization flow using recent independent OTP or
-recovery-code MFA. The upgrade preserves existing session and remembered-MFA
-lifetimes; it does not retrospectively establish UV history for their old AMR
-claims or revoke every existing session. A still-fresh historical session can
-retain credential-management authority under the existing policy. Historical
-`passkey_uv` alone cannot directly initialize an old credential's UV history.
+## Credential migration from 0.1.3
 
-## Upgrading from 0.1.3 to 0.2.0
+Persist `PasskeyCredential` as a complete serde record. Existing byte-array
+representations of credential IDs, COSE public keys, AAGUIDs, transports, and
+counters are retained. The following metadata is added:
 
-Persist `PasskeyCredential` as a complete serde record, including fields added
-after the original release:
-
-| Field | Existing JSON without the field | New registration |
-|---|---|---|
-| `id`, `public_key_cose`, `counter`, `transports`, `aaguid` | Existing representation retained | Populated from the validated response |
-| `user_handle` | `None`; caller's account binding can supply it | `Some` with the ceremony's account handle |
-| `uv_initialized` | `None` (unknown) | `Some` with registration UV |
-| `backup_eligible`, `backup_state` | `None` (unknown) | `Some` with registration BE / BS |
+| Field | Missing from an existing record | New registration |
+| --- | --- | --- |
+| `user_handle` | `None`; use the application's account binding | Ceremony's account handle |
+| `uv_initialized` | `None`, meaning unknown | Registration's verified UV flag |
+| `backup_eligible`, `backup_state` | `None`, meaning unknown | Registration's verified BE/BS flags |
 | `attestation` | `Unknown` | `None`, `SelfAttestation`, or `UntrustedCertificate` |
 
-There is deliberately no `TrustedManufacturer` result. `Unknown` means the old
-record did not preserve this information; `None` is a verified empty `none`
-attestation statement. `UntrustedCertificate` records a successfully verified
-attestation signature without a verified chain of trust.
+The stored-key reader tolerates historical COSE map ordering, integer widths,
+and harmless optional metadata. A stored `key_ops` array, when present, must
+permit signature verification; `kid` and `Base IV` must have their COSE byte-string
+types. Conflicting usage restrictions, duplicate labels, private key material,
+malformed framing, and algorithm/curve confusion reject. New wire keys use the
+WebAuthn/CTAP2 canonical profile. Conforming original key bytes need no migration;
+malformed historical keys are not grandfathered into successful verification.
 
-The stored COSE bytes remain unchanged. The historical reader tolerates old map
-ordering, integer widths, and harmless optional metadata, while rejecting
-ambiguous / duplicate labels, private key material, malformed framing, and
-invalid algorithm / curve combinations. New registrations use the stricter
-WebAuthn / CTAP2 canonical profile. This compatibility path is for persisted
-records; it is not a way to opt new incoming keys out of validation.
+Existing **pending ceremonies** lack the context binding and must restart after
+upgrade. Existing credentials remain usable. New public Rust struct fields and
+error variants require source updates, which is why the crate version is 0.2.0.
+The convenience `new` and `start_registration` methods panic on invalid
+configuration/input; prefer their `try_` equivalents at fallible boundaries.
 
-Old **in-flight ceremony states** lack the new context binding and must restart
-a ceremony after deployment. This short-lived state invalidation does not
-invalidate a stored credential. States with missing / zero / future timestamps
-are rejected; the verifier imposes a 300-second maximum age in addition to the
-caller's shorter TTL. Changing RP ID, origin, UV policy, strict Base64 policy,
-or required-handle policy also invalidates previously issued states.
+## Backends, borrowing, and resource limits
 
-The existing convenience `new` and `start_registration` methods remain. They
-panic on invalid configuration or invalid handle length. Use `try_new` and
-`try_start_registration` for fallible startup / input validation. Adding fields
-to a public Rust struct requires updating external struct literals even though
-old serialized JSON remains compatible.
+| Target / feature | Credential ES256 | Ed25519 | Certificate attestation |
+| --- | --- | --- | --- |
+| Native default | RustCrypto | dalek, strict acceptance policy | RustCrypto |
+| Native `aws-lc` | AWS-LC | dalek, same acceptance policy | RustCrypto |
+| WASM, either feature setting | RustCrypto | dalek, same acceptance policy | RustCrypto |
 
-`AuthSuccess` is a transient verification result, not a persisted credential.
-Its new backup fields are required when deserializing an outcome, so replaying an
-old result cannot silently overwrite known credential metadata with `false`.
+Backend selection is compile-time. It does not alter credential serialization,
+signature encoding, attestation trust, or MFA semantics. Native AWS-LC builds
+need its [C/C++ toolchain requirements](https://aws.github.io/aws-lc-rs/requirements/);
+Windows x86-64 MSVC also needs NASM. JavaScript-hosted `wasm32-unknown-unknown`
+uses Web Crypto and `web-time`; WASI uses its system interfaces.
 
-## Application obligations
+Ed25519 verifies the ordinary message through dalek's multipart API, avoiding
+transcript concatenation. Canonical encoding and small-order-point checks retain
+the previous strict acceptance policy; independent vectors and differential
+tests compare that policy with dalek's strict verifier. Do not enable dalek's
+`legacy_compatibility` feature in the application's dependency graph: it relaxes
+the scalar bound in both its ordinary and strict verification APIs.
 
-The verifier deliberately has no database or network side effects. A production
-integration must provide these operations:
+CBOR and client-data parsing borrow the decoded input. Fixed-size key material,
+hashes, and short binary fields use bounded stack storage where useful. Base64
+decoding and owned results still require storage: this is not a claim that a
+whole ceremony allocates nothing. The [performance report](docs/performance.md)
+provides actual full-ceremony latency, allocations, CPU, artifact size, native /
+WASI results, and any remaining regressions. No speed claim follows from a
+backend or dependency name alone.
 
-1. Generate an opaque account handle once, authorize passkey enrollment and
-   deletion, and keep tenant / account / credential lookups scoped correctly.
-2. Keep pending ceremony state on the server, bind it to the intended account
-   and session, apply a short TTL, and consume it atomically once. A signed
-   cookie alone does not make state single-use. Never accept a client-supplied
-   serialized `RegistrationState` or `AuthenticationState` as trusted state.
-3. Compare-and-swap the counter and prior metadata, then persist verified metadata before session
-   success. Treat a conflict as an uncommitted authentication result. The
-   library permits `0 → 0` counters and rejects non-increasing nonzero counters
-   as its conservative policy; that anomaly is not proof of cloning and the
-   counter is not a replacement for one-time challenges.
-4. Keep session rotation, MFA / AMR upgrades, remembered MFA, audit events, and
-   transaction failure handling consistent with the committed outcome.
-5. Bound HTTP bodies before JSON deserialization, rate-limit ceremonies, and
-   enforce TLS, CSRF / origin controls for application endpoints, and normal
-   account authorization. The field limits below apply after the response
-   struct exists; they cannot undo an allocation by the HTTP framework.
-
-`try_new` checks exact origin serialization, HTTPS (HTTP only for localhost /
-loopback), and the RP ID's relationship to that host. A domain host can use
-itself or a parent domain; an IP-address host requires an exact RP ID match,
-never an address suffix. The constructor does not maintain a
-Public Suffix List or authorize all subdomains of an RP ID. Configure the exact
-trusted origin you serve and an RP ID acceptable under the browser's effective
-domain and public-suffix rules. Local loopback configuration support is not a
-claim of portable browser support for IP-address RP IDs. Unrelated, opaque, native-app, and embedded origins
-are outside this implementation's configured scope.
-
-## Wire encoding and resource limits
-
-The public response structs retain the existing flat JSON adapter shape. The
-examples convert browser `ArrayBuffer` fields to base64url without padding.
-The browser's nested `PublicKeyCredential.toJSON()` object needs a corresponding
-adapter; this library does not claim the flat shape is that browser dictionary.
-
-Strict mode applies to credential ID, attestation object, client data,
-authenticator data, signature, challenge, and user handle. The default remains
-lenient for existing applications; NazoAuth and the examples select strict mode.
-Client data retains its original bytes for hashing, including any initial UTF-8
-BOM. Unknown JSON members are allowed; duplicate or mistyped security fields
-are rejected.
-
-| Input | Limit |
-|---|---:|
+| Input | Library resource policy |
+| --- | ---: |
 | Decoded `clientDataJSON` | 8 KiB |
-| Decoded attestation object / CBOR input | 64 KiB |
-| Decoded registration / assertion `authenticatorData` | 16 KiB |
-| Credential ID | 1–1,023 bytes |
-| User handle | 1–64 bytes |
-| Signature field | 80 bytes |
-| Transports | 16 strings, each at most 32 bytes |
-| CBOR container / nesting / total items | 64 entries / depth 12 / 2,048 items |
-| Attestation chain | 8 certificates, each at most 16 KiB, within the outer limit |
+| Attestation object / CBOR input | 64 KiB |
+| `authenticatorData` | 16 KiB |
+| Credential ID / account handle | 1–1,023 / 1–64 bytes |
+| Signature | 80 bytes |
+| Transport hints | 16 strings of at most 32 bytes |
+| CBOR container / depth / total items | 64 entries / 12 / 2,048 |
+| Attestation chain | 8 certificates, at most 16 KiB each, within the outer bound |
 
-These are deliberate RP resource policies, not CTAP transport limits. Unsupported
-future extension structures may require an explicit limit / schema update.
-Decoded binary data is borrowed internally where practical, and fixed-size
-coordinates / hashes use stack buffers. See the performance artifact for actual
-before / after measurements; no backend speed claim follows from dependency
-choice alone.
+These are RP resource policies, not universal WebAuthn limits. Unsupported
+extension value structures and certificate algorithms are documented in the
+matrix. HTTP body size must be bounded before deserializing the outer response.
+Credential allow/exclude lists grow with the account's stored credentials;
+applications need appropriate account quotas and request controls.
 
-These limits cover individual response fields and parsing. They do not bound
-the number of stored credentials an account can supply to begin operations.
-Registration exclusion lists, authentication allow lists, serialized options
-and pending state grow with that number. NazoAuth currently has no per-account
-credential quota, so its repository reads and begin work retain this linear
-cost. Deployment-level quotas and request controls remain application policy;
-this update does not silently discard existing credentials to impose a cap.
+## Examples and development
 
-## Working examples
+The following local examples run at <http://localhost:3000>:
 
-Run one server at a time at <http://localhost:3000>.
+| Example | Demonstrates |
+| --- | --- |
+| [`axum_server`](examples/axum_server.rs), [`rocket_server`](examples/rocket_server.rs) | Registration and username-first authentication |
+| [`axum_passwordless`](examples/axum_passwordless.rs) | Discoverable login and multiple accounts |
+| [`rocket_credential_manager`](examples/rocket_credential_manager.rs) | Session-authorized listing, addition, and deletion |
+| [`axum_sqlite`](examples/axum_sqlite.rs) | Full credential persistence, legacy-row migration, and CAS |
 
-| Example | Purpose |
-|---|---|
-| [`axum_server`](examples/axum_server.rs) | Minimal single-account registration and username-first authentication |
-| [`rocket_server`](examples/rocket_server.rs) | The same flow with Rocket |
-| [`axum_passwordless`](examples/axum_passwordless.rs) | Multiple accounts, random handles, discoverable login, and atomic registration uniqueness |
-| [`rocket_credential_manager`](examples/rocket_credential_manager.rs) | Authenticated passkey listing / addition / deletion for a demo account |
-| [`axum_sqlite`](examples/axum_sqlite.rs) | Complete credential JSON, legacy-row migration, account-scoped lookup, and counter / metadata CAS |
-
-```bash
+```sh
 cargo run --example axum_server
-cargo run --example axum_passwordless
-cargo run --example rocket_credential_manager
-cargo run --example axum_sqlite
-```
-
-These are local demonstrations, not deployment templates: in-memory session
-stores are unbounded, several examples use one hard-coded account, and they do
-not provide a complete production CSRF, rate-limit, or account recovery layer.
-The manager renders untrusted transport labels as text, and its credential
-listing requires a session; its public setup-status endpoint reveals only
-whether the demo account has a credential.
-
-## Development and evidence
-
-```bash
 cargo fmt --all -- --check
 cargo check --all-targets
 cargo clippy --all-targets -- -D warnings
@@ -420,17 +225,23 @@ cargo test --doc
 cargo audit
 ```
 
-`--all-targets` includes the regression tests inside the examples. Official W3C
-vectors, generated real-signature tests, malformed-input cases, property tests,
-and fuzz targets supplement each other; none alone establishes complete
-protocol correctness. Exact command results, targets, feature combinations,
-constraints, and any failed / unrun checks are recorded in
-[validation](docs/validation.md). Do not infer a platform passed from a CI
-configuration entry alone.
+Run the verification commands with `--features aws-lc` as well when deploying
+that feature. The examples use demonstration account/session stores and do not
+provide a complete production CSRF, rate-limit, or recovery layer.
 
-## License
+The [validation record](docs/validation.md) identifies the exact executed
+revisions, commands, feature/target combinations, independent vectors, property
+tests, fuzz runs, and failures. The [security review](docs/security-review.md)
+explains findings and their fixes. A test's presence or a CI configuration entry
+does not mean that it ran successfully.
 
-Licensed under either:
+## Maintainers and license
 
-- Apache License, Version 2.0 ([license text](APACHE-LICENSE)).
-- MIT License ([license text](LICENSE)).
+Maintained by [bymoye](https://github.com/bymoye) in
+[NazoZero](https://github.com/nazozero). Derived from
+[Sriram's `marirs/passkey-auth-rs`](https://github.com/marirs/passkey-auth-rs);
+the original author's attribution and upstream license texts are retained.
+The [fork record](NAZOAUTH_PATCH.md) identifies the inherited production baseline.
+
+Licensed under either the [Apache License 2.0](APACHE-LICENSE) or the
+[MIT License](LICENSE), at your option.

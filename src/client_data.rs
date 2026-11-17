@@ -20,7 +20,7 @@ use std::borrow::Cow;
 use serde::{Deserialize, Deserializer};
 
 use crate::error::{Error, Result};
-use crate::types::{Challenge, decode_b64_bounded};
+use crate::types::{Challenge, decode_b64_bounded, decode_b64_into};
 
 /// Type tags the spec puts in `clientDataJSON.type`.
 pub(crate) const TYPE_REGISTER: &str = "webauthn.create";
@@ -68,8 +68,9 @@ pub(crate) fn validate(
             actual: p.kind.into_owned(),
         });
     }
-    let got_challenge = decode_b64_bounded(&p.challenge, strict, 64, "challenge")?;
-    if got_challenge != expected_challenge.as_bytes() {
+    let mut challenge = [0; 64];
+    let length = decode_b64_into(&p.challenge, strict, &mut challenge, "challenge")?;
+    if &challenge[..length] != expected_challenge.as_bytes() {
         return Err(Error::ChallengeMismatch);
     }
     if p.origin != expected_origin {

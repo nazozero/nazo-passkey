@@ -843,6 +843,41 @@ fn packed_certificate_subject_version_and_constraints_are_checked() {
 }
 
 #[test]
+fn packed_country_is_structural_and_does_not_claim_vendor_jurisdiction() {
+    let mut cert = CertBundle::new(AaguidExt::None);
+    // ISO 3166 permits private-use codes such as AA (also used by the W3C
+    // vectors). Reserved/historical country names do not prove current
+    // legal incorporation, and this verifier does not authenticate issuers.
+    for code in ["US", "GB", "AA", "ZZ", "UK", "BU"] {
+        cert.modify(|certificate| {
+            certificate.tbs_certificate.subject = x509_cert::name::Name::from_str(&format!(
+                "C={code},O=Tests,OU=Authenticator Attestation,CN=Test"
+            ))
+            .unwrap();
+        });
+        let (wa, state, response) =
+            registration_with_chain("packed", &cert, vec![cert.cert_der.clone()], [0; 16]);
+        let credential = wa.finish_registration(&state, &response).unwrap();
+        assert_eq!(
+            credential.attestation,
+            passkey_auth::AttestationEvidence::UntrustedCertificate
+        );
+    }
+    for code in ["USX", "us", "U1"] {
+        cert.modify(|certificate| {
+            certificate.tbs_certificate.subject = x509_cert::name::Name::from_str(&format!(
+                "C={code},O=Tests,OU=Authenticator Attestation,CN=Test"
+            ))
+            .unwrap();
+        });
+        let (wa, state, response) =
+            registration_with_chain("packed", &cert, vec![cert.cert_der.clone()], [0; 16]);
+        let error = wa.finish_registration(&state, &response).unwrap_err();
+        assert!(error.to_string().contains("country"), "{code}: {error}");
+    }
+}
+
+#[test]
 fn packed_aaguid_extension_cannot_be_critical_or_duplicated() {
     for duplicate in [false, true] {
         let mut cert = CertBundle::new(AaguidExt::Valid([0; 16]));
@@ -1038,6 +1073,86 @@ fn certificate_named_curve_is_checked_independently_of_point_length() {
             registration_with_chain(format, &cert, vec![cert.cert_der.clone()], [0; 16]);
         assert!(wa.finish_registration(&state, &response).is_err());
     }
+}
+
+#[test]
+fn compressed_attestation_certificate_points_are_supported_without_trust_promotion() {
+    let mut cert = CertBundle::new(AaguidExt::None);
+    let compressed = cert.signing_key.verifying_key().to_sec1_point(true);
+    cert.modify(|certificate| {
+        certificate
+            .tbs_certificate
+            .subject_public_key_info
+            .subject_public_key =
+            x509_cert::der::asn1::BitString::from_bytes(compressed.as_bytes()).unwrap();
+    });
+    for format in ["packed", "fido-u2f"] {
+        let (wa, state, response) =
+            registration_with_chain(format, &cert, vec![cert.cert_der.clone()], [0; 16]);
+        let credential = wa.finish_registration(&state, &response).unwrap();
+        assert_eq!(
+            credential.attestation,
+            passkey_auth::AttestationEvidence::UntrustedCertificate
+        );
+    }
+}
+
+#[test]
+fn malformed_or_hybrid_attestation_certificate_points_are_rejected() {
+    let cert = CertBundle::new(AaguidExt::None);
+    let mut hybrid = cert
+        .signing_key
+        .verifying_key()
+        .to_sec1_point(false)
+        .as_bytes()
+        .to_vec();
+    hybrid[0] = 6;
+    let mut invalid_compressed = vec![0xff; 33];
+    invalid_compressed[0] = 2;
+    for point in [vec![0], vec![2; 32], invalid_compressed, hybrid] {
+        let mut changed = CertBundle {
+            signing_key: cert.signing_key.clone(),
+            cert_der: cert.cert_der.clone(),
+        };
+        changed.modify(|certificate| {
+            certificate
+                .tbs_certificate
+                .subject_public_key_info
+                .subject_public_key = x509_cert::der::asn1::BitString::from_bytes(&point).unwrap();
+        });
+        for format in ["packed", "fido-u2f"] {
+            let (wa, state, response) =
+                registration_with_chain(format, &changed, vec![changed.cert_der.clone()], [0; 16]);
+            assert!(wa.finish_registration(&state, &response).is_err());
+        }
+    }
+}
+
+#[test]
+fn u2f_does_not_apply_the_packed_certificate_profile() {
+    let mut cert = CertBundle::new(AaguidExt::Malformed);
+    cert.modify(|certificate| {
+        certificate.tbs_certificate.subject =
+            x509_cert::name::Name::from_str("CN=Legacy U2F Attestation").unwrap();
+        certificate
+            .tbs_certificate
+            .extensions
+            .as_mut()
+            .unwrap()
+            .retain(|extension| extension.extn_id.to_string() != "2.5.29.19");
+    });
+    let (wa, state, response) =
+        registration_with_chain("fido-u2f", &cert, vec![cert.cert_der.clone()], [0; 16]);
+    let credential = wa.finish_registration(&state, &response).unwrap();
+    assert_eq!(
+        credential.attestation,
+        passkey_auth::AttestationEvidence::UntrustedCertificate
+    );
+    // The same noncritical extension and subject still fail the packed
+    // profile. U2F did not vouch for their semantics or the certificate issuer.
+    let (wa, state, response) =
+        registration_with_chain("packed", &cert, vec![cert.cert_der.clone()], [0; 16]);
+    assert!(wa.finish_registration(&state, &response).is_err());
 }
 
 #[test]

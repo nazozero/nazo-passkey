@@ -11,24 +11,57 @@ use crate::error::{Error, Result};
 pub(crate) const ALG_ES256: i64 = -7;
 pub(crate) const ALG_EDDSA: i64 = -8;
 
-/// Decode a canonical, nonweak Ed25519 public key using RustCrypto.
-///
-/// RFC 8032 §5.1.3 requires y < p = 2^255 - 19 after removing the sign bit.
-/// The only 19 out-of-range y encodings have the high 31 bytes shown below.
-/// This byte check replaces decompress-then-recompress, which adds a field
-/// inversion. The only remaining non-unique sign encoding would have x=0:
-/// on the Edwards curve that implies y=±1, both small-order points rejected
-/// by dalek's is_weak(). Point decoding and weak-point detection stay in dalek.
-pub(crate) fn ed25519_verifying_key(bytes: &[u8; 32]) -> Result<ed25519_dalek::VerifyingKey> {
+/// Canonical, wholly small-order point encodings from C2SP/CCTV's pinned
+/// ed25519vectors corpus; tests independently derive this complete set from
+/// curve25519-dalek's EIGHT_TORSION. Each y covers both sign bits, including
+/// the two x=0/sign=1 aliases. Mixed-torsion points are deliberately retained.
+const ED25519_SMALL_ORDER_Y: [[u8; 32]; 5] = [
+    [0; 32],
+    {
+        let mut y = [0; 32];
+        y[0] = 1;
+        y
+    },
+    [
+        0x26, 0xe8, 0x95, 0x8f, 0xc2, 0xb2, 0x27, 0xb0, 0x45, 0xc3, 0xf4, 0x89, 0xf2, 0xef, 0x98,
+        0xf0, 0xd5, 0xdf, 0xac, 0x05, 0xd3, 0xc6, 0x33, 0x39, 0xb1, 0x38, 0x02, 0x88, 0x6d, 0x53,
+        0xfc, 0x05,
+    ],
+    [
+        0xc7, 0x17, 0x6a, 0x70, 0x3d, 0x4d, 0xd8, 0x4f, 0xba, 0x3c, 0x0b, 0x76, 0x0d, 0x10, 0x67,
+        0x0f, 0x2a, 0x20, 0x53, 0xfa, 0x2c, 0x39, 0xcc, 0xc6, 0x4e, 0xc7, 0xfd, 0x77, 0x92, 0xac,
+        0x03, 0x7a,
+    ],
+    {
+        let mut y = [0xff; 32];
+        y[0] = 0xec;
+        y[31] = 0x7f;
+        y
+    },
+];
+
+/// Preserve RFC 8032 canonical encoding and the pre-existing strict weak-point
+/// rejection policy using public bytes. This performs no group arithmetic.
+pub(crate) fn check_ed25519_encoding(bytes: &[u8; 32]) -> Result<()> {
+    // RFC 8032 §5.1.3: y < p = 2^255 - 19 after removing the sign bit.
     if bytes[31] & 0x7f == 0x7f && bytes[1..31] == [0xff; 30] && bytes[0] >= 0xed {
-        return Err(invalid("non-canonical Ed25519 public point"));
+        return Err(invalid("non-canonical Ed25519 point"));
     }
-    let key = ed25519_dalek::VerifyingKey::from_bytes(bytes)
-        .map_err(|_| invalid("invalid Ed25519 public point"))?;
-    if key.is_weak() {
-        return Err(invalid("weak Ed25519 public point"));
+    if ED25519_SMALL_ORDER_Y
+        .iter()
+        .any(|y| bytes[0] == y[0] && bytes[..31] == y[..31] && bytes[31] & 0x7f == y[31])
+    {
+        return Err(invalid("weak Ed25519 point"));
     }
-    Ok(key)
+    Ok(())
+}
+
+/// Decode the public point with dalek; the encoding filter is not a substitute
+/// for proving that a byte string represents a point on the curve.
+pub(crate) fn ed25519_verifying_key(bytes: &[u8; 32]) -> Result<ed25519_dalek::VerifyingKey> {
+    check_ed25519_encoding(bytes)?;
+    ed25519_dalek::VerifyingKey::from_bytes(bytes)
+        .map_err(|_| invalid("invalid Ed25519 public point"))
 }
 
 #[derive(Debug, Clone)]
@@ -94,6 +127,11 @@ impl CoseKey {
                 -2 => x = Some(reader.bytes()?),
                 -3 => y = Some(reader.bytes()?),
                 -4 => return Err(invalid("COSE public key contains private parameter")),
+                2 | 5 if !registration => {
+                    // Known common parameters retain their RFC 9052 schema.
+                    reader.bytes()?;
+                }
+                4 if !registration => read_verification_key_ops(reader)?,
                 _ if registration => {
                     return Err(invalid("credentialPublicKey contains optional parameters"));
                 }
@@ -148,6 +186,32 @@ impl CoseKey {
             Self::Ed25519 { .. } => ALG_EDDSA,
         }
     }
+}
+
+/// RFC 9052 §7/§7.1 and RFC 9053 §2.1/§2.2: present key_ops restricts
+/// permitted uses, even for a historical key. Unknown int/text operations
+/// neither grant verification nor invalidate an accompanying verify(2).
+fn read_verification_key_ops(reader: &mut Decoder<'_>) -> Result<()> {
+    let count = reader.array()?;
+    if count == 0 {
+        return Err(invalid("COSE key_ops must be non-empty"));
+    }
+    let mut permits_verification = false;
+    for _ in 0..count {
+        match reader.major() {
+            Some(0 | 1) => permits_verification |= reader.integer_wide()? == 2,
+            Some(3) => {
+                reader.text()?;
+            }
+            _ => return Err(invalid("COSE key_ops entries must be integers or text")),
+        }
+    }
+    if !permits_verification {
+        return Err(invalid(
+            "COSE key_ops does not permit signature verification",
+        ));
+    }
+    Ok(())
 }
 
 #[cfg(test)]
@@ -216,6 +280,134 @@ mod tests {
         let bytes = encode(map);
         assert!(CoseKey::parse(&bytes).is_ok());
         assert!(CoseKey::parse_prefix(&bytes).is_err());
+    }
+
+    #[test]
+    fn legacy_key_operations_constrain_real_es256_and_ed25519_signatures() {
+        use ed25519_dalek::Signer as _;
+
+        let message = b"stored key restrictions apply before signature verification";
+        let es_signing = p256::ecdsa::SigningKey::from_slice(&[1; 32]).unwrap();
+        let es_signature: p256::ecdsa::Signature = es_signing.sign(message);
+        let ed_signing = ed25519_dalek::SigningKey::from_bytes(&[7; 32]);
+        let ed_map = vec![
+            (1.into(), 1.into()),
+            (3.into(), (-8).into()),
+            ((-1).into(), 6.into()),
+            (
+                (-2).into(),
+                Value::Bytes(ed_signing.verifying_key().to_bytes().to_vec()),
+            ),
+        ];
+        for (map, signature) in [
+            (good_map(), es_signature.to_der().as_bytes().to_vec()),
+            (ed_map, ed_signing.sign(message).to_bytes().to_vec()),
+        ] {
+            let original = CoseKey::parse(&encode(map.clone())).unwrap();
+            crate::crypto::verify(&original, message, &signature).unwrap();
+            for operations in [
+                vec![2.into()],
+                vec![1.into(), 2.into()],
+                vec![2.into(), 2.into()], // repetition does not alter the permitted set
+                vec![
+                    Value::Text("vendor-operation".into()),
+                    Value::Integer(u64::MAX.into()),
+                    Value::Integer((-(1_i128 << 64)).try_into().unwrap()),
+                    2.into(),
+                ],
+            ] {
+                let mut stored = map.clone();
+                stored.push((4.into(), Value::Array(operations)));
+                let encoded = encode(stored);
+                let parsed = CoseKey::parse(&encoded).unwrap();
+                crate::crypto::verify(&parsed, message, &signature).unwrap();
+                // New credentialPublicKey still forbids all optional fields.
+                assert!(CoseKey::parse_prefix(&encoded).is_err());
+            }
+            for operations in [
+                Value::Array(vec![]),
+                Value::Array(vec![1.into()]),
+                Value::Array(vec![Value::Text("verify".into())]),
+                Value::Array(vec![2.into(), Value::Bool(true)]),
+                Value::Array(vec![2.into(), Value::Null]),
+                Value::Array(vec![2.into(), Value::Float(2.0)]),
+                Value::Array(vec![2.into(), Value::Bytes(vec![2])]),
+                Value::Array(vec![2.into(), Value::Array(vec![2.into()])]),
+                Value::Array(vec![2.into(), Value::Map(vec![])]),
+                Value::Integer(2.into()),
+                Value::Text("2".into()),
+            ] {
+                let mut stored = map.clone();
+                stored.push((4.into(), operations));
+                assert!(CoseKey::parse(&encode(stored)).is_err());
+            }
+        }
+    }
+
+    #[test]
+    fn legacy_key_operations_accept_nonminimal_width_but_not_duplicate_fields() {
+        let mut key = good_map();
+        key.push((4.into(), Value::Array(vec![2.into()])));
+        let mut bytes = encode(key.clone());
+        assert_eq!(bytes.pop(), Some(2));
+        bytes.extend([0x18, 2]); // Legacy integer width remains compatible.
+        assert!(CoseKey::parse(&bytes).is_ok());
+        key.push((4.into(), Value::Array(vec![1.into()])));
+        assert!(CoseKey::parse(&encode(key)).is_err());
+    }
+
+    #[test]
+    fn known_legacy_byte_string_parameters_keep_their_schema() {
+        for label in [2, 5] {
+            let mut map = good_map();
+            map.push((label.into(), Value::Bytes(vec![])));
+            assert!(CoseKey::parse(&encode(map)).is_ok());
+            let mut map = good_map();
+            map.push((label.into(), Value::Bool(true)));
+            assert!(CoseKey::parse(&encode(map)).is_err());
+        }
+    }
+
+    #[test]
+    fn every_dalek_torsion_point_and_sign_alias_is_rejected_at_registration() {
+        use std::collections::BTreeSet;
+
+        let expected: BTreeSet<_> = curve25519_dalek::constants::EIGHT_TORSION
+            .iter()
+            .map(|point| {
+                let mut bytes = point.compress().to_bytes();
+                bytes[31] &= 0x7f;
+                bytes
+            })
+            .collect();
+        assert_eq!(expected, BTreeSet::from(ED25519_SMALL_ORDER_Y));
+        for point in curve25519_dalek::constants::EIGHT_TORSION {
+            for sign in [0, 0x80] {
+                let mut bytes = point.compress().to_bytes();
+                bytes[31] = (bytes[31] & 0x7f) | sign;
+                assert!(ed25519_verifying_key(&bytes).is_err());
+                let encoded = encode(vec![
+                    (1.into(), 1.into()),
+                    (3.into(), (-8).into()),
+                    ((-1).into(), 6.into()),
+                    ((-2).into(), Value::Bytes(bytes.to_vec())),
+                ]);
+                assert!(CoseKey::parse_prefix(&encoded).is_err());
+            }
+        }
+        // A torsion component does not make the complete point small-order.
+        // Keep the pre-existing strict policy instead of accidentally
+        // imposing the stronger prime-order-subgroup policy.
+        for torsion in curve25519_dalek::constants::EIGHT_TORSION {
+            for scalar in 1..32u64 {
+                let point = curve25519_dalek::constants::ED25519_BASEPOINT_POINT
+                    * curve25519_dalek::scalar::Scalar::from(scalar)
+                    + torsion;
+                let bytes = point.compress().to_bytes();
+                assert!(ed25519_verifying_key(&bytes).is_ok());
+                assert!(recompressed_ed25519_accepts(&bytes));
+            }
+        }
     }
 
     #[test]

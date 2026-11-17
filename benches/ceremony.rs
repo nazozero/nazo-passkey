@@ -7,10 +7,7 @@ use std::time::Instant;
 use base64::{Engine, engine::general_purpose::URL_SAFE_NO_PAD as B64};
 use ciborium::value::Value;
 use ed25519_dalek::{Signer as _, SigningKey as EdSigningKey};
-use p256::ecdsa::{
-    Signature as EsSignature, SigningKey as EsSigningKey, signature::Signer as _,
-    signature::Verifier as _,
-};
+use p256::ecdsa::{Signature as EsSignature, SigningKey as EsSigningKey, signature::Verifier as _};
 use passkey_auth::{AuthenticationResponse, Challenge, RegistrationResponse, Webauthn};
 use sha2::{Digest, Sha256};
 

@@ -9,7 +9,7 @@ repository  = "https://github.com/nazozero/passkey-auth-rs"
 readme      = "README.md"
 keywords    = ["webauthn", "passkey", "fido2", "authentication"]
 categories  = ["authentication", "cryptography"]
-authors     = ["Sriram <marirs@gmail.com>"]
+authors     = ["bymoye <bymoye@users.noreply.github.com>", "Sriram <marirs@gmail.com>"]
 
 [lib]
 name = "passkey_auth"
@@ -27,8 +27,8 @@ aws-lc = ["dep:aws-lc-rs"]
 # No PEM handling is needed by the verifier. std supplies the synchronization
 # used by the precomputed tables, preserving the baseline verification path.
 p256          = { version = "0.14", default-features = false, features = ["ecdsa", "std", "precomputed-tables"] }
-ed25519-dalek = { version = "2", features = ["pkcs8"] }
-sha2          = "0.10"
+ed25519-dalek = { version = "3", default-features = false, features = ["fast"] }
+sha2          = "0.11"
 getrandom     = "0.4"
 web-time      = "1.1"
 
@@ -60,10 +60,11 @@ hex           = "0.4"
 # same crypto + encoding primitives the real authenticator would use.
 base64        = "0.22"
 ciborium      = "0.2"
-ed25519-dalek = { version = "2", features = ["pkcs8", "rand_core"] }
+# Independent point-encoding regressions use dalek's complete torsion subgroup.
+curve25519-dalek = { version = "5", default-features = false, features = ["precomputed-tables"] }
 # `oid` feature so sha2 implements AssociatedOid - needed when the
 # x509-cert builder asks for the signature-algorithm identifier.
-sha2          = { version = "0.10", features = ["oid"] }
+sha2          = { version = "0.11", features = ["oid"] }
 rand          = "0.8"
 # Re-enable p256's pkcs8 + pem features in dev builds so SigningKey
 # implements SignatureAlgorithmIdentifier (required by x509-cert's
@@ -82,7 +83,6 @@ rocket        = { version = "0.5", default-features = false, features = ["json"]
 # a self-signed P-256 cert at runtime. Used by integration tests
 # under tests/.
 x509-cert-test = { package = "x509-cert", version = "0.3", features = ["builder", "std"] }
-sha2-new      = { package = "sha2", version = "0.11", features = ["oid"] }
 
 # Persistent storage for the axum_sqlite example. `bundled` ships
 # the SQLite amalgamation so the example builds on machines that do

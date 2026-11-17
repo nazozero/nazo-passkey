@@ -128,13 +128,19 @@ impl<'a> Decoder<'a> {
     }
 
     pub(crate) fn integer(&mut self) -> Result<i64> {
-        let (major, n) = self.head()?;
-        let value = match major {
-            0 => i128::from(n),
-            1 => -1 - i128::from(n),
-            _ => return Err(invalid("CBOR integer expected")),
-        };
+        let value = self.integer_wide()?;
         i64::try_from(value).map_err(|_| invalid("CBOR integer outside i64 range"))
+    }
+
+    /// Preserve the full CBOR integer range when an unknown registry value
+    /// is structurally valid. Algorithm and curve fields still use `integer`.
+    pub(crate) fn integer_wide(&mut self) -> Result<i128> {
+        let (major, n) = self.head()?;
+        match major {
+            0 => Ok(i128::from(n)),
+            1 => Ok(-1 - i128::from(n)),
+            _ => Err(invalid("CBOR integer expected")),
+        }
     }
 
     pub(crate) fn bytes(&mut self) -> Result<&'a [u8]> {
@@ -174,7 +180,17 @@ impl<'a> Decoder<'a> {
         let mut previous = None;
         for _ in 0..count {
             let start = self.pos;
-            self.text()?;
+            let identifier = self.text()?;
+            // WebAuthn §9.1: extension identifiers use at most 32 octets,
+            // all VCHAR except double quote and backslash. Unknown valid
+            // identifiers remain ignorable; their values carry no policy.
+            if identifier.len() > 32
+                || identifier
+                    .bytes()
+                    .any(|b| !(0x21..=0x7e).contains(&b) || matches!(b, b'"' | b'\\'))
+            {
+                return Err(invalid("invalid authenticator extension identifier"));
+            }
             self.check_key_order(start, &mut previous)?;
             self.skip_at_depth(1)?;
         }
@@ -198,7 +214,11 @@ impl<'a> Decoder<'a> {
                     ))
                 }
             }
-            7 if additional <= 23 && (20..=23).contains(&n) => Ok(MapKey::Simple(n as u8)),
+            7 if additional <= 24 => Ok(MapKey::Simple(n as u8)),
+            // Float values are supported, but float map keys require extra
+            // equivalence rules for signed zero and NaN (RFC 8949 §5.6.1).
+            // Retain this parser's explicit unsupported-key policy instead
+            // of treating distinct encodings as proof of distinct keys.
             _ => Err(invalid("unsupported CBOR map-key type")),
         }
     }
@@ -223,23 +243,17 @@ impl<'a> Decoder<'a> {
                 if count > MAX_CONTAINER_ITEMS {
                     return Err(invalid("CBOR container limit exceeded"));
                 }
-                let mut keys = [None; MAX_CONTAINER_ITEMS];
+                if major == 5 && !self.canonical {
+                    return self.skip_legacy_map(count, depth);
+                }
                 let mut previous: Option<&[u8]> = None;
-                for i in 0..count {
+                for _ in 0..count {
                     if major == 5 {
                         let start = self.pos;
-                        let key = self.key()?;
-                        let encoded = &self.input[start..self.pos];
-                        if keys[..i].contains(&Some(key)) {
-                            return Err(invalid("duplicate CBOR map key"));
-                        }
-                        // CTAP2 ordering is major-type first, then encoded key
-                        // length/value. Canonical encodings compare lexically.
-                        if self.canonical && previous.is_some_and(|p| p >= encoded) {
-                            return Err(invalid("non-canonical CBOR map ordering"));
-                        }
-                        keys[i] = Some(key);
-                        previous = Some(encoded);
+                        self.key()?;
+                        // Canonical ordering already proves uniqueness. Do
+                        // not also scan or retain every previously seen key.
+                        self.check_key_order(start, &mut previous)?;
                     }
                     self.skip_at_depth(depth + 1)?;
                 }
@@ -248,6 +262,22 @@ impl<'a> Decoder<'a> {
             7 => Ok(()), // Simple values and IEEE floats keep their CTAP width.
             _ => Err(invalid("CBOR tags are not supported by WebAuthn")),
         }
+    }
+
+    // Only persisted, noncanonical COSE metadata needs order-independent
+    // duplicate detection. Keep its bounded key table off the recursive
+    // canonical wire-map and array paths.
+    fn skip_legacy_map(&mut self, count: usize, depth: usize) -> Result<()> {
+        let mut keys = [None; MAX_CONTAINER_ITEMS];
+        for i in 0..count {
+            let key = self.key()?;
+            if keys[..i].contains(&Some(key)) {
+                return Err(invalid("duplicate CBOR map key"));
+            }
+            keys[i] = Some(key);
+            self.skip_at_depth(depth + 1)?;
+        }
+        Ok(())
     }
 }
 
@@ -292,6 +322,42 @@ mod tests {
         assert!(valid(b"\xa2\x01\x02\x03\x26", true));
         assert!(valid(b"\x18\x01", false));
         assert!(!valid(b"\x18\x01", true));
+    }
+
+    #[test]
+    fn simple_map_keys_preserve_the_ctap_encoding_profile() {
+        // Unassigned simple values remain valid CBOR and do not need
+        // application-specific interpretation when skipping unknown values.
+        let keys: [&[u8]; 4] = [&[0xe0], &[0xf4], &[0xf8, 0x20], &[0xf8, 0xff]];
+        let mut map = vec![0xa4];
+        for key in keys {
+            map.extend_from_slice(key);
+            map.push(0);
+            let mut duplicate = vec![0xa2];
+            for _ in 0..2 {
+                duplicate.extend_from_slice(key);
+                duplicate.push(0);
+            }
+            assert!(!valid(&duplicate, true));
+            assert!(!valid(&duplicate, false));
+        }
+        assert!(valid(&map, true));
+        assert!(valid(&map, false));
+
+        let mut reversed = vec![0xa4];
+        for key in keys.into_iter().rev() {
+            reversed.extend_from_slice(key);
+            reversed.push(0);
+        }
+        assert!(!valid(&reversed, true));
+        assert!(valid(&reversed, false));
+        assert!(!valid(&[0xa1, 0xf8, 0x18, 0], true));
+        assert!(!valid(&[0xa1, 0xfc, 0], true));
+        // CTAP preserves floating-point value widths. Float map keys remain
+        // unsupported; their equivalence is not inferred from raw ordering.
+        assert!(valid(&[0xa1, 0x61, b'x', 0xf9, 0x3e, 0x00], true));
+        assert!(valid(&[0xa1, 0x61, b'x', 0xfa, 0x3f, 0xc0, 0, 0], true));
+        assert!(!valid(&[0xa1, 0xf9, 0x00, 0x00, 0], true));
     }
 
     #[test]

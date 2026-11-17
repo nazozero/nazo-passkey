@@ -100,14 +100,11 @@ impl<'a> ParsedAttestation<'a> {
         client_data_hash: &[u8; 32],
     ) -> Result<AttestationEvidence> {
         let alg = statement.alg.ok_or_else(|| invalid("packed missing alg"))?;
-        let mut message = Vec::with_capacity(self.auth_data_raw.len() + 32);
-        message.extend_from_slice(self.auth_data_raw);
-        message.extend_from_slice(client_data_hash);
         if statement.chain_len == 0 {
             if alg != key.alg() {
                 return Err(invalid("packed self attestation algorithm mismatch"));
             }
-            crypto::verify(key, &message, statement.sig)?;
+            crypto::verify_auth_data(key, self.auth_data_raw, client_data_hash, statement.sig)?;
             return Ok(AttestationEvidence::SelfAttestation);
         }
         if alg != ALG_ES256 {
@@ -127,7 +124,11 @@ impl<'a> ParsedAttestation<'a> {
         for certificate in &statement.chain[1..statement.chain_len] {
             AttestationCert::validate_der(certificate)?;
         }
-        verify_es256_sec1(&leaf.p256_pubkey_sec1, &message, statement.sig)?;
+        verify_es256_parts(
+            &leaf.verifying_key,
+            &[self.auth_data_raw, client_data_hash],
+            statement.sig,
+        )?;
         Ok(AttestationEvidence::UntrustedCertificate)
     }
 
@@ -149,15 +150,19 @@ impl<'a> ParsedAttestation<'a> {
             .attested
             .as_ref()
             .ok_or_else(|| invalid("fido-u2f missing attested credential data"))?;
-        let mut message = Vec::with_capacity(130 + attested.credential_id.len());
-        message.push(0);
-        message.extend_from_slice(&self.auth_data.rp_id_hash);
-        message.extend_from_slice(client_data_hash);
-        message.extend_from_slice(attested.credential_id);
-        message.push(4);
-        message.extend_from_slice(x);
-        message.extend_from_slice(y);
-        verify_es256_sec1(&leaf.p256_pubkey_sec1, &message, statement.sig)?;
+        verify_es256_parts(
+            &leaf.verifying_key,
+            &[
+                &[0],
+                &self.auth_data.rp_id_hash,
+                client_data_hash,
+                attested.credential_id,
+                &[4],
+                x,
+                y,
+            ],
+            statement.sig,
+        )?;
         Ok(AttestationEvidence::UntrustedCertificate)
     }
 }
@@ -218,10 +223,17 @@ impl<'a> Statement<'a> {
     }
 }
 
-fn verify_es256_sec1(sec1: &[u8; 65], message: &[u8], sig: &[u8]) -> Result<()> {
-    use p256::ecdsa::signature::Verifier;
-    let key = p256::ecdsa::VerifyingKey::from_sec1_bytes(sec1).map_err(|_| Error::BadSignature)?;
+fn verify_es256_parts(key: &p256::ecdsa::VerifyingKey, parts: &[&[u8]], sig: &[u8]) -> Result<()> {
+    use p256::ecdsa::signature::hazmat::PrehashVerifier;
+    use sha2::{Digest, Sha256};
+
     let signature = p256::ecdsa::Signature::from_der(sig).map_err(|_| Error::BadSignature)?;
-    key.verify(message, &signature)
+    let mut digest = Sha256::new();
+    for part in parts {
+        digest.update(part);
+    }
+    // Hash the complete locally assembled transcript, without allocating a
+    // concatenation buffer. No external prehash is accepted by this helper.
+    key.verify_prehash(&digest.finalize(), &signature)
         .map_err(|_| Error::BadSignature)
 }

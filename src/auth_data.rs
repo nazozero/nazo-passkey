@@ -158,6 +158,35 @@ mod tests {
     }
 
     #[test]
+    fn extension_identifiers_follow_webauthn_without_requiring_known_names() {
+        fn with_extension(name: &str) -> Vec<u8> {
+            let mut bytes = minimal(FLAG_ED);
+            bytes.push(0xa1);
+            if name.len() < 24 {
+                bytes.push(0x60 + name.len() as u8);
+            } else {
+                bytes.extend_from_slice(&[0x78, name.len() as u8]);
+            }
+            bytes.extend_from_slice(name.as_bytes());
+            bytes.push(0xf5);
+            bytes
+        }
+        for name in ["credProtect", "future_extension-01", &"a".repeat(32)] {
+            assert!(AuthenticatorData::parse(&with_extension(name)).is_ok());
+        }
+        for name in [
+            "has space",
+            "has\"quote",
+            "has\\backslash",
+            "\u{7f}",
+            "é",
+            &"a".repeat(33),
+        ] {
+            assert!(AuthenticatorData::parse(&with_extension(name)).is_err());
+        }
+    }
+
+    #[test]
     fn attested_credential_id_lengths_are_bounded() {
         for n in [0, 1024, u16::MAX] {
             let mut bytes = minimal(FLAG_AT);

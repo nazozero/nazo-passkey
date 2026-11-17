@@ -9,38 +9,39 @@
 //! ES256 signature on the wire is **DER-encoded**, not raw r||s - be
 //! careful here.
 
-use ed25519_dalek::Signature as EdSig;
-#[cfg(any(test, not(all(feature = "aws-lc", not(target_family = "wasm")))))]
+use ed25519_dalek::{Signature as EdSig, ed25519::signature::MultipartVerifier as _};
+#[cfg(test)]
 use p256::PublicKey;
 use p256::ecdsa::Signature as EsSig;
 #[cfg(any(test, not(all(feature = "aws-lc", not(target_family = "wasm")))))]
 use p256::ecdsa::VerifyingKey as EsKey;
-#[cfg(any(test, not(all(feature = "aws-lc", not(target_family = "wasm")))))]
+#[cfg(test)]
 use p256::ecdsa::signature::Verifier as _;
 #[cfg(not(all(feature = "aws-lc", not(target_family = "wasm"))))]
 use p256::ecdsa::signature::hazmat::PrehashVerifier;
 use sha2::{Digest, Sha256};
 
-use crate::cose::{CoseKey, ed25519_verifying_key};
+use crate::cose::{CoseKey, check_ed25519_encoding, ed25519_verifying_key};
 use crate::error::{Error, Result};
 
 /// Verify `sig` over `msg` using the COSE public key. Returns `Ok(())`
 /// on a valid signature; any failure path (wrong key, malformed sig,
 /// algorithm mismatch) collapses to [`Error::BadSignature`] so we
 /// don't leak which check failed to the wire.
+#[cfg(test)]
 pub(crate) fn verify(key: &CoseKey, msg: &[u8], sig: &[u8]) -> Result<()> {
     match key {
         CoseKey::Es256 { x, y } => verify_es256(x, y, msg, sig),
-        CoseKey::Ed25519 { key } => verify_ed25519(key, msg, sig),
+        CoseKey::Ed25519 { key } => verify_ed25519(key, &[msg], sig),
     }
 }
 
-/// Authentication hashes the ES256 transcript in two borrowed pieces. Ed25519
-/// signs the message itself (not Ed25519ph), so reuse the decoded authData
-/// allocation for its transcript instead of allocating and copying a new one.
+/// Verify the exact WebAuthn transcript from its two borrowed parts. ES256
+/// hashes the parts directly; ordinary Ed25519 signs the complete message,
+/// not an Ed25519ph digest.
 pub(crate) fn verify_auth_data(
     key: &CoseKey,
-    auth_data: &mut Vec<u8>,
+    auth_data: &[u8],
     client_data_hash: &[u8; 32],
     sig: &[u8],
 ) -> Result<()> {
@@ -51,7 +52,7 @@ pub(crate) fn verify_auth_data(
             sec1[1..33].copy_from_slice(x);
             sec1[33..].copy_from_slice(y);
             let mut digest = Sha256::new();
-            digest.update(&*auth_data);
+            digest.update(auth_data);
             digest.update(client_data_hash);
             let digest = digest.finalize();
             #[cfg(all(feature = "aws-lc", not(target_family = "wasm")))]
@@ -81,13 +82,11 @@ pub(crate) fn verify_auth_data(
                     .map_err(|_| Error::BadSignature)
             }
         }
-        CoseKey::Ed25519 { key } => {
-            auth_data.extend_from_slice(client_data_hash);
-            verify_ed25519(key, auth_data, sig)
-        }
+        CoseKey::Ed25519 { key } => verify_ed25519(key, &[auth_data, client_data_hash], sig),
     }
 }
 
+#[cfg(test)]
 fn verify_es256(x: &[u8; 32], y: &[u8; 32], msg: &[u8], sig: &[u8]) -> Result<()> {
     #[cfg(all(feature = "aws-lc", not(target_family = "wasm")))]
     {
@@ -109,7 +108,7 @@ fn verify_es256(x: &[u8; 32], y: &[u8; 32], msg: &[u8], sig: &[u8]) -> Result<()
     }
 }
 
-#[cfg(any(test, not(all(feature = "aws-lc", not(target_family = "wasm")))))]
+#[cfg(test)]
 fn verify_es256_rustcrypto(x: &[u8; 32], y: &[u8; 32], msg: &[u8], sig: &[u8]) -> Result<()> {
     // SEC1 uncompressed point: 0x04 || X || Y.
     let mut sec1 = [0u8; 65];
@@ -132,12 +131,22 @@ fn verify_es256_rustcrypto(x: &[u8; 32], y: &[u8; 32], msg: &[u8], sig: &[u8]) -
     vk.verify(msg, &parsed).map_err(|_| Error::BadSignature)
 }
 
-fn verify_ed25519(key: &[u8; 32], msg: &[u8], sig: &[u8]) -> Result<()> {
+fn verify_ed25519(key: &[u8; 32], message: &[&[u8]], sig: &[u8]) -> Result<()> {
     let vk = ed25519_verifying_key(key).map_err(|_| Error::BadSignature)?;
     let parsed = EdSig::from_slice(sig).map_err(|_| Error::BadSignature)?;
-    // Reject weak/small-order keys, non-canonical scalars and malleable points.
-    // This is ordinary Ed25519; do not substitute Ed25519ph for WebAuthn -8.
-    vk.verify_strict(msg, &parsed)
+    check_ed25519_encoding(parsed.r_bytes()).map_err(|_| Error::BadSignature)?;
+    // Reviewed against ed25519-dalek 3.0.0. MultipartVerifier and verify_strict
+    // share the S<L parser and exact RCompute(SHA512(R||A||message)) equation.
+    // Success compares the canonical encoded expected R to wire R, so it also
+    // proves R is a decodable canonical point. The complete finite encoding
+    // filter above preserves strict's separate small-order A/R rejection;
+    // A's actual point decoding remains in dalek. This avoids an otherwise
+    // redundant R decompression and message concatenation, without computing
+    // our own signature equation, hash or curve arithmetic. Dependency changes
+    // must retain the independent CCTV and strict-oracle differential tests.
+    // This is ordinary Ed25519, never Ed25519ph. Do not enable dalek's
+    // legacy_compatibility feature, which relaxes even verify_strict's S check.
+    vk.multipart_verify(message, &parsed)
         .map_err(|_| Error::BadSignature)
 }
 
@@ -145,7 +154,7 @@ fn verify_ed25519(key: &[u8; 32], msg: &[u8], sig: &[u8]) -> Result<()> {
 mod tests {
     use super::*;
     use ed25519_dalek::{Signer as _, SigningKey};
-    use p256::ecdsa::{SigningKey as EsSigningKey, signature::Signer as _};
+    use p256::ecdsa::SigningKey as EsSigningKey;
     use rand::RngCore;
 
     #[test]
@@ -184,6 +193,117 @@ mod tests {
         assert!(verify(&key, msg, &bad).is_err());
     }
 
+    fn ed25519_strict_reference(key: &[u8; 32], message: &[u8], signature: &[u8]) -> bool {
+        let Ok(key) = ed25519_dalek::VerifyingKey::from_bytes(key) else {
+            return false;
+        };
+        // Independent, deliberately slower oracle for the pre-optimization
+        // acceptance policy, including RFC 8032's canonical public encoding.
+        if key.to_edwards().compress().as_bytes() != key.as_bytes() {
+            return false;
+        }
+        let Ok(signature) = EdSig::from_slice(signature) else {
+            return false;
+        };
+        key.verify_strict(message, &signature).is_ok()
+    }
+
+    #[test]
+    fn cctv_ed25519_independent_acceptance_contract() {
+        // Pinned independent vectors and their BSD license are retained in
+        // tests/fixtures/cctv. These distinguish wholly small-order points
+        // from valid points with a nonzero torsion component.
+        let vectors: Vec<serde_json::Value> =
+            serde_json::from_str(include_str!("../tests/fixtures/cctv/ed25519vectors.json"))
+                .unwrap();
+        assert_eq!(vectors.len(), 914);
+        let mut accepted = 0;
+        for vector in &vectors {
+            let public: [u8; 32] = hex::decode(vector["key"].as_str().unwrap())
+                .unwrap()
+                .try_into()
+                .unwrap();
+            let signature = hex::decode(vector["sig"].as_str().unwrap()).unwrap();
+            let message = vector["msg"].as_str().unwrap().as_bytes();
+            let expected = vector["flags"].as_array().is_none_or(|flags| {
+                flags.iter().all(|flag| {
+                    matches!(
+                        flag.as_str(),
+                        Some("low_order_component_A" | "low_order_component_R")
+                    )
+                })
+            });
+            let key = CoseKey::Ed25519 { key: public };
+            let actual = verify(&key, message, &signature).is_ok();
+            assert_eq!(actual, expected, "CCTV vector {}", vector["number"]);
+            assert_eq!(
+                actual,
+                ed25519_strict_reference(&public, message, &signature),
+                "strict reference for CCTV vector {}",
+                vector["number"]
+            );
+            for split in 0..=message.len() {
+                assert_eq!(
+                    verify_ed25519(
+                        &public,
+                        &[&message[..split], &[], &message[split..]],
+                        &signature,
+                    )
+                    .is_ok(),
+                    expected,
+                    "CCTV vector {} at split {split}",
+                    vector["number"]
+                );
+            }
+            accepted += usize::from(actual);
+        }
+        assert_eq!(accepted, 43);
+        assert_eq!(vectors.len() - accepted, 871);
+    }
+
+    #[test]
+    fn ed25519_borrowed_transcript_and_scalar_bounds() {
+        let signing = SigningKey::from_bytes(&[7; 32]);
+        let key = CoseKey::Ed25519 {
+            key: signing.verifying_key().to_bytes(),
+        };
+        let client_hash = [29; 32];
+        for length in [0, 37, 38, 512, 16_384] {
+            let auth_data = vec![23; length];
+            let unchanged = auth_data.clone();
+            let mut message = auth_data.clone();
+            message.extend_from_slice(&client_hash);
+            let signature = signing.sign(&message).to_bytes();
+            verify_auth_data(&key, &auth_data, &client_hash, &signature).unwrap();
+            assert_eq!(auth_data, unchanged);
+            let mut wrong_hash = client_hash;
+            wrong_hash[0] ^= 1;
+            assert!(verify_auth_data(&key, &auth_data, &wrong_hash, &signature).is_err());
+
+            // S+L must remain rejected even though it represents the same
+            // scalar modulo the group order. Arithmetic here mutates a test
+            // fixture; the production scalar parser remains in dalek.
+            let order =
+                hex::decode("edd3f55c1a631258d69cf7a2def9de1400000000000000000000000000000010")
+                    .unwrap();
+            let mut noncanonical = signature;
+            let mut carry = 0u16;
+            for (destination, byte) in noncanonical[32..].iter_mut().zip(order) {
+                let sum = u16::from(*destination) + u16::from(byte) + carry;
+                *destination = sum as u8;
+                carry = sum >> 8;
+            }
+            assert_eq!(carry, 0);
+            assert!(verify_auth_data(&key, &auth_data, &client_hash, &noncanonical).is_err());
+            for signature_length in [0, 1, 31, 32, 63, 65, 128] {
+                assert!(
+                    verify_auth_data(&key, &auth_data, &client_hash, &vec![0; signature_length],)
+                        .is_err()
+                );
+            }
+        }
+    }
+
     #[test]
     fn ed25519_verifier_rejects_every_out_of_range_y_and_negative_zero() {
         let mut forged = [0; 64];
@@ -203,6 +323,23 @@ mod tests {
             key[0] = 0xec;
             key[31] = 0x7f | sign;
             assert!(verify(&CoseKey::Ed25519 { key }, b"message", &forged).is_err());
+        }
+    }
+
+    proptest::proptest! {
+        #![proptest_config(proptest::test_runner::Config::with_cases(1024))]
+
+        #[test]
+        fn ed25519_random_transcripts_preserve_strict_acceptance(
+            public in proptest::prelude::any::<[u8; 32]>(),
+            signature in proptest::prelude::any::<[u8; 64]>(),
+            message in proptest::collection::vec(proptest::prelude::any::<u8>(), 0..256),
+        ) {
+            let key = CoseKey::Ed25519 { key: public };
+            proptest::prop_assert_eq!(
+                verify(&key, &message, &signature).is_ok(),
+                ed25519_strict_reference(&public, &message, &signature)
+            );
         }
     }
 
@@ -275,17 +412,14 @@ mod tests {
         for signature in [low, high] {
             let der = signature.to_der();
             verify(&key, &message, der.as_bytes()).unwrap();
-            let mut borrowed_transcript = auth_data.clone();
-            verify_auth_data(&key, &mut borrowed_transcript, &client_hash, der.as_bytes()).unwrap();
+            let borrowed_transcript = auth_data.clone();
+            verify_auth_data(&key, &borrowed_transcript, &client_hash, der.as_bytes()).unwrap();
             // ES256 hashes borrowed parts under both backends.
             assert_eq!(borrowed_transcript, auth_data);
             assert!(verify(&key, b"wrong message", der.as_bytes()).is_err());
             let mut wrong_hash = client_hash;
             wrong_hash[0] ^= 1;
-            assert!(
-                verify_auth_data(&key, &mut auth_data.clone(), &wrong_hash, der.as_bytes())
-                    .is_err()
-            );
+            assert!(verify_auth_data(&key, &auth_data, &wrong_hash, der.as_bytes()).is_err());
         }
         let mut trailing = low.to_der().as_bytes().to_vec();
         trailing.push(0);
@@ -304,9 +438,7 @@ mod tests {
         ];
         for signature in invalid {
             assert!(verify(&key, &message, &signature).is_err());
-            assert!(
-                verify_auth_data(&key, &mut auth_data.clone(), &client_hash, &signature).is_err()
-            );
+            assert!(verify_auth_data(&key, &auth_data, &client_hash, &signature).is_err());
         }
         for invalid_key in [
             CoseKey::Es256 {
@@ -323,7 +455,7 @@ mod tests {
             assert!(
                 verify_auth_data(
                     &invalid_key,
-                    &mut auth_data.clone(),
+                    &auth_data,
                     &client_hash,
                     low.to_der().as_bytes(),
                 )

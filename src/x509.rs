@@ -28,7 +28,7 @@ const OID_CN: ObjectIdentifier = ObjectIdentifier::new_unwrap("2.5.4.3");
 
 #[derive(Debug)]
 pub(crate) struct AttestationCert {
-    pub p256_pubkey_sec1: [u8; 65],
+    pub verifying_key: p256::ecdsa::VerifyingKey,
     pub aaguid: Option<[u8; 16]>,
 }
 
@@ -60,13 +60,11 @@ impl AttestationCert {
             .subject_public_key
             .as_bytes()
             .ok_or_else(|| invalid("attestation certificate key has unused bits"))?;
-        let p256_pubkey_sec1: [u8; 65] = key
-            .try_into()
-            .map_err(|_| invalid("attestation certificate key must be uncompressed P-256"))?;
-        if p256_pubkey_sec1[0] != 4 {
-            return Err(invalid(
-                "attestation certificate key must be uncompressed P-256",
-            ));
+        // RFC 5480 §2.2 requires uncompressed SEC1 support and permits the
+        // compressed form. Both are decoded and validated by RustCrypto;
+        // hybrid, identity and other encodings are not certificate keys.
+        if !matches!(key.first(), Some(2..=4)) {
+            return Err(invalid("invalid attestation certificate point encoding"));
         }
 
         let mut aaguid = None;
@@ -82,13 +80,19 @@ impl AttestationCert {
                 {
                     return Err(invalid("duplicate X.509 extension"));
                 }
+                // WebAuthn §8.6 needs the U2F certificate's P-256 key. The
+                // packed-specific AAGUID/profile rules in §8.2.1 do not
+                // apply to U2F. Neither path establishes certificate trust.
+                if !packed {
+                    continue;
+                }
                 if extension.extn_id == OID_AAGUID {
                     if extension.critical {
                         return Err(invalid("AAGUID extension must not be critical"));
                     }
                     aaguid = Some(parse_aaguid(extension.extn_value.as_bytes())?);
                 }
-                if packed && extension.extn_id == OID_FIRMWARE_VERSION {
+                if extension.extn_id == OID_FIRMWARE_VERSION {
                     if extension.critical {
                         return Err(invalid("firmware version extension must not be critical"));
                     }
@@ -99,7 +103,7 @@ impl AttestationCert {
                         invalid("firmware version must be a non-negative DER INTEGER")
                     })?;
                 }
-                if packed && extension.extn_id == OID_ENTERPRISE_SERIAL_NUMBER {
+                if extension.extn_id == OID_ENTERPRISE_SERIAL_NUMBER {
                     // This verifier does not request enterprise attestation.
                     // WebAuthn L3 §8.2.2 forbids this device identifier in
                     // non-enterprise packed attestation, even if noncritical.
@@ -129,7 +133,8 @@ impl AttestationCert {
             validate_packed_subject(&tbs.subject)?;
         }
         Ok(Self {
-            p256_pubkey_sec1,
+            verifying_key: p256::ecdsa::VerifyingKey::from_sec1_bytes(key)
+                .map_err(|_| Error::BadSignature)?,
             aaguid,
         })
     }
@@ -164,6 +169,10 @@ fn validate_packed_subject(subject: &x509_cert::name::Name) -> Result<()> {
             if text.is_empty() {
                 return Err(invalid("packed certificate empty subject field"));
             }
+            // The certificate's country is an unverified assertion, just
+            // like the vendor's legal name. ISO 3166 includes private-use
+            // codes (the W3C vectors use AA); a current assignment table
+            // would also incorrectly reject historical/reserved claims.
             if index == 0 && (text.len() != 2 || !text.bytes().all(|v| v.is_ascii_uppercase())) {
                 return Err(invalid(
                     "packed certificate country must be two uppercase ASCII letters",

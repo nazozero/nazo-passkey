@@ -13,7 +13,7 @@ use crate::types::{
     AuthSuccess, AuthenticationChallenge, AuthenticationResponse, AuthenticationState,
     AuthenticatorSelection, Challenge, CosePublicKey, CredentialDescriptor, CredentialId,
     PasskeyCredential, PubKeyCredParam, RegistrationChallenge, RegistrationResponse,
-    RegistrationState, RpId, RpInfo, UserInfo, decode_b64_bounded, now_secs,
+    RegistrationState, RpId, RpInfo, UserInfo, decode_b64_bounded, decode_b64_into, now_secs,
 };
 
 const CEREMONY_TIMEOUT_MS: u32 = 60_000;
@@ -729,8 +729,10 @@ impl Webauthn {
         let discoverable = state.allow_credentials.is_empty();
         match response.user_handle.as_deref() {
             Some(encoded) => {
-                let handle = self.decode_b64(encoded, 64, "userHandle")?;
-                if expected != Some(handle.as_slice()) || handle.is_empty() {
+                let mut handle = [0; 64];
+                let length =
+                    decode_b64_into(encoded, self.strict_base64, &mut handle, "userHandle")?;
+                if expected != Some(&handle[..length]) || length == 0 {
                     return Err(Error::UserHandleMismatch);
                 }
             }
@@ -747,8 +749,7 @@ impl Webauthn {
             self.strict_base64,
         )?;
         let cdj_hash = sha256_32(&cdj_raw);
-        let mut ad_bytes =
-            self.decode_b64(&response.authenticator_data, 16384, "authenticatorData")?;
+        let ad_bytes = self.decode_b64(&response.authenticator_data, 16384, "authenticatorData")?;
         let ad = AuthenticatorData::parse(&ad_bytes)?;
         if ad.rp_id_hash != self.rp_id_hash {
             return Err(Error::RpIdHashMismatch);
@@ -775,8 +776,14 @@ impl Webauthn {
         let user_verified = ad.user_verified();
         let new_counter = ad.sign_count;
         let key = CoseKey::parse(stored.public_key_cose.as_bytes())?;
-        let sig = self.decode_b64(&response.signature, 80, "signature")?;
-        crypto::verify_auth_data(&key, &mut ad_bytes, &cdj_hash, &sig)?;
+        let mut sig = [0; 80];
+        let sig_len = decode_b64_into(
+            &response.signature,
+            self.strict_base64,
+            &mut sig,
+            "signature",
+        )?;
+        crypto::verify_auth_data(&key, &ad_bytes, &cdj_hash, &sig[..sig_len])?;
         // Counter anomalies are an RP policy decision. Preserve NazoAuth's
         // strict rejection policy, including backups; 0/0 remains supported.
         if (new_counter != 0 || stored.counter != 0) && new_counter <= stored.counter {

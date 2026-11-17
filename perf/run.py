@@ -2,6 +2,7 @@
 """Run already-built baseline/candidate binaries in alternating order.
 
 Example: python3 perf/run.py --baseline ../passkey-auth-baseline/perf/target/release/ceremony-bench --candidate perf/target/release/ceremony-bench --output results.json
+An optional --checkpoint adds a third revision in rotated/reversed order.
 No compilation or dependency installation runs during measurement.
 """
 import argparse
@@ -18,6 +19,7 @@ from pathlib import Path
 parser = argparse.ArgumentParser()
 parser.add_argument("--baseline", required=True)
 parser.add_argument("--candidate", required=True)
+parser.add_argument("--checkpoint", help="optional previously shipped candidate artifact")
 parser.add_argument("--output", required=True)
 parser.add_argument("--rounds", type=int, default=5)
 parser.add_argument("--iterations", type=int, default=5000)
@@ -29,8 +31,9 @@ if args.cpu is not None:
         parser.error("selected CPU is outside this process affinity")
     os.sched_setaffinity(0, {args.cpu})
 
+labels = ["baseline", "checkpoint", "candidate"] if args.checkpoint else ["baseline", "candidate"]
 artifacts = {}
-for label in ("baseline", "candidate"):
+for label in labels:
     path = Path(getattr(args, label)).resolve()
     artifacts[label] = {"path": str(path), "bytes": path.stat().st_size, "sha256": hashlib.sha256(path.read_bytes()).hexdigest()}
 cpu = {}
@@ -40,9 +43,18 @@ for line in Path("/proc/cpuinfo").read_text().splitlines():
         if key.strip() in ("model name", "cpu MHz", "cpu cores"):
             cpu.setdefault(key.strip(), value.strip())
 metadata = {"utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()), "platform": platform.platform(), "cpu": cpu, "logical_cpus": os.cpu_count(), "affinity": sorted(os.sched_getaffinity(0)), "memory": Path("/proc/meminfo").read_text().splitlines()[:3], "node": subprocess.check_output(["node", "--version"], text=True).strip() if args.wasi else None, "mode": "WASI preview1 / Node" if args.wasi else "native", "artifacts": artifacts, "iterations": args.iterations, "rounds": args.rounds}
+if args.checkpoint:
+    metadata["process_order"] = []
 runs = []
 for round_index in range(args.rounds):
-    order = ["baseline", "candidate"] if round_index % 2 == 0 else ["candidate", "baseline"]
+    if args.checkpoint:
+        offset = round_index % len(labels)
+        order = labels[offset:] + labels[:offset]
+        if round_index % 2:
+            order.reverse()
+        metadata["process_order"].append({"round": round_index + 1, "labels": order})
+    else:
+        order = ["baseline", "candidate"] if round_index % 2 == 0 else ["candidate", "baseline"]
     for label in order:
         command = [artifacts[label]["path"]]
         if args.wasi:
@@ -59,7 +71,7 @@ for round_index in range(args.rounds):
         runs.append({"round": round_index + 1, "label": label, "wall_seconds": wall, "cpu_seconds": cpu_seconds, "cpu_percent_of_one_core": 100 * cpu_seconds / wall, "rows": rows})
         print(f"{label} round {round_index+1}: {wall:.3f}s", flush=True)
 summary = {}
-for label in ("baseline", "candidate"):
+for label in labels:
     cases = {row["case"] for run in runs if run["label"] == label for row in run["rows"]}
     summary[label] = {}
     for case in sorted(cases):

@@ -120,13 +120,15 @@ def main():
     parser.add_argument("--baseline", type=Path, required=True)
     parser.add_argument("--rustcrypto", type=Path, required=True)
     parser.add_argument("--aws-lc", dest="aws_lc", type=Path)
+    parser.add_argument("--checkpoint-rustcrypto", type=Path)
+    parser.add_argument("--checkpoint-aws-lc", type=Path)
     parser.add_argument("--aws-lc-version")
     parser.add_argument("--aws-lc-sys-version")
     parser.add_argument("--trace-dir", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--preload", type=Path, default=Path("/lib/x86_64-linux-gnu/libc_malloc_debug.so"))
     args = parser.parse_args()
-    if args.aws_lc is not None and (not args.aws_lc_version or not args.aws_lc_sys_version):
+    if (args.aws_lc is not None or args.checkpoint_aws_lc is not None) and (not args.aws_lc_version or not args.aws_lc_sys_version):
         parser.error("the AWS executable requires explicit --aws-lc-version and --aws-lc-sys-version")
     if platform.system() != "Linux" or os.confstr("CS_GNU_LIBC_VERSION") is None:
         parser.error("this experiment requires Linux/glibc and libc_malloc_debug")
@@ -137,6 +139,10 @@ def main():
     paths = {"baseline": args.baseline, "rustcrypto": args.rustcrypto}
     if args.aws_lc is not None:
         paths["aws_lc"] = args.aws_lc
+    if args.checkpoint_rustcrypto is not None:
+        paths["checkpoint_rustcrypto"] = args.checkpoint_rustcrypto
+    if args.checkpoint_aws_lc is not None:
+        paths["checkpoint_aws_lc"] = args.checkpoint_aws_lc
     binaries = {label: artifact(path) for label, path in paths.items()}
     session_dir = args.trace_dir.resolve() / uuid.uuid4().hex
     session_dir.mkdir(parents=True, exist_ok=False)
@@ -151,8 +157,8 @@ def main():
             "artifacts": binaries,
             "harness_source": artifact(root / "benches/ceremony.rs"),
             "driver_source": artifact(Path(__file__)),
-            "aws_lc_rs": args.aws_lc_version if args.aws_lc else None,
-            "aws_lc_sys": args.aws_lc_sys_version if args.aws_lc else None,
+            "aws_lc_rs": args.aws_lc_version if args.aws_lc or args.checkpoint_aws_lc else None,
+            "aws_lc_sys": args.aws_lc_sys_version if args.aws_lc or args.checkpoint_aws_lc else None,
         },
         "method": {
             "trace_window_operations": OPERATIONS,
@@ -196,7 +202,7 @@ def main():
             if excess_requests < 0 or excess_bytes < 0:
                 raise ValueError(f"{label}/{case}: native tracer missed Rust allocator requests")
             matches = excess_requests == 0 and excess_bytes == 0
-            if label in ("baseline", "rustcrypto") and not matches:
+            if label in ("baseline", "rustcrypto", "checkpoint_rustcrypto") and not matches:
                 raise ValueError(f"{label}/{case}: portable native/Rust counters differ; investigate profiling overhead")
             results["cases"][label][case] = {
                 "native_glibc": native,
