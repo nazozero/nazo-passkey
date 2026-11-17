@@ -18,7 +18,8 @@ signing keys usable; users do not need to register their passkeys again.
 
 **Rust 1.100.0 / edition 2024** is the target toolchain. The default uses
 RustCrypto `p256`, `ed25519-dalek`, and `sha2`. The optional `aws-lc` feature
-selects `aws-lc-rs =1.18.2` for native credential ES256 verification; Ed25519
+selects `aws-lc-rs` for native credential ES256 verification; the manifest permits
+compatible versions from 1.18.2 and the final lockfiles select **1.19.0**. Ed25519
 always uses dalek's strict verifier. There is no locally implemented
 cryptographic primitive. See
 [validation](docs/validation.md) for the exact builds actually run and
@@ -95,7 +96,7 @@ the dependency declaration to select it for native builds.
 | Build | Credential ES256 authentication / packed self-attestation | Ed25519 |
 |---|---|---|
 | Native, default features | RustCrypto P-256 | dalek `verify_strict` |
-| Native, `aws-lc` enabled | AWS-LC 1.18.2 | dalek `verify_strict` |
+| Native, `aws-lc` enabled | AWS-LC (`aws-lc-rs 1.19.0` in the final lockfiles) | dalek `verify_strict` |
 | Any WASM target, either feature setting | RustCrypto P-256 | dalek `verify_strict` |
 
 Certificate-attestation verification for packed x5c and FIDO U2F remains on
@@ -105,14 +106,21 @@ decision. Selection happens at compile time, with no application-level runtime
 backend selector or shared-state wrapper. Native builds with the feature acquire an AWS-LC native
 build dependency; WASM does not build it.
 
-The [backend measurements](docs/evidence/performance-backends.json) motivated
-this option: on the recorded host, the median of five ES256 parse-and-verify
-P50 measurements was 401.7 µs for RustCrypto and 81.1 µs for AWS-LC, a latency
-ratio of about 4.95:1. These are backend microbenchmarks, not whole-ceremony
+NazoAuth's baseline already locks `aws-lc-rs 1.19.0` / `aws-lc-sys 0.47.0`.
+The library's compatible version requirement preserves that resolution. An
+initial exact 1.18.2 constraint would have forced a consumer downgrade; integration
+review blocked it before merging or deployment and the constraint was corrected.
+
+The [initial backend measurements with AWS-LC 1.18.2](docs/evidence/performance-backends.json)
+motivated this option: on the recorded host, the median of five ES256
+parse-and-verify P50 measurements was 401.7 µs for RustCrypto and 81.1 µs for
+AWS-LC 1.18.2, a latency ratio of about 4.95:1. These are exploratory backend
+microbenchmarks for that version, not measurements of the final 1.19.0 lock or whole-ceremony
 speedups. The Ed25519 probe did not justify switching and accepted a small-order
 key fixture that dalek's strict policy rejects, so it is never selected for
 Ed25519. Full ceremony results and the exact tested feature combinations are
-reported separately in the performance and validation documents.
+reported separately in the performance and validation documents. Final 1.19.0
+performance measurements remain pending until their new results are recorded.
 
 ## Registration and username-first authentication
 

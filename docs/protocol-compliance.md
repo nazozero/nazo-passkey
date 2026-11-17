@@ -57,7 +57,7 @@ this matrix.
 | `types` | `src/types.rs`: wire types, persisted credential, states, bounded Base64 |
 | `binary` | `src/cbor.rs`, `src/auth_data.rs`, `src/cose.rs` |
 | `attest` | `src/attestation.rs`, `src/x509.rs` |
-| `crypto` | `src/crypto.rs`: RustCrypto default; optional native AWS-LC for credential ES256; Ed25519 always dalek strict; all WASM uses RustCrypto |
+| `crypto` | `src/crypto.rs`: RustCrypto default; optional native AWS-LC for credential ES256 (compatible manifest minimum 1.18.2, final lock 1.19.0); Ed25519 always dalek strict; all WASM uses RustCrypto |
 | `CE` | `tests/ceremony_e2e.rs` |
 | `BR` | `tests/binary_regressions.rs` |
 | `AE` | `tests/attestation_e2e.rs` |

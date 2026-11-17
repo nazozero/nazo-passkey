@@ -95,8 +95,9 @@ rusqlite      = { version = "0.41", features = ["bundled"] }
 getrandom = { version = "0.4", features = ["wasm_js"] }
 
 [target.'cfg(not(target_family = "wasm"))'.dependencies]
-# Match the backend already used by NazoAuth, avoiding a second native version.
-aws-lc-rs = { version = "=1.18.2", optional = true }
+# Allow the consumer workspace to retain its existing compatible AWS-LC
+# version. Reproducible validation is pinned by the committed lockfiles.
+aws-lc-rs = { version = "1.18.2", optional = true }
 
 [lints.cargo]
 unused_dependencies = "warn"

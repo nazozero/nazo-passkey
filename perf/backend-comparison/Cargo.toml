@@ -5,7 +5,7 @@ edition = "2024"
 publish = false
 
 [dependencies]
-aws-lc-rs = "=1.18.2"
+aws-lc-rs = "=1.19.0"
 ed25519-dalek = "2"
 p256 = { version = "0.14", features = ["ecdsa"] }
 serde_json = "1"

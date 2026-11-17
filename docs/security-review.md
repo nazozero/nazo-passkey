@@ -477,24 +477,36 @@ into the verification core.
 ### Crypto backend selection
 
 The default remains RustCrypto. A feature disabled by default, `aws-lc`, selects
-`aws-lc-rs =1.18.2` for native credential ES256 verification, matching the version
-already used by NazoAuth. All WASM targets retain RustCrypto even when the
+`aws-lc-rs` for native credential ES256 verification. The compatible manifest
+requirement starts at 1.18.2; all final library, performance, fuzz and comparison
+lockfiles select **1.19.0**. NazoAuth's actual baseline lockfile already selected
+1.19.0 with `aws-lc-sys 0.47.0`. All WASM targets retain RustCrypto even when the
 feature is enabled. Ed25519 always retains dalek's strict verifier. Certificate
 signatures in packed x5c and FIDO U2F also remain on RustCrypto; ES256 assertions
 and packed self-attestation use the selected credential backend. No runtime
 backend-selection trait, Arc, Mutex, or asynchronous wrapper is introduced.
 
+An initial exact `=1.18.2` constraint incorrectly treated NazoAuth's manifest
+minimum as its locked version and would have forced the consumer's existing
+crypto/TLS dependency tree backwards. The integration review detected and
+blocked that resolution before any merge or deployment. The constraint was
+relaxed and the lockfiles updated to preserve 1.19.0; no NazoAuth production
+downgrade was merged or deployed. This distinction also applies to benchmark
+provenance: the earlier measurements do not describe 1.19.0.
+
 The choice follows a measured comparison, rather than an assumption about
-native code. The [recorded five-round backend experiment](evidence/performance-backends.json)
-used 5,000 samples per case. Its median of per-round ES256 parse-and-verify P50s
-was 401.7 µs for RustCrypto and 81.1 µs for AWS-LC, a ratio of about 4.95:1.
-Ed25519 timings were similar, around 60 µs. The AWS-LC Ed25519 primitive also
+native code. The [initial five-round backend experiment](evidence/performance-backends.json)
+used **AWS-LC 1.18.2** and 5,000 samples per case. Its median of per-round ES256
+parse-and-verify P50s was 401.7 µs for RustCrypto and 81.1 µs for AWS-LC 1.18.2,
+a ratio of about 4.95:1. Ed25519 timings were similar, around 60 µs. That version's Ed25519 primitive also
 accepted the experiment's identity-key/small-order forgery fixture. This
 demonstrates that it cannot replace the existing strict RP acceptance policy
 without additional validation; the crate does not select it. These measurements
 are backend evidence only. They do not establish whole-ceremony gains, total
 native allocation counts, or performance on another host; those require the
-separate production-path measurements.
+separate production-path measurements. Final measurements with the production
+and acceptance lock at 1.19.0 remain pending; the exploratory figures are not
+substitutes for that rerun.
 
 Both ES256 paths retain RustCrypto's DER/scalar parser before verification.
 AWS-LC uses the fixed P-256/SHA-256/ASN.1 algorithm with the 65-byte uncompressed
