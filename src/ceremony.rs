@@ -480,13 +480,6 @@ impl Webauthn {
         if asserted_id != attested.credential_id {
             return Err(Error::CredentialIdMismatch);
         }
-        if state
-            .exclude_credentials
-            .iter()
-            .any(|id| id.as_bytes() == asserted_id)
-        {
-            return Err(Error::CredentialExcluded);
-        }
         let cose = &attested.key;
 
         // 6a. WebAuthn §7.1 step 19: the credential's alg MUST be one of
@@ -501,6 +494,17 @@ impl Webauthn {
         }
 
         let attestation = att.verify_statement(cose, &cdj_hash)?;
+
+        // A duplicate is a distinct application conflict only after the
+        // statement is valid. Preserve invalid-attestation rejection/audit
+        // behavior even when the asserted credential is already excluded.
+        if state
+            .exclude_credentials
+            .iter()
+            .any(|id| id.as_bytes() == asserted_id)
+        {
+            return Err(Error::CredentialExcluded);
+        }
 
         // 7. Build the persisted credential.
         Ok(PasskeyCredential {

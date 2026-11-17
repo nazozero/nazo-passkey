@@ -7,7 +7,7 @@ use const_oid::ObjectIdentifier;
 use x509_cert::Certificate;
 use x509_cert::certificate::Version;
 use x509_cert::der::Decode;
-use x509_cert::der::asn1::{PrintableStringRef, Utf8StringRef};
+use x509_cert::der::asn1::{PrintableStringRef, UintRef, Utf8StringRef};
 use x509_cert::der::oid::db::rfc5912::ID_EC_PUBLIC_KEY;
 use x509_cert::ext::pkix::BasicConstraints;
 
@@ -16,6 +16,10 @@ use crate::error::{Error, Result};
 
 const OID_P256: ObjectIdentifier = ObjectIdentifier::new_unwrap("1.2.840.10045.3.1.7");
 const OID_AAGUID: ObjectIdentifier = ObjectIdentifier::new_unwrap("1.3.6.1.4.1.45724.1.1.4");
+const OID_FIRMWARE_VERSION: ObjectIdentifier =
+    ObjectIdentifier::new_unwrap("1.3.6.1.4.1.45724.1.1.5");
+const OID_ENTERPRISE_SERIAL_NUMBER: ObjectIdentifier =
+    ObjectIdentifier::new_unwrap("1.3.6.1.4.1.45724.1.1.2");
 const OID_BASIC_CONSTRAINTS: ObjectIdentifier = ObjectIdentifier::new_unwrap("2.5.29.19");
 const OID_C: ObjectIdentifier = ObjectIdentifier::new_unwrap("2.5.4.6");
 const OID_O: ObjectIdentifier = ObjectIdentifier::new_unwrap("2.5.4.10");
@@ -84,6 +88,25 @@ impl AttestationCert {
                     }
                     aaguid = Some(parse_aaguid(extension.extn_value.as_bytes())?);
                 }
+                if packed && extension.extn_id == OID_FIRMWARE_VERSION {
+                    if extension.critical {
+                        return Err(invalid("firmware version extension must not be critical"));
+                    }
+                    // WebAuthn L3 §8.2.1: validate the complete DER INTEGER
+                    // without imposing a machine-integer width or trusting
+                    // the asserted version as authenticator provenance.
+                    UintRef::from_der(extension.extn_value.as_bytes()).map_err(|_| {
+                        invalid("firmware version must be a non-negative DER INTEGER")
+                    })?;
+                }
+                if packed && extension.extn_id == OID_ENTERPRISE_SERIAL_NUMBER {
+                    // This verifier does not request enterprise attestation.
+                    // WebAuthn L3 §8.2.2 forbids this device identifier in
+                    // non-enterprise packed attestation, even if noncritical.
+                    return Err(invalid(
+                        "enterprise serial number attestation is not enabled",
+                    ));
+                }
                 if extension.extn_id == OID_BASIC_CONSTRAINTS {
                     basic_constraints = Some(
                         BasicConstraints::from_der(extension.extn_value.as_bytes())
@@ -143,7 +166,7 @@ fn validate_packed_subject(subject: &x509_cert::name::Name) -> Result<()> {
             }
             if index == 0 && (text.len() != 2 || !text.bytes().all(|v| v.is_ascii_uppercase())) {
                 return Err(invalid(
-                    "packed certificate country must be an ISO 3166 alpha-2 code",
+                    "packed certificate country must be two uppercase ASCII letters",
                 ));
             }
             if index == 2 && text != "Authenticator Attestation" {

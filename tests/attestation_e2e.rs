@@ -697,6 +697,21 @@ impl CertBundle {
         change(&mut certificate);
         self.cert_der = certificate.to_der().unwrap();
     }
+
+    fn add_raw_extension(&mut self, oid: &str, critical: bool, value: &[u8]) {
+        self.modify(|certificate| {
+            certificate
+                .tbs_certificate
+                .extensions
+                .as_mut()
+                .unwrap()
+                .push(x509_cert::ext::Extension {
+                    extn_id: const_oid::ObjectIdentifier::new(oid).unwrap(),
+                    critical,
+                    extn_value: x509_cert::der::asn1::OctetString::new(value.to_vec()).unwrap(),
+                });
+        });
+    }
 }
 
 fn registration_with_chain(
@@ -849,6 +864,161 @@ fn packed_aaguid_extension_cannot_be_critical_or_duplicated() {
             registration_with_chain("packed", &cert, vec![cert.cert_der.clone()], [0; 16]);
         assert!(wa.finish_registration(&state, &response).is_err());
     }
+}
+
+#[test]
+fn packed_firmware_version_accepts_nonnegative_der_integers() {
+    let versions: [&[u8]; 6] = [
+        &[0x02, 0x01, 0x00], // Zero is a valid non-negative version.
+        &[0x02, 0x01, 0x2a], // The WebAuthn Level 3 certificate example uses 42.
+        &[0x02, 0x01, 0x7f],
+        &[0x02, 0x02, 0x00, 0x80], // Positive 128 needs a sign-padding byte.
+        &[
+            0x02, 0x09, 0x00, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+        ],
+        &[
+            0x02, 0x09, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        ], // 2^64
+    ];
+    for (index, version) in versions.into_iter().enumerate() {
+        let mut cert = CertBundle::new(AaguidExt::None);
+        cert.add_raw_extension("1.3.6.1.4.1.45724.1.1.5", false, version);
+        let (wa, state, response) =
+            registration_with_chain("packed", &cert, vec![cert.cert_der.clone()], [0; 16]);
+        let credential = wa
+            .finish_registration(&state, &response)
+            .unwrap_or_else(|error| panic!("firmware case {index}: {error}"));
+        assert_eq!(
+            credential.attestation,
+            passkey_auth::AttestationEvidence::UntrustedCertificate
+        );
+    }
+}
+
+#[test]
+fn packed_firmware_version_rejects_invalid_der() {
+    let versions: [(&str, &[u8]); 10] = [
+        ("negative one", &[0x02, 0x01, 0xff]),
+        ("negative 128", &[0x02, 0x01, 0x80]),
+        ("wrong tag", &[0x04, 0x01, 0x00]),
+        ("missing INTEGER", &[]),
+        ("empty INTEGER", &[0x02, 0x00]),
+        ("redundant sign padding", &[0x02, 0x02, 0x00, 0x01]),
+        ("nonminimal length", &[0x02, 0x81, 0x01, 0x00]),
+        ("indefinite length", &[0x02, 0x80, 0x00, 0x00]),
+        ("truncated value", &[0x02, 0x02, 0x01]),
+        ("trailing value", &[0x02, 0x01, 0x00, 0x05, 0x00]),
+    ];
+    for (name, version) in versions {
+        let mut cert = CertBundle::new(AaguidExt::None);
+        cert.add_raw_extension("1.3.6.1.4.1.45724.1.1.5", false, version);
+        let (wa, state, response) =
+            registration_with_chain("packed", &cert, vec![cert.cert_der.clone()], [0; 16]);
+        assert!(
+            matches!(
+                wa.finish_registration(&state, &response),
+                Err(passkey_auth::Error::Cbor(message))
+                    if message == "firmware version must be a non-negative DER INTEGER"
+            ),
+            "invalid firmware encoding: {name}"
+        );
+    }
+}
+
+#[test]
+fn packed_firmware_version_cannot_be_critical_or_duplicated() {
+    for duplicate in [false, true] {
+        let mut cert = CertBundle::new(AaguidExt::None);
+        cert.add_raw_extension("1.3.6.1.4.1.45724.1.1.5", !duplicate, &[0x02, 0x01, 0x2a]);
+        if duplicate {
+            cert.add_raw_extension("1.3.6.1.4.1.45724.1.1.5", false, &[0x02, 0x01, 0x2b]);
+        }
+        let (wa, state, response) =
+            registration_with_chain("packed", &cert, vec![cert.cert_der.clone()], [0; 16]);
+        let expected = if duplicate {
+            "duplicate X.509 extension"
+        } else {
+            "firmware version extension must not be critical"
+        };
+        assert!(matches!(
+            wa.finish_registration(&state, &response),
+            Err(passkey_auth::Error::Cbor(message)) if message == expected
+        ));
+    }
+}
+
+#[test]
+fn ordinary_packed_attestation_rejects_enterprise_serial_numbers() {
+    for critical in [false, true] {
+        for value in [&[0x04, 0x03, 0x01, 0x02, 0x03][..], &[][..]] {
+            let mut cert = CertBundle::new(AaguidExt::None);
+            // Even a well-formed, noncritical device serial is forbidden:
+            // this RP has not requested or authorized enterprise attestation.
+            cert.add_raw_extension("1.3.6.1.4.1.45724.1.1.2", critical, value);
+            let (wa, state, response) =
+                registration_with_chain("packed", &cert, vec![cert.cert_der.clone()], [0; 16]);
+            assert!(matches!(
+                wa.finish_registration(&state, &response),
+                Err(passkey_auth::Error::Cbor(message))
+                    if message == "enterprise serial number attestation is not enabled"
+            ));
+        }
+    }
+}
+
+#[test]
+fn excluded_registration_still_verifies_packed_signature_and_certificate() {
+    let mut cert = CertBundle::new(AaguidExt::None);
+    let (wa, mut state, mut response) =
+        registration_with_chain("packed", &cert, vec![cert.cert_der.clone()], [0; 16]);
+    state.exclude_credentials.push(passkey_auth::CredentialId(
+        B64URL.decode(&response.id).unwrap(),
+    ));
+    assert!(matches!(
+        wa.finish_registration(&state, &response),
+        Err(passkey_auth::Error::CredentialExcluded)
+    ));
+
+    let bytes = B64URL.decode(&response.attestation_object).unwrap();
+    let original: CborValue = ciborium::de::from_reader(bytes.as_slice()).unwrap();
+    // A real, correctly encoded ECDSA signature over the wrong transcript
+    // must remain a verification failure, not become a duplicate conflict.
+    let wrong_signature: EsSig = cert.signing_key.sign(b"not the registration transcript");
+    let mut envelope = original.clone();
+    let CborValue::Map(fields) = &mut envelope else {
+        unreachable!()
+    };
+    let (_, CborValue::Map(statement)) = &mut fields[1] else {
+        unreachable!()
+    };
+    statement[1].1 = CborValue::Bytes(wrong_signature.to_der().as_bytes().to_vec());
+    let mut bytes = Vec::new();
+    ciborium::ser::into_writer(&envelope, &mut bytes).unwrap();
+    response.attestation_object = B64URL.encode(bytes);
+    assert!(matches!(
+        wa.finish_registration(&state, &response),
+        Err(passkey_auth::Error::BadSignature)
+    ));
+
+    // Restore the valid statement signature and keep the same credential,
+    // challenge, outer ID and certificate key. Only the leaf profile changes.
+    cert.add_raw_extension("1.3.6.1.4.1.45724.1.1.5", true, &[0x02, 0x01, 0x2a]);
+    let mut envelope = original;
+    let CborValue::Map(fields) = &mut envelope else {
+        unreachable!()
+    };
+    let (_, CborValue::Map(statement)) = &mut fields[1] else {
+        unreachable!()
+    };
+    statement[2].1 = CborValue::Array(vec![CborValue::Bytes(cert.cert_der)]);
+    let mut bytes = Vec::new();
+    ciborium::ser::into_writer(&envelope, &mut bytes).unwrap();
+    response.attestation_object = B64URL.encode(bytes);
+    assert!(matches!(
+        wa.finish_registration(&state, &response),
+        Err(passkey_auth::Error::Cbor(message))
+            if message == "firmware version extension must not be critical"
+    ));
 }
 
 #[test]

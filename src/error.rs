@@ -27,7 +27,9 @@ pub enum Error {
     #[error("credential ID does not match the attested credential")]
     CredentialIdMismatch,
 
-    /// The matching attested ID is excluded by the server-issued state.
+    /// The matching ID is excluded by the server-issued state after all
+    /// supported attestation-statement checks have passed. This does not
+    /// establish certificate-chain or manufacturer trust.
     /// Distinct from an inconsistent response ID so callers can preserve
     /// their duplicate-enrollment conflict response without misclassifying
     /// malformed registrations.
