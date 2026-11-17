@@ -1,0 +1,101 @@
+name: Publish continuation evidence
+
+on:
+  push:
+    branches: [audit/publish-continuation-20261118]
+    paths: [.github/workflows/publish-continuation-evidence.yml]
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: nazoauth/webauthn-protocol-calibration-20261117
+          fetch-depth: 0
+          path: library
+          persist-credentials: true
+          show-progress: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: nazozero/NazoAuth
+          ref: dfd4c4f839aac20627f7d618a83ba2b4d1b107c5
+          path: evidence-source
+          persist-credentials: false
+          show-progress: false
+      - name: Verify tested sources and capture completed CI
+        working-directory: library
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          git diff --exit-code 6b05844a0cc5f7443e0bec378f904b2c3d39f387 HEAD -- src tests benches perf fuzz Cargo.toml Cargo.lock
+          mkdir -p docs/evidence/continuation-20261118
+          gh api repos/nazozero/passkey-auth-rs/actions/runs/44130880569 > docs/evidence/continuation-20261118/ci-run.json
+          gh api 'repos/nazozero/passkey-auth-rs/actions/runs/44130880569/jobs?per_page=100' > docs/evidence/continuation-20261118/ci-jobs.json
+          cp ../evidence-source/docs/evidence/passkey-continuation-20261118/*.json docs/evidence/continuation-20261118/
+          cp ../evidence-source/docs/evidence/passkey-continuation-20261118/*.sha256 docs/evidence/continuation-20261118/
+          cp ../evidence-source/docs/evidence/passkey-continuation-20261118/*.txt docs/evidence/continuation-20261118/
+          cp ../evidence-source/docs/evidence/passkey-continuation-20261118/*.lock docs/evidence/continuation-20261118/
+      - name: Reconcile current reports and preserve historical records
+        working-directory: library
+        run: |
+          python3 - <<'PY'
+          import hashlib, json
+          from pathlib import Path
+          evidence = Path('docs/evidence/continuation-20261118')
+          run = json.loads((evidence/'ci-run.json').read_text())
+          jobs = json.loads((evidence/'ci-jobs.json').read_text())['jobs']
+          assert run['head_sha'] == '6b05844a0cc5f7443e0bec378f904b2c3d39f387'
+          assert run['conclusion'] == 'success' and len(jobs) == 12
+          assert all(j['conclusion'] == 'success' for j in jobs)
+          for name in ('performance', 'validation'):
+              source = Path('docs/' + name + '.md')
+              historical = Path('docs/' + name + '-checkpoint-8260480.md')
+              if not historical.exists():
+                  historical.write_text('> Historical checkpoint only: 8260480. References to current/final below mean that checkpoint, not runtime 8493867. See [' + name + '.md](' + name + '.md) for the newer evidence.\n\n' + source.read_text())
+          old_index = Path('docs/evidence/README.md')
+          archive_index = Path('docs/evidence/README-checkpoint-8260480.md')
+          if not archive_index.exists():
+              archive_index.write_text('> Historical evidence index for the 8260480 checkpoint. See [README.md](README.md) for the current index.\n\n' + old_index.read_text())
+          perf = Path('../evidence-source/docs/evidence/passkey-continuation-20261118/summary.md').read_text()
+          perf += '''\n## Interpretation and limits\n\nThe optimized Ed25519 finish paths improve P50/P95/P99 against the fully calibrated 8260480 checkpoint in all three execution modes. This does not mean every case improved, or that all original-baseline regressions disappeared. Native Ed25519 registration remains about 77% above the original baseline, and WASI registration about 129% above it. Begin operations also remain above the original baseline. Required state and public-key checks were not removed to reproduce an older acceptance boundary.\n\nNative portable ES256 registration P99 is +17.45%; AWS-LC ES256 authentication P99 is +5.28%; WASI ES256 registration P95 is +37.63% and P99 +4.52%, all versus the checkpoint. These observations remain in the report. One hosted runner and six rounds do not establish whether each tail difference is reproducible across deployments. The primitive controls are not uniformly faster either; this is a whole-library/API comparison, not proof of a faster Ed25519 primitive.\n\nAll timing modes have concurrency one. No claim is made about saturation, multi-user throughput, network latency, physical authenticators, browser interoperability, production SLOs, or statistical significance. Quantiles are medians of per-round quantiles, not pooled samples. Each artifact's hash, exact lockfiles, source/compiler/environment and raw per-round observations are retained. Allocation profiling ran separately and cannot contaminate the reported timing runs.\n\n## Allocations, including native crypto\n\nThe following values are requests and cumulative requested bytes per API call, including returned-value destruction. They are not live memory or RSS. Native glibc hooks count C allocations as well as Rust allocations; direct mmap or custom allocators bypassing the hook remain outside its scope. The raw report retains the Rust-only and native-minus-Rust breakdown.\n\n| Case | Original requests / bytes | Checkpoint Rust | Current Rust | Checkpoint AWS-LC | Current AWS-LC |\n|---|---:|---:|---:|---:|---:|\n'''
+          allocations = json.loads((evidence/'allocations.json').read_text())['cases']
+          labels = ('baseline', 'checkpoint_rustcrypto', 'rustcrypto', 'checkpoint_aws_lc', 'aws_lc')
+          for case in sorted(allocations['rustcrypto']):
+              cells = []
+              for label in labels:
+                  value = allocations[label][case]['native_glibc']
+                  cells.append(f"{value['requests_per_operation']:g} / {value['requested_bytes_per_operation']:g}")
+              perf += '| ' + case + ' | ' + ' | '.join(cells) + ' |\n'
+          perf += '''\n## Reproduce and inspect\n\n- [Raw portable timings](evidence/continuation-20261118/native-rustcrypto.json), [AWS-LC timings](evidence/continuation-20261118/native-aws-lc.json), [WASI timings](evidence/continuation-20261118/wasi.json), and [allocation observations](evidence/continuation-20261118/allocations.json).\n- [Immutable measurement workflow](https://github.com/nazozero/NazoAuth/blob/dfd4c4f839aac20627f7d618a83ba2b4d1b107c5/.github/workflows/passkey-performance-continuation.yml) and [completed run](https://github.com/nazozero/NazoAuth/actions/runs/44135648844). The pinned result commit also retains raw allocation traces and build logs.\n- [Previous 8260480 report](performance-checkpoint-8260480.md) is historical and uses a different machine. Do not subtract those timings from the current machine's observations.\n'''
+          Path('docs/performance.md').write_text(perf)
+          validation = '''# Current validation record — 2026-11-18\n\nRuntime revision: **84938674306a2ca0b84319e8ee499b61b8f32e84**. Measured/documented library revision: **6b05844a0cc5f7443e0bec378f904b2c3d39f387**. This record supersedes descriptions of 8260480 as the current production source. The [historical record](validation-checkpoint-8260480.md) remains intact.\n\n## Fresh hosted CI\n\n[Run 44130880569](https://github.com/nazozero/passkey-auth-rs/actions/runs/44130880569) completed successfully: **12 of 12 jobs**. The exact run and job/step payloads are retained in [ci-run.json](evidence/continuation-20261118/ci-run.json) and [ci-jobs.json](evidence/continuation-20261118/ci-jobs.json).\n\n| Job | Result |\n|---|---|\n'''
+          for job in jobs:
+              validation += '| ' + job['name'].replace('|', '\\|') + ' | ' + job['conclusion'] + ' |\n'
+          validation += '''\nThis covers the workflow's two backends on Linux x86_64, Linux ARM64, Windows x86_64 and macOS Intel, warnings-denied Clippy/rustdoc and formatting, measurement-driver contracts, browser-target WASM compilation, executable WASI checks, dependency audit and both backend fuzz smoke campaigns. macOS ARM64 and physical-device/browser interoperability are not established by these jobs. A bounded fuzz campaign is not proof that no defect exists.\n\n## Performance and memory\n\nThe [new three-way report](performance.md) compares original baseline d59b317, calibrated checkpoint 8260480 and current runtime on one host. All three modes, six balanced rounds, and the separate Rust/native allocation collection completed successfully. The report explicitly retains the original-baseline registration cost and several other tail regressions; successful measurement is not an all-cases performance PASS.\n\n## Protocol and deployment boundary\n\nThe [protocol matrix](protocol-compliance.md) describes the supported RP profile, not full implementation of every optional WebAuthn feature. Passing signature verification is not attestation trust. Certificate issuer/root/revocation/MDS policy, unsupported algorithms/formats and unsupported extension enforcement remain outside the stated profile. The caller must still provide correct origin/RP-ID policy, trusted state storage, user binding and atomic credential updates.\n\nThe current implementation retains strict Ed25519 acceptance checks while verifying borrowed transcript parts. It does not replace ordinary Ed25519 with Ed25519ph. `legacy_compatibility` remains unsupported. Correct `authors` attribution is retained in Cargo.toml.\n\n## Consumer integration is separate\n\nNazoAuth PR #287 pins runtime 8493867, but its earlier dependency-policy failure is not erased by this library CI. The native Jiff migration is being verified on `nazozero/NazoAuth:validation/jiff-continuation-20261118`, based on the independent mdoc/passkey joint branch. Until that branch passes its own full compile, semantic, database, WASM and security gates, it is not integration-ready. No PR was merged and no deployment was performed by this continuation.\n'''
+          Path('docs/validation.md').write_text(validation)
+          Path('docs/validation-20261118.md').write_text('# Continuation record — 2026-11-18\n\nThe recovery has now produced fresh [current-source CI evidence](validation.md) and a complete [same-host three-way timing/allocation report](performance.md). Historical 8260480 evidence is explicitly separate. Library CI passed all 12 jobs; all measurement modes completed, but the retained tail regressions prevent an all-cases performance-PASS claim.\n\nThe remaining work is the separate NazoAuth Jiff migration and consumer integration validation. See the current validation record for scope and limitations.\n')
+          old_index.write_text('''# Validation and performance evidence\n\nCurrent runtime: **84938674306a2ca0b84319e8ee499b61b8f32e84**; tested/measured library head: **6b05844a0cc5f7443e0bec378f904b2c3d39f387**.\n\n- [Current validation](../validation.md), [current performance](../performance.md), and [raw continuation evidence](continuation-20261118/).\n- [Historical checkpoint index](README-checkpoint-8260480.md) and all its original files remain intact; they do not validate later source.\n\nTiming, allocation tracing, source-level protocol assessment, library CI and consumer CI are distinct evidence classes. No old result is relabeled as a new execution.\n''')
+          lines = []
+          for path in sorted(evidence.iterdir()):
+              if path.is_file() and path.name != 'SHA256SUMS':
+                  lines.append(hashlib.sha256(path.read_bytes()).hexdigest() + '  ' + path.name)
+          (evidence/'SHA256SUMS').write_text('\n'.join(lines) + '\n')
+          print(perf)
+          PY
+      - name: Publish documentation only to the existing PR branch
+        working-directory: library
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add docs
+          git diff --cached --stat
+          git commit -m 'docs(validation): publish fresh strict-Ed25519 CI, latency and allocation evidence'
+          git push origin HEAD:refs/heads/nazoauth/webauthn-protocol-calibration-20261117
