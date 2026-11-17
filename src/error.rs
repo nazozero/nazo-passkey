@@ -2,8 +2,8 @@
 //!
 //! All variants are deliberately specific (not "verification failed")
 //! so callers can log/audit them - they don't leak data to the client
-//! since the route layer is expected to translate any error into a
-//! generic 401/400 before responding.
+//! since the route layer must translate them into its safe public error
+//! contract rather than exposing internal diagnostic strings.
 
 use thiserror::Error;
 
@@ -26,6 +26,13 @@ pub enum Error {
 
     #[error("credential ID does not match the attested credential")]
     CredentialIdMismatch,
+
+    /// The matching attested ID is excluded by the server-issued state.
+    /// Distinct from an inconsistent response ID so callers can preserve
+    /// their duplicate-enrollment conflict response without misclassifying
+    /// malformed registrations.
+    #[error("credential is excluded by the registration state")]
+    CredentialExcluded,
 
     #[error("credential backup eligibility changed")]
     BackupEligibilityChanged,

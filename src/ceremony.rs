@@ -477,13 +477,15 @@ impl Webauthn {
         // 6. Parse the COSE public key and verify any attestation
         // statement signed by it.
         let asserted_id = self.decode_b64(&response.id, 1023, "credential ID")?;
-        if asserted_id != attested.credential_id
-            || state
-                .exclude_credentials
-                .iter()
-                .any(|id| id.as_bytes() == asserted_id)
-        {
+        if asserted_id != attested.credential_id {
             return Err(Error::CredentialIdMismatch);
+        }
+        if state
+            .exclude_credentials
+            .iter()
+            .any(|id| id.as_bytes() == asserted_id)
+        {
+            return Err(Error::CredentialExcluded);
         }
         let cose = &attested.key;
 

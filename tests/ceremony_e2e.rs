@@ -568,6 +568,16 @@ fn registration_outer_id_and_exclusion_are_enforced() {
     excluded.exclude_credentials.push(existing.id);
     assert!(matches!(
         wa.finish_registration(&excluded, &response),
+        Err(Error::CredentialExcluded)
+    ));
+    // An excluded outer ID must still match the ID actually attested. Do not
+    // let callers mistake a malformed response for a duplicate enrollment.
+    response.id = B64URL.encode(b"other-id");
+    excluded
+        .exclude_credentials
+        .push(passkey_auth::CredentialId(b"other-id".to_vec()));
+    assert!(matches!(
+        wa.finish_registration(&excluded, &response),
         Err(Error::CredentialIdMismatch)
     ));
 }
