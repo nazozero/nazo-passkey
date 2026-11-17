@@ -83,13 +83,13 @@ async fn register_start(
 ) -> Result<Response, AppError> {
     let sid = get_or_create_sid(&cookies);
 
-    let user_guard = state.user.lock().await;
-    let user_id = if user_guard.id.is_empty() {
-        // First-time register: assign a stable user id.
-        rand_bytes(16)
-    } else {
-        user_guard.id.clone()
-    };
+    let mut user_guard = state.user.lock().await;
+    if user_guard.id.is_empty() {
+        // Assign exactly once while holding the account lock. Concurrent
+        // registration starts must not mint different handles for one user.
+        user_guard.id = rand_bytes(16);
+    }
+    let user_id = user_guard.id.clone();
     let existing: Vec<_> = user_guard
         .credentials
         .iter()
@@ -109,12 +109,6 @@ async fn register_start(
         .entry(sid.clone())
         .or_default()
         .reg_state = Some(reg_state);
-
-    // Persist the user id so finish_registration uses the same one.
-    let mut user_guard = state.user.lock().await;
-    if user_guard.id.is_empty() {
-        user_guard.id = user_id;
-    }
 
     Ok(json_with_sid(&challenge, &sid))
 }
@@ -140,7 +134,18 @@ async fn register_finish(
         .map_err(|e| AppError::Unauthorized(format!("registration verify failed: {e}")))?;
 
     let cred_id_b64 = credential.id.to_b64url();
-    state.user.lock().await.credentials.push(credential);
+    let mut user = state.user.lock().await;
+    if user.id != reg_state.user_id {
+        return Err(AppError::BadRequest("registration account changed"));
+    }
+    if user
+        .credentials
+        .iter()
+        .any(|existing| existing.id == credential.id)
+    {
+        return Err(AppError::BadRequest("credential already registered"));
+    }
+    user.credentials.push(credential);
 
     Ok(Json(RegisterFinishReply {
         ok: true,
@@ -168,9 +173,12 @@ async fn authenticate_start(
         ));
     }
     let creds = user_guard.credentials.clone();
+    let user_handle = user_guard.id.clone();
     drop(user_guard);
 
-    let (challenge, auth_state) = state.wa.start_authentication_with_creds(&creds);
+    let (challenge, auth_state) = state
+        .wa
+        .start_authentication_with_creds_for_user(&user_handle, &creds);
 
     state
         .sessions
@@ -215,6 +223,8 @@ async fn authenticate_finish(
 
     // Update the stored counter (per the spec).
     stored.counter = outcome.new_counter;
+    stored.backup_eligible = Some(outcome.backup_eligible);
+    stored.backup_state = Some(outcome.backup_state);
 
     Ok(Json(AuthFinishReply {
         ok: true,
@@ -300,7 +310,8 @@ async fn main() {
         .authenticator_attachment(Attachment::Any)
         // UV preferred (not required) so even a hardware-key tap counts.
         // For a real production passkey deployment, flip this to true.
-        .require_user_verification(false);
+        .require_user_verification(false)
+        .strict_base64(true);
 
     let state = Arc::new(AppState {
         user: Mutex::new(User::default()),

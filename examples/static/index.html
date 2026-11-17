@@ -75,9 +75,8 @@
       log("→ navigator.credentials.create(...)");
       const cred = await navigator.credentials.create({ publicKey: opts });
 
-      // Re-encode for the wire. The server accepts either url-safe or
-      // standard base64 (passkey-auth is permissive), but url-safe is
-      // the spec-correct form.
+      // Re-encode binary fields as strict base64url without padding,
+      // matching the server verifier policy.
       const body = {
         id: cred.id,
         attestationObject: b64urlEncode(cred.response.attestationObject),

@@ -42,7 +42,6 @@ use axum::{
     routing::post,
 };
 use serde::{Deserialize, Serialize};
-use sha2::{Digest, Sha256};
 use tokio::sync::Mutex;
 // See axum_server.rs for why we do NOT install CorsLayer::permissive().
 use tower_http::services::ServeDir;
@@ -57,8 +56,8 @@ use passkey_auth::{
 #[derive(Default, Clone)]
 struct User {
     /// The stable opaque user id we hand to the WebAuthn ceremony.
-    /// Derived from the username so it survives restarts within a
-    /// process; a real app would store it in the DB.
+    /// Random and independent of the username; persist it with the account
+    /// in a real application. Never derive this value from personal data.
     handle: Vec<u8>,
     credentials: Vec<PasskeyCredential>,
 }
@@ -113,10 +112,9 @@ async fn register_start(
     }
     drop(users);
 
-    // Derive a stable user_handle from the username. Real apps mint a
-    // random UUID at sign-up time and store it; we hash so the demo
-    // is deterministic across restarts of a single process.
-    let user_handle = Sha256::digest(username.as_bytes())[..16].to_vec();
+    // An opaque random handle avoids username enumeration and correlation
+    // across relying parties. The pending state binds it to this account.
+    let user_handle = rand::random::<[u8; 32]>();
 
     let (challenge, reg_state) =
         state
@@ -156,9 +154,22 @@ async fn register_finish(
         .map_err(|e| AppError::Unauthorized(format!("registration verify failed: {e}")))?;
 
     let mut users = state.users.lock().await;
-    let entry = users.entry(username.clone()).or_default();
-    entry.handle = Sha256::digest(username.as_bytes())[..16].to_vec();
-    entry.credentials.push(credential);
+    // The start-time check is only a UI convenience: two pending ceremonies
+    // can race. Enforce uniqueness atomically at the actual insertion.
+    if users.values().any(|user| {
+        user.credentials
+            .iter()
+            .any(|existing| existing.id == credential.id)
+    }) {
+        return Err(AppError::BadRequest("credential already registered"));
+    }
+    let std::collections::hash_map::Entry::Vacant(entry) = users.entry(username.clone()) else {
+        return Err(AppError::BadRequest("username already registered"));
+    };
+    entry.insert(User {
+        handle: reg_state.user_id,
+        credentials: vec![credential],
+    });
 
     Ok(Json(RegisterFinishReply { ok: true, username }))
 }
@@ -222,7 +233,7 @@ async fn authenticate_finish(
         .user_handle
         .as_deref()
         .ok_or(AppError::BadRequest("response missing userHandle"))?;
-    let user_handle = base64_decode_lenient(user_handle_b64)
+    let user_handle = base64_decode_strict(user_handle_b64)
         .ok_or(AppError::BadRequest("userHandle not valid base64"))?;
 
     // Look up the user by handle, then find the asserted credential
@@ -244,10 +255,12 @@ async fn authenticate_finish(
 
     let outcome = state
         .wa
-        .finish_authentication(&auth_state, &body, stored)
+        .finish_discoverable_authentication(&auth_state, &body, stored, &user_handle)
         .map_err(|e| AppError::Unauthorized(format!("auth verify failed: {e}")))?;
 
     stored.counter = outcome.new_counter;
+    stored.backup_eligible = Some(outcome.backup_eligible);
+    stored.backup_state = Some(outcome.backup_state);
     drop(users);
 
     // ── Session rotation ────────────────────────────────────────────
@@ -306,16 +319,11 @@ struct WhoamiReply {
 
 // ---------- helpers -------------------------------------------------------
 
-/// Decode either url-safe or standard base64 (with or without padding).
-/// Mirrors the permissive decoder inside passkey-auth itself.
-fn base64_decode_lenient(s: &str) -> Option<Vec<u8>> {
+/// Match the strict wire policy used by the ceremony verifier.
+fn base64_decode_strict(s: &str) -> Option<Vec<u8>> {
     use base64::Engine;
-    use base64::engine::general_purpose::{STANDARD, STANDARD_NO_PAD, URL_SAFE, URL_SAFE_NO_PAD};
-    URL_SAFE_NO_PAD
+    base64::engine::general_purpose::URL_SAFE_NO_PAD
         .decode(s)
-        .or_else(|_| URL_SAFE.decode(s))
-        .or_else(|_| STANDARD_NO_PAD.decode(s))
-        .or_else(|_| STANDARD.decode(s))
         .ok()
 }
 
@@ -381,7 +389,8 @@ async fn main() {
     .authenticator_attachment(Attachment::Any)
     // For passwordless flow we want UV - the authenticator MUST
     // confirm the user identity (Touch ID / PIN), not just presence.
-    .require_user_verification(true);
+    .require_user_verification(true)
+    .strict_base64(true);
 
     let state = Arc::new(AppState {
         users: Mutex::new(HashMap::new()),
@@ -402,4 +411,108 @@ async fn main() {
     println!("passwordless demo listening on http://localhost:3000");
     let listener = tokio::net::TcpListener::bind(addr).await.unwrap();
     axum::serve(listener, app).await.unwrap();
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use base64::{Engine as _, engine::general_purpose::URL_SAFE_NO_PAD};
+    use ciborium::value::Value;
+    use sha2::{Digest as _, Sha256};
+
+    fn pending_registration(
+        wa: &Webauthn,
+        handle: &[u8],
+        credential_id: &[u8],
+    ) -> (RegistrationState, RegistrationResponse) {
+        let (challenge, state) = wa.start_registration(handle, "alice", "Alice", &[]);
+        let public_key = ed25519_dalek::SigningKey::from_bytes(&[7; 32])
+            .verifying_key()
+            .to_bytes();
+        let key = Value::Map(vec![
+            (Value::Integer(1.into()), Value::Integer(1.into())),
+            (Value::Integer(3.into()), Value::Integer((-8).into())),
+            (Value::Integer((-1).into()), Value::Integer(6.into())),
+            (
+                Value::Integer((-2).into()),
+                Value::Bytes(public_key.to_vec()),
+            ),
+        ]);
+        let mut auth_data = Sha256::digest(b"localhost").to_vec();
+        auth_data.push(0x45); // UP | UV | AT
+        auth_data.extend_from_slice(&0u32.to_be_bytes());
+        auth_data.extend_from_slice(&[0; 16]);
+        auth_data.extend_from_slice(&(credential_id.len() as u16).to_be_bytes());
+        auth_data.extend_from_slice(credential_id);
+        ciborium::ser::into_writer(&key, &mut auth_data).unwrap();
+        let attestation = Value::Map(vec![
+            (Value::Text("fmt".into()), Value::Text("none".into())),
+            (Value::Text("attStmt".into()), Value::Map(vec![])),
+            (Value::Text("authData".into()), Value::Bytes(auth_data)),
+        ]);
+        let mut attestation_bytes = Vec::new();
+        ciborium::ser::into_writer(&attestation, &mut attestation_bytes).unwrap();
+        let client_data = serde_json::json!({
+            "type": "webauthn.create",
+            "challenge": challenge.challenge,
+            "origin": "http://localhost:3000",
+            "crossOrigin": false,
+        });
+        (
+            state,
+            RegistrationResponse {
+                id: URL_SAFE_NO_PAD.encode(credential_id),
+                transports: vec![],
+                attestation_object: URL_SAFE_NO_PAD.encode(attestation_bytes),
+                client_data_json: URL_SAFE_NO_PAD.encode(serde_json::to_vec(&client_data).unwrap()),
+            },
+        )
+    }
+
+    #[tokio::test]
+    async fn two_pending_signups_cannot_add_a_key_to_the_same_account() {
+        let state = Arc::new(AppState {
+            users: Mutex::new(HashMap::new()),
+            sessions: Mutex::new(HashMap::new()),
+            wa: Webauthn::new("localhost", "Test", "http://localhost:3000")
+                .require_user_verification(true)
+                .strict_base64(true),
+        });
+        let (first_state, first_response) = pending_registration(&state.wa, &[1; 32], &[1; 16]);
+        let (second_state, second_response) = pending_registration(&state.wa, &[2; 32], &[2; 16]);
+        for (sid, pending) in [("first", first_state), ("second", second_state)] {
+            state.sessions.lock().await.insert(
+                sid.into(),
+                Session {
+                    reg_state: Some(("alice".into(), pending)),
+                    ..Session::default()
+                },
+            );
+        }
+        let mut first_headers = HeaderMap::new();
+        first_headers.insert(
+            axum::http::header::COOKIE,
+            HeaderValue::from_static("sid=first"),
+        );
+        let mut second_headers = HeaderMap::new();
+        second_headers.insert(
+            axum::http::header::COOKIE,
+            HeaderValue::from_static("sid=second"),
+        );
+        assert!(
+            register_finish(State(state.clone()), first_headers, Json(first_response))
+                .await
+                .is_ok()
+        );
+        assert!(
+            register_finish(State(state.clone()), second_headers, Json(second_response))
+                .await
+                .is_err()
+        );
+        let users = state.users.lock().await;
+        let user = users.get("alice").unwrap();
+        assert_eq!(user.handle, vec![1; 32]);
+        assert_eq!(user.credentials.len(), 1);
+        assert_eq!(user.credentials[0].id.as_bytes(), &[1; 16]);
+    }
 }

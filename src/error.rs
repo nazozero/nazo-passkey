@@ -9,6 +9,27 @@ use thiserror::Error;
 
 #[derive(Error, Debug)]
 pub enum Error {
+    /// An input exceeds the documented bound, checked before decoding.
+    #[error("{field} exceeds the {limit}-byte limit")]
+    InputTooLarge { field: &'static str, limit: usize },
+
+    /// This RP supports same-origin ceremonies only.
+    #[error("cross-origin ceremonies and topOrigin are not enabled")]
+    CrossOriginUnsupported,
+
+    /// State is unbound, from a different RP policy, or has an invalid timestamp.
+    #[error("invalid ceremony state: {0}")]
+    InvalidState(&'static str),
+
+    #[error("invalid WebAuthn configuration: {0}")]
+    Configuration(&'static str),
+
+    #[error("credential ID does not match the attested credential")]
+    CredentialIdMismatch,
+
+    #[error("credential backup eligibility changed")]
+    BackupEligibilityChanged,
+
     /// Invalid base64url encoding on a wire field (challenge, credential
     /// id, signature, etc.).
     #[error("invalid base64url: {0}")]
@@ -65,8 +86,8 @@ pub enum Error {
     BadSignature,
 
     /// The authenticator counter went backwards or did not increase
-    /// when the spec requires it. Caller should treat this as a cloned
-    /// credential and reject.
+    /// under this RP's strict counter policy. This is an anomaly signal,
+    /// not proof of cloning; concurrent authenticators can also cause it.
     #[error("counter went backwards (stored={stored}, new={new}): possible cloned credential")]
     CounterReplay { stored: u32, new: u32 },
 

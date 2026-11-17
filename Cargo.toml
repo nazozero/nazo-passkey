@@ -1,11 +1,11 @@
 [package]
 name        = "passkey-auth"
-version     = "0.1.3"
+version     = "0.2.0"
 edition     = "2024"
-rust-version = "1.88"
+rust-version = "1.100"
 license     = "MIT OR Apache-2.0"
-description = "Pure-Rust WebAuthn server library focused on passkeys (no openssl)."
-repository  = "https://github.com/marirs/passkey-auth-rs"
+description = "WebAuthn relying party verifier with a pure-Rust default and optional native AWS-LC ES256."
+repository  = "https://github.com/nazozero/passkey-auth-rs"
 readme      = "README.md"
 keywords    = ["webauthn", "passkey", "fido2", "authentication"]
 categories  = ["authentication", "cryptography"]
@@ -15,15 +15,22 @@ authors     = ["Sriram <marirs@gmail.com>"]
 name = "passkey_auth"
 path = "src/lib.rs"
 
+[features]
+default = []
+# Native ES256 acceleration. Ed25519 retains dalek's strict acceptance policy;
+# WebAssembly targets retain the portable RustCrypto ES256 implementation.
+aws-lc = ["dep:aws-lc-rs"]
+
 [dependencies]
-# Crypto, all rustcrypto / pure-Rust. No openssl anywhere in the tree.
-p256          = { version = "0.14", features = ["ecdsa"] }
+# Portable RustCrypto dependencies; the optional native AWS-LC dependency is
+# declared separately under its target condition below.
+# No PEM handling is needed by the verifier. std supplies the synchronization
+# used by the precomputed tables, preserving the baseline verification path.
+p256          = { version = "0.14", default-features = false, features = ["ecdsa", "std", "precomputed-tables"] }
 ed25519-dalek = { version = "2", features = ["pkcs8"] }
 sha2          = "0.10"
-rand          = "0.8"
-
-# CBOR for COSE keys + attestationObject.
-ciborium      = "0.2"
+getrandom     = "0.4"
+web-time      = "1.1"
 
 # Base64URL for credential IDs, challenges, raw byte fields on the wire.
 base64        = "0.22"
@@ -46,6 +53,7 @@ x509-cert     = { version = "0.2", features = ["std"] }
 const-oid     = "0.9"
 
 [dev-dependencies]
+proptest      = "1.12"
 # Known-vector regression tests live under tests/.
 hex           = "0.4"
 # Integration tests synthesise authenticator output so they need the
@@ -68,7 +76,7 @@ p256          = { version = "0.14", features = ["ecdsa", "pkcs8", "pem"] }
 axum          = "0.7"
 tokio         = { version = "1", features = ["macros", "rt-multi-thread", "sync"] }
 tower-http    = { version = "0.6", features = ["fs", "cors"] }
-rocket        = { version = "0.5", features = ["json"] }
+rocket        = { version = "0.5", default-features = false, features = ["json"] }
 
 # x509-cert with the `builder` feature so attestation tests can mint
 # a self-signed P-256 cert at runtime. Used by integration tests
@@ -79,7 +87,19 @@ sha2-new      = { package = "sha2", version = "0.11", features = ["oid"] }
 # Persistent storage for the axum_sqlite example. `bundled` ships
 # the SQLite amalgamation so the example builds on machines that do
 # not have sqlite installed system-wide (notably Windows CI).
-rusqlite      = { version = "0.32", features = ["bundled"] }
+rusqlite      = { version = "0.41", features = ["bundled"] }
+
+[target.'cfg(all(target_arch = "wasm32", target_os = "unknown"))'.dependencies]
+# web-time already uses wasm-bindgen on this target; use Web Crypto for
+# challenges and for the random backend selected by p256's std feature.
+getrandom = { version = "0.4", features = ["wasm_js"] }
+
+[target.'cfg(not(target_family = "wasm"))'.dependencies]
+# Match the backend already used by NazoAuth, avoiding a second native version.
+aws-lc-rs = { version = "=1.18.2", optional = true }
+
+[lints.cargo]
+unused_dependencies = "warn"
 
 [[example]]
 name = "axum_server"
@@ -100,3 +120,7 @@ path = "examples/rocket_credential_manager.rs"
 [[example]]
 name = "axum_sqlite"
 path = "examples/axum_sqlite.rs"
+
+[[bench]]
+name = "ceremony"
+harness = false

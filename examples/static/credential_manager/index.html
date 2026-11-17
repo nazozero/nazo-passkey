@@ -102,8 +102,8 @@
     }
     document.getElementById("status").className = "";
     document.getElementById("status").textContent = "Not signed in.";
-    const creds = await fetch("/credentials").then(r => r.json());
-    show(creds.length === 0 ? "view-empty" : "view-signin");
+    const registered = await fetch("/registration/status").then(r => r.json());
+    show(registered ? "view-signin" : "view-empty");
   }
 
   async function renderCredentials() {
@@ -113,16 +113,27 @@
     for (const c of creds) {
       const tr = document.createElement("tr");
       const isLast = creds.length === 1;
-      tr.innerHTML = `
-        <td class="id">${c.id.slice(0, 16)}…</td>
-        <td class="id">${c.aaguid_hex}</td>
-        <td>${c.transports.join(", ") || "(none)"}</td>
-        <td>${c.counter}</td>
-        <td>
-          <button data-id="${c.id}" class="del" ${isLast ? "disabled title='cannot remove last'" : ""}>
-            Remove
-          </button>
-        </td>`;
+      // Transports are client-supplied metadata. Never interpolate them as HTML.
+      for (const [value, className] of [
+        [c.id.slice(0, 16) + "…", "id"],
+        [c.aaguid_hex, "id"],
+        [c.transports.join(", ") || "(none)", ""],
+        [String(c.counter), ""],
+      ]) {
+        const cell = document.createElement("td");
+        cell.textContent = value;
+        cell.className = className;
+        tr.appendChild(cell);
+      }
+      const action = document.createElement("td");
+      const button = document.createElement("button");
+      button.dataset.id = c.id;
+      button.className = "del";
+      button.disabled = isLast;
+      button.textContent = "Remove";
+      if (isLast) button.title = "cannot remove last";
+      action.appendChild(button);
+      tr.appendChild(action);
       body.appendChild(tr);
     }
     body.querySelectorAll("button.del").forEach(btn => {

@@ -9,12 +9,19 @@
 //! ES256 signature on the wire is **DER-encoded**, not raw r||s - be
 //! careful here.
 
-use ed25519_dalek::{Signature as EdSig, Verifier as _, VerifyingKey as EdKey};
-use p256::ecdsa::signature::Verifier as _;
-use p256::ecdsa::{Signature as EsSig, VerifyingKey as EsKey};
+use ed25519_dalek::Signature as EdSig;
+#[cfg(any(test, not(all(feature = "aws-lc", not(target_family = "wasm")))))]
 use p256::PublicKey;
+use p256::ecdsa::Signature as EsSig;
+#[cfg(any(test, not(all(feature = "aws-lc", not(target_family = "wasm")))))]
+use p256::ecdsa::VerifyingKey as EsKey;
+#[cfg(any(test, not(all(feature = "aws-lc", not(target_family = "wasm")))))]
+use p256::ecdsa::signature::Verifier as _;
+#[cfg(not(all(feature = "aws-lc", not(target_family = "wasm"))))]
+use p256::ecdsa::signature::hazmat::PrehashVerifier;
+use sha2::{Digest, Sha256};
 
-use crate::cose::CoseKey;
+use crate::cose::{CoseKey, ed25519_verifying_key};
 use crate::error::{Error, Result};
 
 /// Verify `sig` over `msg` using the COSE public key. Returns `Ok(())`
@@ -28,7 +35,82 @@ pub(crate) fn verify(key: &CoseKey, msg: &[u8], sig: &[u8]) -> Result<()> {
     }
 }
 
+/// Authentication hashes the ES256 transcript in two borrowed pieces. Ed25519
+/// signs the message itself (not Ed25519ph), so reuse the decoded authData
+/// allocation for its transcript instead of allocating and copying a new one.
+pub(crate) fn verify_auth_data(
+    key: &CoseKey,
+    auth_data: &mut Vec<u8>,
+    client_data_hash: &[u8; 32],
+    sig: &[u8],
+) -> Result<()> {
+    match key {
+        CoseKey::Es256 { x, y } => {
+            let mut sec1 = [0; 65];
+            sec1[0] = 4;
+            sec1[1..33].copy_from_slice(x);
+            sec1[33..].copy_from_slice(y);
+            let mut digest = Sha256::new();
+            digest.update(&*auth_data);
+            digest.update(client_data_hash);
+            let digest = digest.finalize();
+            #[cfg(all(feature = "aws-lc", not(target_family = "wasm")))]
+            {
+                // Keep identical DER/scalar bounds across backends.
+                let _signature = EsSig::from_der(sig).map_err(|_| Error::BadSignature)?;
+                // This digest is computed above from the exact local transcript;
+                // no caller-supplied hash enters import_less_safe. The public
+                // API checks its SHA-256 algorithm and fixed 32-byte length.
+                let digest = aws_lc_rs::digest::Digest::import_less_safe(
+                    &digest,
+                    &aws_lc_rs::digest::SHA256,
+                )
+                .map_err(|_| Error::BadSignature)?;
+                aws_lc_rs::signature::UnparsedPublicKey::new(
+                    &aws_lc_rs::signature::ECDSA_P256_SHA256_ASN1,
+                    &sec1,
+                )
+                .verify_digest(&digest, sig)
+                .map_err(|_| Error::BadSignature)
+            }
+            #[cfg(not(all(feature = "aws-lc", not(target_family = "wasm"))))]
+            {
+                let vk = EsKey::from_sec1_bytes(&sec1).map_err(|_| Error::BadSignature)?;
+                let signature = EsSig::from_der(sig).map_err(|_| Error::BadSignature)?;
+                vk.verify_prehash(&digest, &signature)
+                    .map_err(|_| Error::BadSignature)
+            }
+        }
+        CoseKey::Ed25519 { key } => {
+            auth_data.extend_from_slice(client_data_hash);
+            verify_ed25519(key, auth_data, sig)
+        }
+    }
+}
+
 fn verify_es256(x: &[u8; 32], y: &[u8; 32], msg: &[u8], sig: &[u8]) -> Result<()> {
+    #[cfg(all(feature = "aws-lc", not(target_family = "wasm")))]
+    {
+        let mut sec1 = [0; 65];
+        sec1[0] = 4;
+        sec1[1..33].copy_from_slice(x);
+        sec1[33..].copy_from_slice(y);
+        let _signature = EsSig::from_der(sig).map_err(|_| Error::BadSignature)?;
+        aws_lc_rs::signature::UnparsedPublicKey::new(
+            &aws_lc_rs::signature::ECDSA_P256_SHA256_ASN1,
+            &sec1,
+        )
+        .verify(msg, sig)
+        .map_err(|_| Error::BadSignature)
+    }
+    #[cfg(not(all(feature = "aws-lc", not(target_family = "wasm"))))]
+    {
+        verify_es256_rustcrypto(x, y, msg, sig)
+    }
+}
+
+#[cfg(any(test, not(all(feature = "aws-lc", not(target_family = "wasm")))))]
+fn verify_es256_rustcrypto(x: &[u8; 32], y: &[u8; 32], msg: &[u8], sig: &[u8]) -> Result<()> {
     // SEC1 uncompressed point: 0x04 || X || Y.
     let mut sec1 = [0u8; 65];
     sec1[0] = 0x04;
@@ -43,32 +125,47 @@ fn verify_es256(x: &[u8; 32], y: &[u8; 32], msg: &[u8], sig: &[u8]) -> Result<()
     // Note on signature malleability (high-S):
     // ECDSA admits two valid signatures (r, s) and (r, n-s) for any
     // message. WebAuthn does NOT require the verifier to reject the
-    // high-S form, and major server implementations (webauthn-rs,
-    // WebAuthn4J, Yubico java-webauthn-server) accept both. The
-    // single-use challenge in our `state` prevents the malleable
-    // variant from being useful for replay, so we follow suit and
-    // accept either form here.
+    // high-S form. Accept either valid form; the application must atomically
+    // consume its challenge state so a malleable signature cannot be used
+    // to repeat an already completed ceremony.
     let parsed = EsSig::from_der(sig).map_err(|_| Error::BadSignature)?;
     vk.verify(msg, &parsed).map_err(|_| Error::BadSignature)
 }
 
 fn verify_ed25519(key: &[u8; 32], msg: &[u8], sig: &[u8]) -> Result<()> {
-    let vk = EdKey::from_bytes(key).map_err(|_| Error::BadSignature)?;
-    if sig.len() != 64 {
-        return Err(Error::BadSignature);
-    }
-    let mut sb = [0u8; 64];
-    sb.copy_from_slice(sig);
-    let parsed = EdSig::from_bytes(&sb);
-    vk.verify(msg, &parsed).map_err(|_| Error::BadSignature)
+    let vk = ed25519_verifying_key(key).map_err(|_| Error::BadSignature)?;
+    let parsed = EdSig::from_slice(sig).map_err(|_| Error::BadSignature)?;
+    // Reject weak/small-order keys, non-canonical scalars and malleable points.
+    // This is ordinary Ed25519; do not substitute Ed25519ph for WebAuthn -8.
+    vk.verify_strict(msg, &parsed)
+        .map_err(|_| Error::BadSignature)
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
     use ed25519_dalek::{Signer as _, SigningKey};
-    use p256::ecdsa::{signature::Signer as _, SigningKey as EsSigningKey};
+    use p256::ecdsa::{SigningKey as EsSigningKey, signature::Signer as _};
     use rand::RngCore;
+
+    #[test]
+    fn rfc8032_ed25519_vector_and_small_order_forgery() {
+        // RFC 8032 §7.1, TEST 1. Signature bytes are copied, not generated here.
+        let public: [u8; 32] =
+            hex::decode("d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a")
+                .unwrap()
+                .try_into()
+                .unwrap();
+        let signature = hex::decode("e5564300c360ac729086e2cc806e828a84877f1eb8e5d974d873e065224901555fb8821590a33bacc61e39701cf9b46bd25bf5f0595bbe24655141438e7a100b").unwrap();
+        let key = CoseKey::Ed25519 { key: public };
+        verify(&key, b"", &signature).unwrap();
+        assert!(verify(&key, b"changed", &signature).is_err());
+        let mut identity = [0; 32];
+        identity[0] = 1;
+        let mut forged = [0; 64];
+        forged[0] = 1;
+        assert!(verify(&CoseKey::Ed25519 { key: identity }, b"any message", &forged).is_err());
+    }
 
     #[test]
     fn ed25519_round_trip() {
@@ -85,6 +182,47 @@ mod tests {
         let mut bad = sig.to_bytes();
         bad[0] ^= 0x01;
         assert!(verify(&key, msg, &bad).is_err());
+    }
+
+    #[test]
+    fn ed25519_verifier_rejects_every_out_of_range_y_and_negative_zero() {
+        let mut forged = [0; 64];
+        forged[0] = 1;
+        for sign in [0, 0x80] {
+            for offset in 0..19u8 {
+                let mut key = [0xff; 32];
+                key[0] = 0xed + offset;
+                key[31] = 0x7f | sign;
+                assert!(verify(&CoseKey::Ed25519 { key }, b"message", &forged).is_err());
+            }
+            let mut key = [0; 32];
+            key[0] = 1;
+            key[31] = sign;
+            assert!(verify(&CoseKey::Ed25519 { key }, b"message", &forged).is_err());
+            let mut key = [0xff; 32];
+            key[0] = 0xec;
+            key[31] = 0x7f | sign;
+            assert!(verify(&CoseKey::Ed25519 { key }, b"message", &forged).is_err());
+        }
+    }
+
+    proptest::proptest! {
+        #[test]
+        fn ed25519_encoding_optimization_preserves_real_signatures(
+            seed in proptest::prelude::any::<[u8; 32]>(),
+            message in proptest::collection::vec(proptest::prelude::any::<u8>(), 0..256),
+        ) {
+            let signing = SigningKey::from_bytes(&seed);
+            let key = CoseKey::Ed25519 { key: signing.verifying_key().to_bytes() };
+            let signature = signing.sign(&message).to_bytes();
+            proptest::prop_assert!(verify(&key, &message, &signature).is_ok());
+            let mut wrong_message = message;
+            wrong_message.push(0);
+            proptest::prop_assert!(verify(&key, &wrong_message, &signature).is_err());
+            let mut wrong_signature = signature;
+            wrong_signature[0] ^= 1;
+            proptest::prop_assert!(verify(&key, &wrong_message[..wrong_message.len() - 1], &wrong_signature).is_err());
+        }
     }
 
     #[test]
@@ -112,5 +250,123 @@ mod tests {
         let n = bad.len();
         bad[n - 1] ^= 0x01;
         assert!(verify(&key, msg, &bad).is_err());
+    }
+
+    fn es256_key(signing: &EsSigningKey) -> CoseKey {
+        let point = signing.verifying_key().to_sec1_point(false);
+        CoseKey::Es256 {
+            x: <[u8; 32]>::try_from(&point.x().unwrap()[..]).unwrap(),
+            y: <[u8; 32]>::try_from(&point.y().unwrap()[..]).unwrap(),
+        }
+    }
+
+    #[test]
+    fn es256_backends_preserve_transcript_high_s_and_der_contract() {
+        let signing = EsSigningKey::from_slice(&[7; 32]).unwrap();
+        let key = es256_key(&signing);
+        let auth_data = vec![23; 37];
+        let client_hash = [29; 32];
+        let mut message = auth_data.clone();
+        message.extend(client_hash);
+        let signature: EsSig = signing.sign(&message);
+        let low = signature.normalize_s();
+        let high = EsSig::from_scalars(low.r(), -low.s()).unwrap();
+        assert_ne!(low, high);
+        for signature in [low, high] {
+            let der = signature.to_der();
+            verify(&key, &message, der.as_bytes()).unwrap();
+            let mut borrowed_transcript = auth_data.clone();
+            verify_auth_data(&key, &mut borrowed_transcript, &client_hash, der.as_bytes()).unwrap();
+            // ES256 hashes borrowed parts under both backends.
+            assert_eq!(borrowed_transcript, auth_data);
+            assert!(verify(&key, b"wrong message", der.as_bytes()).is_err());
+            let mut wrong_hash = client_hash;
+            wrong_hash[0] ^= 1;
+            assert!(
+                verify_auth_data(&key, &mut auth_data.clone(), &wrong_hash, der.as_bytes())
+                    .is_err()
+            );
+        }
+        let mut trailing = low.to_der().as_bytes().to_vec();
+        trailing.push(0);
+        let mut out_of_range_r = vec![0x30, 0x26, 0x02, 0x21, 0];
+        out_of_range_r.extend([0xff; 32]);
+        out_of_range_r.extend([0x02, 0x01, 0x01]);
+        let invalid = [
+            vec![],
+            low.to_bytes().to_vec(), // raw r||s is not the WebAuthn ES256 wire format
+            trailing,
+            vec![0x30, 6, 2, 1, 0, 2, 1, 1],          // zero r
+            vec![0x30, 6, 2, 1, 0x80, 2, 1, 1],       // negative r
+            vec![0x30, 7, 2, 2, 0, 1, 2, 1, 1],       // non-minimal integer
+            vec![0x30, 0x80, 2, 1, 1, 2, 1, 1, 0, 0], // indefinite length
+            out_of_range_r,
+        ];
+        for signature in invalid {
+            assert!(verify(&key, &message, &signature).is_err());
+            assert!(
+                verify_auth_data(&key, &mut auth_data.clone(), &client_hash, &signature).is_err()
+            );
+        }
+        for invalid_key in [
+            CoseKey::Es256 {
+                x: [0; 32],
+                y: [0; 32],
+            },
+            CoseKey::Es256 {
+                x: [0xff; 32],
+                y: [0xff; 32],
+            },
+            es256_key(&EsSigningKey::from_slice(&[8; 32]).unwrap()),
+        ] {
+            assert!(verify(&invalid_key, &message, low.to_der().as_bytes()).is_err());
+            assert!(
+                verify_auth_data(
+                    &invalid_key,
+                    &mut auth_data.clone(),
+                    &client_hash,
+                    low.to_der().as_bytes(),
+                )
+                .is_err()
+            );
+        }
+    }
+
+    #[cfg(all(feature = "aws-lc", not(target_family = "wasm")))]
+    #[test]
+    fn es256_native_backend_matches_rustcrypto_for_fixed_key_corpus() {
+        let signing = EsSigningKey::from_slice(&[7; 32]).unwrap();
+        let message = b"fixed native backend equivalence corpus";
+        let signature: EsSig = signing.sign(message);
+        let low = signature.normalize_s();
+        let high = EsSig::from_scalars(low.r(), -low.s()).unwrap();
+        for key in [
+            es256_key(&signing),
+            es256_key(&EsSigningKey::from_slice(&[8; 32]).unwrap()),
+            CoseKey::Es256 {
+                x: [0; 32],
+                y: [0; 32],
+            },
+            CoseKey::Es256 {
+                x: [0xff; 32],
+                y: [0xff; 32],
+            },
+        ] {
+            let CoseKey::Es256 { x, y } = key else {
+                unreachable!()
+            };
+            for message in [message.as_slice(), b"wrong".as_slice(), b"".as_slice()] {
+                for signature in [
+                    low.to_der().as_bytes().to_vec(),
+                    high.to_der().as_bytes().to_vec(),
+                    low.to_bytes().to_vec(),
+                ] {
+                    assert_eq!(
+                        verify_es256(&x, &y, message, &signature).is_ok(),
+                        verify_es256_rustcrypto(&x, &y, message, &signature).is_ok()
+                    );
+                }
+            }
+        }
     }
 }

@@ -20,6 +20,7 @@ use sha2::{Digest, Sha256};
 use x509_cert_test::builder::{Builder, CertificateBuilder, profile::BuilderProfile};
 use x509_cert_test::der::asn1::OctetString;
 use x509_cert_test::der::{Encode, oid::AssociatedOid};
+use x509_cert_test::ext::pkix::BasicConstraints;
 use x509_cert_test::ext::{Criticality, Extension};
 use x509_cert_test::name::Name;
 use x509_cert_test::serial_number::SerialNumber;
@@ -44,7 +45,10 @@ impl x509_cert_test::der::Encode for FidoAaguid {
     fn encoded_len(&self) -> x509_cert_test::der::Result<x509_cert_test::der::Length> {
         OctetString::new(self.0.to_vec()).unwrap().encoded_len()
     }
-    fn encode(&self, encoder: &mut impl x509_cert_test::der::Writer) -> x509_cert_test::der::Result<()> {
+    fn encode(
+        &self,
+        encoder: &mut impl x509_cert_test::der::Writer,
+    ) -> x509_cert_test::der::Result<()> {
         OctetString::new(self.0.to_vec()).unwrap().encode(encoder)
     }
 }
@@ -74,7 +78,10 @@ impl x509_cert_test::der::Encode for MalformedAaguid {
             .unwrap()
             .encoded_len()
     }
-    fn encode(&self, encoder: &mut impl x509_cert_test::der::Writer) -> x509_cert_test::der::Result<()> {
+    fn encode(
+        &self,
+        encoder: &mut impl x509_cert_test::der::Writer,
+    ) -> x509_cert_test::der::Result<()> {
         OctetString::new(vec![0xDE, 0xAD, 0xBE, 0xEF, 0x00, 0x11, 0x22])
             .unwrap()
             .encode(encoder)
@@ -94,9 +101,20 @@ const ORIGIN: &str = "https://example.com";
 
 struct TestProfile(Name);
 impl BuilderProfile for TestProfile {
-    fn get_issuer(&self, _: &Name) -> Name { self.0.clone() }
-    fn get_subject(&self) -> Name { self.0.clone() }
-    fn build_extensions(&self, _: x509_cert_test::spki::SubjectPublicKeyInfoRef<'_>, _: x509_cert_test::spki::SubjectPublicKeyInfoRef<'_>, _: &x509_cert_test::certificate::TbsCertificate) -> x509_cert_test::builder::Result<Vec<Extension>> { Ok(Vec::new()) }
+    fn get_issuer(&self, _: &Name) -> Name {
+        self.0.clone()
+    }
+    fn get_subject(&self) -> Name {
+        self.0.clone()
+    }
+    fn build_extensions(
+        &self,
+        _: x509_cert_test::spki::SubjectPublicKeyInfoRef<'_>,
+        _: x509_cert_test::spki::SubjectPublicKeyInfoRef<'_>,
+        _: &x509_cert_test::certificate::TbsCertificate,
+    ) -> x509_cert_test::builder::Result<Vec<Extension>> {
+        Ok(Vec::new())
+    }
 }
 
 // ---------- cert + key bundle ----------------------------------------------
@@ -137,14 +155,14 @@ impl CertBundle {
         let spki =
             SubjectPublicKeyInfoOwned::try_from(pk_der.as_slice()).expect("SPKI from p256 DER");
 
-        let subject = Name::from_str("CN=passkey-auth test attestation")
+        let subject = Name::from_str("C=US,O=Passkey Auth Tests,OU=Authenticator Attestation,CN=passkey-auth test attestation")
             .expect("name parse")
             .to_der()
             .expect("name to DER");
         let subject = Name::from_der_slice(&subject);
 
-        // Use Leaf profile (no constraints, no SAN). We are a leaf cert
-        // in a one-cert chain; that's all the FIDO format needs.
+        // Keep the profile minimal; packed-required subject fields and
+        // BasicConstraints are added explicitly for these test certificates.
         let profile = TestProfile(subject);
         let mut builder = CertificateBuilder::new(
             profile,
@@ -153,6 +171,13 @@ impl CertBundle {
             spki,
         )
         .expect("CertificateBuilder::new");
+
+        builder
+            .add_extension(&BasicConstraints {
+                ca: false,
+                path_len_constraint: None,
+            })
+            .expect("add basic constraints");
 
         // Add the FIDO AAGUID extension if requested. ToExtension on
         // FidoAaguid handles the double OCTET STRING wrapping the spec
@@ -201,11 +226,8 @@ impl FromDerSlice for Name {
 /// The credential's own keypair, separate from the attestation cert's.
 /// In `packed-x5c` they are different; in `fido-u2f` they are different too.
 ///
-/// The signing key itself is unused in the registration tests (we only
-/// need the public coordinates for COSE encoding); the suppression keeps
-/// the type ready if a future test wants to sign an assertion too.
+/// The signing key is used for real packed self-attestation signatures.
 struct CredKey {
-    #[allow(dead_code)]
     signing_key: SigningKey,
     x: [u8; 32],
     y: [u8; 32],
@@ -661,4 +683,368 @@ fn packed_x5c_malformed_aaguid_rejected() {
         msg.contains("AAGUID") || msg.contains("malformed"),
         "expected malformed/AAGUID error, got: {msg}",
     );
+}
+
+// ---------- certificate profile and format-confusion regressions -----------
+
+impl CertBundle {
+    /// Attestation verification does not authenticate the certificate issuer.
+    /// Mutating a certificate's profile does not change the key that signs the
+    /// attestation, which isolates these checks from the signature check.
+    fn modify(&mut self, change: impl FnOnce(&mut x509_cert::Certificate)) {
+        use x509_cert::der::{Decode, Encode};
+        let mut certificate = x509_cert::Certificate::from_der(&self.cert_der).unwrap();
+        change(&mut certificate);
+        self.cert_der = certificate.to_der().unwrap();
+    }
+}
+
+fn registration_with_chain(
+    format: &str,
+    cert: &CertBundle,
+    chain: Vec<Vec<u8>>,
+    aaguid: [u8; 16],
+) -> (
+    Webauthn,
+    passkey_auth::RegistrationState,
+    RegistrationResponse,
+) {
+    let credential = CredKey::new();
+    let auth_data = auth_data_register(
+        RP_ID,
+        aaguid,
+        b"profile-regression",
+        &credential.cose_pubkey(),
+    );
+    let wa = Webauthn::new(RP_ID, "Test", ORIGIN).strict_base64(true);
+    let (challenge, state) = wa.start_registration(b"user", "alice", "Alice", &[]);
+    let (cdj_raw, cdj_b64) = client_data("webauthn.create", &challenge.challenge, ORIGIN);
+    let mut message = Vec::new();
+    if format == "fido-u2f" {
+        message.push(0);
+        message.extend_from_slice(&Sha256::digest(RP_ID.as_bytes()));
+        message.extend_from_slice(&Sha256::digest(&cdj_raw));
+        message.extend_from_slice(b"profile-regression");
+        message.push(4);
+        message.extend_from_slice(&credential.x);
+        message.extend_from_slice(&credential.y);
+    } else {
+        message.extend_from_slice(&auth_data);
+        message.extend_from_slice(&Sha256::digest(&cdj_raw));
+    }
+    let signature: EsSig = cert.signing_key.sign(&message);
+    let mut statement = Vec::new();
+    if format == "packed" {
+        statement.push((CborValue::Text("alg".into()), (-7).into()));
+    }
+    statement.push((
+        CborValue::Text("sig".into()),
+        CborValue::Bytes(signature.to_der().as_bytes().to_vec()),
+    ));
+    statement.push((
+        CborValue::Text("x5c".into()),
+        CborValue::Array(chain.into_iter().map(CborValue::Bytes).collect()),
+    ));
+    let envelope = CborValue::Map(vec![
+        ("fmt".into(), format.into()),
+        ("attStmt".into(), CborValue::Map(statement)),
+        ("authData".into(), CborValue::Bytes(auth_data)),
+    ]);
+    let mut bytes = Vec::new();
+    ciborium::ser::into_writer(&envelope, &mut bytes).unwrap();
+    let response = RegistrationResponse {
+        id: B64URL.encode(b"profile-regression"),
+        transports: vec![],
+        attestation_object: B64URL.encode(bytes),
+        client_data_json: cdj_b64,
+    };
+    (wa, state, response)
+}
+
+#[test]
+fn packed_certificate_subject_version_and_constraints_are_checked() {
+    use x509_cert::certificate::Version;
+    use x509_cert::der::asn1::OctetString;
+    use x509_cert::name::Name;
+    let cases: [fn(&mut x509_cert::Certificate); 7] = [
+        |cert| cert.tbs_certificate.version = Version::V2,
+        |cert| cert.tbs_certificate.subject = Name::from_str("CN=Only Common Name").unwrap(),
+        |cert| {
+            cert.tbs_certificate.subject =
+                Name::from_str("C=US,O=Tests,OU=Wrong Unit,CN=Test").unwrap()
+        },
+        |cert| {
+            cert.tbs_certificate.subject =
+                Name::from_str("C=USA,O=Tests,OU=Authenticator Attestation,CN=Test").unwrap()
+        },
+        |cert| cert.tbs_certificate.extensions.as_mut().unwrap().clear(),
+        |cert| {
+            let extension = cert
+                .tbs_certificate
+                .extensions
+                .as_mut()
+                .unwrap()
+                .first_mut()
+                .unwrap();
+            extension.extn_value = OctetString::new(
+                BasicConstraints {
+                    ca: true,
+                    path_len_constraint: None,
+                }
+                .to_der()
+                .unwrap(),
+            )
+            .unwrap();
+        },
+        |cert| {
+            let extension = cert
+                .tbs_certificate
+                .extensions
+                .as_mut()
+                .unwrap()
+                .first_mut()
+                .unwrap();
+            extension.extn_value = OctetString::new(
+                BasicConstraints {
+                    ca: false,
+                    path_len_constraint: Some(0),
+                }
+                .to_der()
+                .unwrap(),
+            )
+            .unwrap();
+        },
+    ];
+    for (index, change) in cases.into_iter().enumerate() {
+        let mut cert = CertBundle::new(AaguidExt::None);
+        cert.modify(change);
+        let (wa, state, response) =
+            registration_with_chain("packed", &cert, vec![cert.cert_der.clone()], [0; 16]);
+        assert!(
+            wa.finish_registration(&state, &response).is_err(),
+            "certificate case {index}"
+        );
+    }
+}
+
+#[test]
+fn packed_aaguid_extension_cannot_be_critical_or_duplicated() {
+    for duplicate in [false, true] {
+        let mut cert = CertBundle::new(AaguidExt::Valid([0; 16]));
+        cert.modify(|certificate| {
+            let extensions = certificate.tbs_certificate.extensions.as_mut().unwrap();
+            let index = extensions
+                .iter()
+                .position(|e| {
+                    e.extn_id == const_oid::ObjectIdentifier::new_unwrap("1.3.6.1.4.1.45724.1.1.4")
+                })
+                .unwrap();
+            if duplicate {
+                extensions.push(extensions[index].clone());
+            } else {
+                extensions[index].critical = true;
+            }
+        });
+        let (wa, state, response) =
+            registration_with_chain("packed", &cert, vec![cert.cert_der.clone()], [0; 16]);
+        assert!(wa.finish_registration(&state, &response).is_err());
+    }
+}
+
+#[test]
+fn certificate_named_curve_is_checked_independently_of_point_length() {
+    use x509_cert::der::asn1::Any;
+    let mut cert = CertBundle::new(AaguidExt::None);
+    cert.modify(|certificate| {
+        let p384 = const_oid::ObjectIdentifier::new_unwrap("1.3.132.0.34");
+        certificate
+            .tbs_certificate
+            .subject_public_key_info
+            .algorithm
+            .parameters = Some(Any::encode_from(&p384).unwrap());
+    });
+    for format in ["packed", "fido-u2f"] {
+        let (wa, state, response) =
+            registration_with_chain(format, &cert, vec![cert.cert_der.clone()], [0; 16]);
+        assert!(wa.finish_registration(&state, &response).is_err());
+    }
+}
+
+#[test]
+fn chain_length_and_intermediate_der_are_checked() {
+    let cert = CertBundle::new(AaguidExt::None);
+    for format in ["packed", "fido-u2f"] {
+        for chain in [
+            Vec::new(),
+            vec![cert.cert_der.clone(), vec![1, 2, 3]],
+            vec![cert.cert_der.clone(); 9],
+        ] {
+            let (wa, state, response) = registration_with_chain(format, &cert, chain, [0; 16]);
+            assert!(wa.finish_registration(&state, &response).is_err());
+        }
+    }
+    let (wa, state, response) =
+        registration_with_chain("fido-u2f", &cert, vec![cert.cert_der.clone(); 2], [0; 16]);
+    assert!(wa.finish_registration(&state, &response).is_err());
+}
+
+#[test]
+fn u2f_nonzero_aaguid_is_not_an_unsupported_extra_requirement() {
+    let cert = CertBundle::new(AaguidExt::None);
+    let (wa, state, response) =
+        registration_with_chain("fido-u2f", &cert, vec![cert.cert_der.clone()], [0x55; 16]);
+    let credential = wa.finish_registration(&state, &response).unwrap();
+    assert_eq!(
+        credential.attestation,
+        passkey_auth::AttestationEvidence::UntrustedCertificate
+    );
+}
+
+#[test]
+fn checked_attestation_signature_does_not_claim_certificate_trust() {
+    let cert = CertBundle::new(AaguidExt::None);
+    let (wa, state, response) =
+        registration_with_chain("packed", &cert, vec![cert.cert_der.clone()], [0; 16]);
+    let credential = wa.finish_registration(&state, &response).unwrap();
+    assert_eq!(
+        credential.attestation,
+        passkey_auth::AttestationEvidence::UntrustedCertificate
+    );
+}
+
+fn self_attestation_response(
+    ed25519: bool,
+    mutation: u8,
+) -> (
+    Webauthn,
+    passkey_auth::RegistrationState,
+    RegistrationResponse,
+) {
+    use ed25519_dalek::Signer as _;
+    let ec = CredKey::new();
+    let ed = ed25519_dalek::SigningKey::from_bytes(&[7; 32]);
+    let cose = if ed25519 {
+        let map = CborValue::Map(vec![
+            (1.into(), 1.into()),
+            (3.into(), (-8).into()),
+            ((-1).into(), 6.into()),
+            (
+                (-2).into(),
+                CborValue::Bytes(ed.verifying_key().to_bytes().to_vec()),
+            ),
+        ]);
+        let mut bytes = Vec::new();
+        ciborium::ser::into_writer(&map, &mut bytes).unwrap();
+        bytes
+    } else {
+        ec.cose_pubkey()
+    };
+    let auth_data = auth_data_register(RP_ID, [0; 16], b"self-attestation", &cose);
+    let wa = Webauthn::new(RP_ID, "Test", ORIGIN).strict_base64(true);
+    let (challenge, state) = wa.start_registration(b"user", "alice", "Alice", &[]);
+    let (cdj, cdj_encoded) = client_data("webauthn.create", &challenge.challenge, ORIGIN);
+    let mut message = auth_data.clone();
+    message.extend_from_slice(&Sha256::digest(&cdj));
+    let mut signature = if ed25519 {
+        ed.sign(&message).to_bytes().to_vec()
+    } else {
+        let signature: EsSig = ec.signing_key.sign(&message);
+        signature.to_der().as_bytes().to_vec()
+    };
+    if mutation == 2 {
+        let last = signature.len() - 1;
+        signature[last] ^= 1;
+    }
+    let algorithm = if mutation == 1 {
+        if ed25519 { -7 } else { -8 }
+    } else if ed25519 {
+        -8
+    } else {
+        -7
+    };
+    let algorithm_value = if mutation == 5 {
+        CborValue::Integer((u64::MAX - 6).into())
+    } else {
+        algorithm.into()
+    };
+    let mut statement = vec![
+        ("alg".into(), algorithm_value),
+        ("sig".into(), CborValue::Bytes(signature)),
+    ];
+    if mutation == 3 {
+        statement.push(("ecdaaKeyId".into(), CborValue::Bytes(vec![1])));
+    }
+    if mutation == 4 {
+        statement.push(("x5c".into(), CborValue::Array(vec![])));
+    }
+    let envelope = CborValue::Map(vec![
+        ("fmt".into(), "packed".into()),
+        ("attStmt".into(), CborValue::Map(statement)),
+        ("authData".into(), CborValue::Bytes(auth_data)),
+    ]);
+    let mut bytes = Vec::new();
+    ciborium::ser::into_writer(&envelope, &mut bytes).unwrap();
+    (
+        wa,
+        state,
+        RegistrationResponse {
+            id: B64URL.encode(b"self-attestation"),
+            transports: vec![],
+            attestation_object: B64URL.encode(bytes),
+            client_data_json: cdj_encoded,
+        },
+    )
+}
+
+#[test]
+fn es256_self_attestation_uses_the_registered_algorithm_and_real_signature() {
+    for mutation in 0..=5 {
+        let (wa, state, response) = self_attestation_response(false, mutation);
+        let result = wa.finish_registration(&state, &response);
+        if mutation == 0 {
+            assert_eq!(
+                result.unwrap().attestation,
+                passkey_auth::AttestationEvidence::SelfAttestation
+            );
+        } else {
+            assert!(result.is_err(), "mutation {mutation}");
+        }
+    }
+}
+
+#[test]
+fn ed25519_self_attestation_uses_the_registered_algorithm_and_real_signature() {
+    for mutation in 0..=5 {
+        let (wa, state, response) = self_attestation_response(true, mutation);
+        let result = wa.finish_registration(&state, &response);
+        if mutation == 0 {
+            assert_eq!(
+                result.unwrap().attestation,
+                passkey_auth::AttestationEvidence::SelfAttestation
+            );
+        } else {
+            assert!(result.is_err(), "mutation {mutation}");
+        }
+    }
+}
+
+#[test]
+fn duplicate_attestation_statement_members_are_rejected() {
+    let (wa, state, mut response) = self_attestation_response(false, 0);
+    let bytes = B64URL.decode(&response.attestation_object).unwrap();
+    let envelope: CborValue = ciborium::de::from_reader(bytes.as_slice()).unwrap();
+    for position in 0..2 {
+        let mut duplicated = envelope.clone();
+        let CborValue::Map(fields) = &mut duplicated else {
+            unreachable!()
+        };
+        let (_, CborValue::Map(statement)) = &mut fields[1] else {
+            unreachable!()
+        };
+        statement.insert(position, statement[position].clone());
+        let mut bytes = Vec::new();
+        ciborium::ser::into_writer(&duplicated, &mut bytes).unwrap();
+        response.attestation_object = B64URL.encode(bytes);
+        assert!(wa.finish_registration(&state, &response).is_err());
+    }
 }
