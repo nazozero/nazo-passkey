@@ -7,6 +7,8 @@ Library baseline:
 `nazoauth/patched-rustcrypto`, package `passkey-auth 0.1.3`.
 NazoAuth integration baseline:
 `9560ea04bbc01a2da7b002eeeeb0ebe2e7dffbe9`.
+Final production revision:
+`b3ecfa40c8f626903f36d6065640236ac87fe472` (crate 0.2.0).
 
 This review examines the complete library verification path, its tests and
 examples, and the NazoAuth integration contract. It introduces code changes,
@@ -41,6 +43,13 @@ computing base. Public nonce/hash comparisons do not need constant-time equality
 because their values are not authentication secrets.
 
 ## Baseline provenance and retained fixes
+
+GitHub repository metadata identifies
+[`marirs/passkey-auth-rs`](https://github.com/marirs/passkey-auth-rs) as both the
+parent and source of the `nazozero/passkey-auth-rs` fork. The audit and changes
+start from NazoAuth's locked patched revision, not that upstream repository's
+`main` or the fork's older `main`; the pinned branch includes downstream fixes
+that must be retained.
 
 The work starts from the dependency actually locked by NazoAuth. The repository
 history includes `63a54b2` (serde support), `1958b77` (patched RustCrypto P-256),
@@ -201,6 +210,19 @@ matches the ordinary supported credential range. RP-wide uniqueness is still
 an atomic database check; state exclusion alone cannot prevent two ceremonies
 that started concurrently. See `CE::registration_outer_id_and_exclusion_are_enforced`
 and example race test.
+
+The final integration review also found an error-mapping regression introduced
+by combining ID mismatch and exclusion into one `CredentialIdMismatch` outcome.
+NazoAuth's existing duplicate-registration response is HTTP 409. Revision
+`b3ecfa40c8f626903f36d6065640236ac87fe472` separates the errors: inconsistent
+response/attested IDs still return `CredentialIdMismatch` first; only a matching
+ID in the server-issued exclusion list returns `CredentialExcluded`. NazoAuth
+maps the latter to `AlreadyRegistered` and its existing conflict response.
+The accepted input set and check order do not change. The existing regression
+now asserts both exact errors, including an inconsistent outer ID that is also
+excluded, which must remain an ID mismatch. This distinction is an application
+error contract, not a new claim that an excluded credential's attestation
+signature has been verified.
 
 ### S-08 — Certificate parsing did not establish the required supported profile
 
@@ -514,19 +536,25 @@ relaxed and the lockfiles updated to preserve 1.19.0; no NazoAuth production
 downgrade was merged or deployed. This distinction also applies to benchmark
 provenance: the earlier measurements do not describe 1.19.0.
 
-The choice follows measurements of the final production dependency and public
-API. In the [five-round native AWS-LC 1.19.0 comparison](evidence/performance-final-native-aws-lc.json),
-complete ES256 authentication finish P50 changed from **431.722 to 87.482 µs**,
-a **79.7%** reduction. That includes decoding, policy checks, COSE parsing and
-real signature verification. In that same comparison window, strict Ed25519
-authentication changed from **54.993 to 67.842 µs (+23.4%)**, and registration
-finish from **4.366 to 10.005 µs (+129.2%)**. None-attestation registration now
+All three complete-API comparisons were repeated for the final
+**b3ecfa40c8f626903f36d6065640236ac87fe472** implementation after the error-contract
+correction; the earlier fa0f0c measurements remain historical checkpoints.
+In the [five-round native AWS-LC 1.19.0 comparison](evidence/performance-final-native-aws-lc.json),
+complete ES256 authentication finish P50 changed from **419.884 to 86.491 µs**,
+a **79.4%** reduction (about **4.85 times** the inverse latency). All five
+per-round P50 comparisons improved by 78.95%–80.08%. This includes decoding,
+policy checks, COSE parsing and real signature verification. In that same
+comparison window, strict Ed25519 authentication changed from **56.315 to
+62.384 µs (+10.8%)**, and registration finish from **4.517 to 9.184 µs (+103.3%)**.
+The separate portable window measured Ed25519 authentication / registration
+costs of +17.4% / +140.2%, using its own baseline. None-attestation registration now
 checks the point, and authentication applies canonical/weak-key checks and
 dalek strict verification. The slower paths retain those security checks.
 The experiment does not isolate an exact cost for each individual check.
 
 The [separate native allocation measurement](evidence/allocations-native.json)
-includes C-side requests observed through glibc, as well as Rust allocations:
+was also repeated for b3ecfa4 across all 30 cases. It includes C-side requests
+observed through glibc, as well as Rust allocations:
 AWS-LC ES256 authentication uses **23 requests / 1,327 bytes** per operation
 against baseline **16 / 1,363**. Its Rust-only **6 / 324** count is not a total;
 17 requests occur through C. These are cumulative allocation/reallocation
@@ -534,14 +562,22 @@ requests, not peak memory, and mechanisms bypassing the glibc hooks remain
 outside that experiment. The linked benchmark artifact also grows. Timing
 measurements run without the allocation tracer.
 
-The portable backend removes substantial parser allocation overhead, but host
-noise in the unchanged ES256 control prevents an attributable small latency
-improvement claim. WASI has no AWS-LC backend and shows no general latency win.
+Portable ES256 authentication P50 changed from **424.581 to 415.778 µs (-2.1%)**,
+but paired rounds ranged from -8.4% to +37.0%. This does not establish a stable
+latency improvement. WASI has no AWS-LC backend and shows no general latency
+win: ES256 authentication changed by -0.6%, Ed25519 authentication by +7.1%,
+and Ed25519 registration by +135.1%.
 All rounds, separate comparison windows, tails, throughput, CPU, artifact
 sizes and limitations remain in [performance.md](performance.md). The displayed
 quantiles are medians of five per-round quantiles, not pooled percentiles;
 these single-concurrency verifier measurements do not establish HTTP/database
 or multi-user performance.
+
+The first portable comparison's driver completed all five rounds and wrote the
+raw results with exit 0. A subsequent metadata wrapper failed on an incorrect
+harness path; only that postprocessing was corrected. The provenance record
+retains the incident and the original samples, with no discarded or replaced
+rounds.
 
 The [initial backend experiment](evidence/performance-backends.json) used
 **AWS-LC 1.18.2** and remains exploratory evidence. The
@@ -623,9 +659,9 @@ backend or build configuration not run is listed as unmeasured.
 
 ## Validation snapshot
 
-The final implementation has **104 passing native RustCrypto tests and 105
-passing native AWS-LC tests**, plus one documentation test in each backend
-configuration. These supersede the earlier 97-test portable checkpoint.
+The final b3ecfa4 implementation has **104 passing native RustCrypto tests and
+105 passing native AWS-LC tests**, plus one all-feature documentation test in
+the local rerun. These supersede the earlier 97-test portable checkpoint.
 Formatting, check, Clippy and rustdoc gates passed. The implementation CI at
 `fa0f0c869b88c8609fbd6097a8ecfefacff2a6b3` also passed both backend configurations
 on Linux x86-64 and ARM64, Windows RustCrypto, browser-target WASM compilation
@@ -637,15 +673,28 @@ and the then-queued macOS jobs. Those ARM64 jobs later failed to acquire runners
 because of GitHub capacity constraints, before any code executed. The workflow
 keeps the same tests on macOS Intel instead; [the original annotations](evidence/ci-macos-runner-capacity.json)
 are preserved and macOS ARM64 is not counted as tested. The subsequent
-[final library run 44070479207](https://github.com/nazozero/passkey-auth-rs/actions/runs/44070479207)
+[earlier complete library run 44070479207](https://github.com/nazozero/passkey-auth-rs/actions/runs/44070479207)
 completed with **all 12 jobs successful**, including **104 RustCrypto tests +
 one doctest** and **105 AWS-LC tests + one doctest** on macOS Intel, with no
 failures or ignored tests. Linux x86-64/ARM64, Windows, quality, audit, WASM and
-fuzz also passed. The [final CI evidence](evidence/ci-final-validation.json)
+fuzz also passed. The [historical CI evidence](evidence/ci-validation-787a717.json)
 records PR head `787a717ce7e3daeeb578a69a4b5c3dd8f9236024` separately from the
 Actions-tested synthetic merge `51cd42793469ca7dc17ca1112bc637bd706060b3`.
-This result applies to the library workflow; NazoAuth's dependency and
-integration gates remain separate. A completed target build or WASI run does not
+This historical run predates the final `CredentialExcluded` error-contract
+correction. The final b3ecfa4 revision independently passed local formatting,
+all-feature Clippy, 104 default-backend tests, 105 AWS-LC tests and one
+all-feature documentation test; the [local gate record](evidence/credential-excluded-local-validation.json)
+preserves commands and log digests. Its own hosted
+[run 44074112339](https://github.com/nazozero/passkey-auth-rs/actions/runs/44074112339)
+then completed with **all 12 jobs successful**. Both backends passed on Linux
+x86-64/ARM64, Windows x86-64 and macOS Intel, alongside quality, audit, WASM and
+fuzz. The Mac logs confirm 104 / 105 all-target tests respectively and one
+doctest per backend, with no failures or ignored tests. The
+[final snapshot](evidence/ci-final-validation.json) records the actual tested
+synthetic merge `961270ed1c4eecd555575e6ad422935fe580aad7` separately from PR
+head `b3ecfa40c8f626903f36d6065640236ac87fe472`. Mac ARM64 remains unverified.
+Library results do not cover NazoAuth's
+separate dependency and integration gates. A completed target build or WASI run does not
 establish real browser/authenticator interoperability. Exact commands, later
 CI outcomes and integration results appear in [validation.md](validation.md).
 
@@ -657,12 +706,18 @@ completed 579,392 executions in 121 seconds with exit 0. Leak checking remains
 unavailable in this environment; the successful bounded fuzz run does not
 replace it or prove the absence of every parser defect.
 
-The final implementation CI additionally completed **815,795 RustCrypto fuzz
+The earlier fa0f0c implementation CI completed **815,795 RustCrypto fuzz
 executions and 995,046 AWS-LC fuzz executions**, each in 61 seconds with a
 successful command result. Their command lines and completion excerpts are
 preserved in the implementation CI snapshot. This later success does not erase
 the local LeakSanitizer failure or expand finite fuzzing into an exhaustive
 parser proof.
+
+The final b3ecfa4 CI independently completed **1,321,531 RustCrypto fuzz
+executions and 1,634,909 AWS-LC fuzz executions**, each in 61 seconds, with both
+CI steps successful and no local leak-detection override. Its complete log
+digest and completion excerpts are in the final snapshot. Earlier successful
+campaigns and the failed local LeakSanitizer run remain separate evidence.
 
 ### Windows AWS-LC build failure and correction
 

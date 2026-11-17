@@ -119,11 +119,12 @@ initial exact 1.18.2 constraint would have forced a consumer downgrade; integrat
 review blocked it before merging or deployment and the constraint was corrected.
 
 The [final performance comparison](docs/performance.md) uses AWS-LC **1.19.0**
-and measures the public ceremony API against the exact pinned baseline. In the
-same five-round native comparison, complete ES256 authentication finish P50
-fell from **431.722 to 87.482 µs (79.7%)** with the feature enabled. Ed25519
-still uses dalek: its authentication P50 rose from **54.993 to 67.842 µs
-(23.4%)**, and registration finish from **4.366 to 10.005 µs (129.2%)**.
+and measures production commit `b3ecfa40c8f626903f36d6065640236ac87fe472` against the exact pinned baseline.
+In its five-round native comparison, complete ES256 authentication finish P50
+fell from **419.884 to 86.491 µs (79.4%)** with the feature enabled.
+Ed25519 still uses dalek: its authentication P50 changed from
+**56.315 to 62.384 µs (+10.8%)**, and registration finish from
+**4.517 to 9.184 µs (+103.3%)**.
 The additional key-validity and strict-verification work remains enabled.
 These figures are medians of per-round P50s on the recorded Linux host with
 one concurrent operation, not application or multi-user capacity measurements.

@@ -3,7 +3,8 @@
 Review date: **2026-11-17**. Baseline: NazoAuth's actual
 `nazoauth/patched-rustcrypto` revision
 `d59b317998e56f4a16a69133d7a854c5c34f795b` (`passkey-auth 0.1.3`).
-The revised column describes this working branch (crate **0.2.0**). It does not describe the
+The revised column describes production commit
+`b3ecfa40c8f626903f36d6065640236ac87fe472` (crate **0.2.0**). It does not describe the
 older upstream `main` or the crates.io package merely sharing that version.
 
 ## References and interpretation
@@ -47,6 +48,11 @@ Actual command exit status, test counts, target support, and unrun work are
 recorded separately in [validation.md](validation.md). Performance conclusions
 belong in [performance.md](performance.md). No certification claim follows from
 this matrix.
+
+The revised primary assessments are **80 PASS, 17 PARTIAL and 12 NOT APPLICABLE**,
+for 109 rows in total. A row with both implemented and outstanding obligations
+is classified PARTIAL; its completed scope is stated separately. Even a PASS
+applies only to that row's declared scope, not every optional Level 3 feature.
 
 ## Implementation and evidence keys
 
@@ -108,8 +114,8 @@ this matrix.
 | REG-07 | [W3] §7.1 s18–19 · MAY · policy uses backup | Backup admission policy | NOT APPLICABLE | NOT APPLICABLE | No “synced only” or “hardware only” policy is advertised. BE/BS are retained and exposed, not converted into manufacturer assurance. |
 | REG-08 | [W3] §7.1 s20 · MUST | Credential algorithm | PASS | PASS | Enforced against advertised algorithms; binary parser additionally proves kty/alg/crv consistency. `BR::algorithm_and_label_integer_overflow_cannot_alias_negative_values`. |
 | REG-09 | [W1] §7.1 s13–14; [W3] §7.1 s21–22 · MUST | Exact format / statement | PARTIAL | PASS within scope | Case-sensitive dispatch; unknown format / ECDAA is an explicit error. See attestation rows. |
-| REG-10 | [W3] §7.1 s25 · SHOULD; type consistency · POLICY | Credential ID bound | FAIL | PASS | Response `id` must equal attested ID; new ID limited to 1–1,023 bytes. `CE::registration_outer_id_and_exclusion_are_enforced`; long-ID W3 vector. |
-| REG-11 | [W3] §7.1 s26 · SHOULD · RP account store | Duplicate ID rejection | PARTIAL, caller | PARTIAL, caller | Library enforces state exclusion list; global / RP account uniqueness remains a transactional store operation. Examples enforce insertion under lock / SQL unique key; Nazo DB has uniqueness. |
+| REG-10 | [W3] §7.1 s25 · SHOULD; type consistency · POLICY | Credential ID bound | FAIL | PASS | Response `id` must equal attested ID; new ID limited to 1–1,023 bytes. `CredentialIdMismatch` takes precedence even if the inconsistent outer ID is excluded. `CE::registration_outer_id_and_exclusion_are_enforced`; long-ID W3 vector. |
+| REG-11 | [W3] §7.1 s26 · SHOULD · RP account store | Duplicate ID rejection | PARTIAL, caller | PARTIAL, caller | Library rejects a matching ID in the state exclusion list with `CredentialExcluded`; NazoAuth maps that outcome to its existing AlreadyRegistered / HTTP 409 contract. Global / RP account uniqueness remains transactional. The CE regression checks the distinct exclusion error and mismatch precedence; database uniqueness and insert-time checks remain mandatory. |
 | REG-12 | [W3] §7.1 s27 · MUST | Record metadata | FAIL for new L3 fields | PASS | Whole record includes user handle, uv_initialized, BE/BS and explicit attestation evidence. `CE::registration_attestation_evidence_is_explicit`, `uv_fact_and_factor_eligibility_are_distinct_and_legacy_json_is_readable`. |
 | REG-13 | [W3] §7.1 s28–29 · MUST / POLICY | Store only on success | PARTIAL, caller | PARTIAL, caller | Verifier has no side effects and returns only after checks. Authorization, transaction and session state remain caller-owned. Example double-pending signup regression proves insertion-time check. |
 
@@ -189,9 +195,9 @@ this matrix.
 | COMP-03 | [W1], [W2], [W3] §2.4 · SHOULD / storage policy | Stored noncanonical key | PASS leniently | PASS with bounded compatibility | Original COSE bytes retained; stored parser tolerates ordering/width/optional metadata only. Duplicate/private/malformed key ambiguity is deliberately not grandfathered. COSE unit tests. |
 | COMP-04 | Deployment upgrade · POLICY | Old pending state | PASS without binding | PASS by safe restart | Old states reject; stored credentials unaffected. All callers must restart the short ceremony rather than bypass context binding. CE state test. |
 | COMP-05 | NazoAuth security contract · POLICY | Tenant / user / credential | PARTIAL application-specific | PASS in revised integration source | GETDEL envelope tenant rechecked; repository lookup scoped; credential ID and account handle checks retained. Nazo identity / HTTP tests. |
-| COMP-06 | NazoAuth security contract · POLICY | MFA / remembered MFA | PARTIAL for uvInitialized | PASS for new decisions; PARTIAL historical evidence | UV=false and unknown-history UV=true do not automatically gain new MFA. Authorized later initialization is explicit. Existing session / remembered lifetimes remain; historical AMR is not retrospectively re-proven or globally revoked. Nazo policy and HTTP tests. |
+| COMP-06 | NazoAuth security contract · POLICY | MFA / remembered MFA | PARTIAL for uvInitialized | PARTIAL historical evidence; new-decision checks pass | UV=false and unknown-history UV=true do not automatically gain new MFA. Authorized later initialization is explicit. Existing session / remembered lifetimes remain; historical AMR is not retrospectively re-proven or globally revoked. Nazo policy and HTTP tests. |
 | COMP-07 | NazoAuth security contract · POLICY | Counter / metadata CAS | PASS counter CAS | PASS with complete metadata CAS | Prior counter and prior known BE constrain write; JSONB updates preserve UV history and BS. SQL conflict cannot issue success. Live DB regression tests; execution status separate. |
-| COMP-08 | Public API / wire adapter · POLICY | API compatibility | PASS | PARTIAL source compatibility; credential serialization retained | The crate moves to 0.2.0. Methods retained; new fallible / discoverable methods added. Rust struct literals need new fields. Old credential JSON does not. Flat response adapter preserved; not identical to browser nested toJSON. |
+| COMP-08 | Public API / wire adapter · POLICY | API compatibility | PASS | PARTIAL source compatibility; credential serialization retained | The crate moves to 0.2.0. Methods retained; new fallible / discoverable methods added. Rust struct literals need new fields, and exhaustive error matches need new variants including `CredentialExcluded`. Old credential JSON remains readable. Flat response adapter preserved; not identical to browser nested toJSON. |
 | COMP-09 | [W1] §7.1 s12 / §7.2 s14; [W2] §7.1 s17 / §7.2 s18; [W3] §7 · version change | Unsolicited extensions | PARTIAL | PASS to L2/3 policy; intentional L1 rule difference | L1 demanded requested extension IDs only. Later levels permit ignoring unsolicited outputs. This verifier structurally validates then ignores unimplemented outputs without assigning security meaning. |
 
 
@@ -206,9 +212,9 @@ authenticator, account-recovery or hosting infrastructure to this crate.
 | APP-01 | [W3] §4 RP definition · MUST · client/server transport | HTTPS / equivalent | PARTIAL, deployment | PARTIAL, deployment | Production origin configuration requires HTTPS; actual TLS termination remains outside the verifier. Localhost HTTP examples are local development only. |
 | APP-02 | [W3] §5.4.1, §5.4.3 · SHOULD / SHOULD NOT | User-facing names | PARTIAL, application | PARTIAL, application | Callers supply displayName and user name; no unnecessary script/name restriction is added. PRECIS recommendation remains RP-05; UI choices are not credential identity. |
 | APP-03 | [W1] §7, §14.10; [W3] §7, §14.6.2 · SHOULD | Enumeration resistance | PARTIAL, application | PARTIAL, application | Library errors are not a public account-existence oracle contract. NazoAuth's existing uniform-response behavior is retained (`passkey_login_begin_does_not_enumerate_account_or_credential_state`). Response/rate-limit policy remains application-owned; demos deliberately expose setup state. |
-| APP-04 | [W3] §13.4.8–9 · SHOULD NOT / MUST NOT (conditional) | Untrusted origin code | PARTIAL, deployment | PASS exact-origin verifier; PARTIAL hosting | No automatic subdomain acceptance. Production CSP, script supply chain and code hosting still matter. Manager example removes a concrete stored HTML injection sink. |
-| APP-05 | [W3] §13.4.6 · SHOULD | Multiple credentials / recovery | PASS API; PARTIAL product | PASS API; PARTIAL product | Multiple credential lists and exclude IDs supported; NazoAuth's enrollment/deletion authorization retained. Account recovery UX is outside the library. |
-| APP-06 | [W3] §6.1.3 · RECOMMENDED / SHOULD · backup loss | Backup-state recovery UX | FAIL metadata; PARTIAL product | PASS metadata; PARTIAL product | BE/BS now stored after verification. No automatic recovery-factor prompt or password deletion is introduced on BS transitions; NazoAuth does not make those decisions from these flags. |
+| APP-04 | [W3] §13.4.8–9 · SHOULD NOT / MUST NOT (conditional) | Untrusted origin code | PARTIAL, deployment | PARTIAL hosting; exact-origin verification passes | No automatic subdomain acceptance. Production CSP, script supply chain and code hosting still matter. Manager example removes a concrete stored HTML injection sink. |
+| APP-05 | [W3] §13.4.6 · SHOULD | Multiple credentials / recovery | PASS API; PARTIAL product | PARTIAL product; multiple-credential API passes | Multiple credential lists and exclude IDs supported; NazoAuth's enrollment/deletion authorization retained. Account recovery UX is outside the library. |
+| APP-06 | [W3] §6.1.3 · RECOMMENDED / SHOULD · backup loss | Backup-state recovery UX | FAIL metadata; PARTIAL product | PARTIAL product; verified-metadata handling passes | BE/BS now stored after verification. No automatic recovery-factor prompt or password deletion is introduced on BS transitions; NazoAuth does not make those decisions from these flags. |
 | APP-07 | [W2] §7.1 s23; [W3] §5.2.1, §7.2 s1 · SHOULD / SHOULD NOT | Preserve transport hints | PASS core; PARTIAL SQLite | PASS | Accepted strings retained without filtering unknown enum values. Full-record persistence avoids lossy CSV reconstruction of new rows. with_creds APIs replay hints; labels render as text. |
 | APP-08 | [W3] §5.4 · SHOULD · broad authenticator coverage | Recommended algorithm breadth | PARTIAL, explicit subset | PARTIAL, explicit subset | RSA remains unoffered to preserve the two required algorithms and a smaller verifier surface. This is a justified interoperability limit, not a claim that all registered COSE algorithms work. |
 | APP-09 | [W3] §5.4 · NOT RECOMMENDED | Fully specified algorithm aliases | PASS | PASS | Offers -7/-8 as before; no automatic migration to new alias identifiers based only on IANA registry evolution. Keys remain bound to the explicit supported curves. |

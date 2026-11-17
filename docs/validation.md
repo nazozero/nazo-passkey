@@ -1,6 +1,6 @@
 # Validation record
 
-The baseline is NazoAuth's actual pinned revision d59b317998e56f4a16a69133d7a854c5c34f795b. The final production implementation is **fa0f0c869b88c8609fbd6097a8ecfefacff2a6b3** (crate 0.2.0); subsequent commits add CI setup and evidence. The [protocol matrix](protocol-compliance.md) gives source-level assessments, which are distinct from actual command outcomes.
+The baseline is NazoAuth's actual pinned revision d59b317998e56f4a16a69133d7a854c5c34f795b. The final production implementation is **b3ecfa40c8f626903f36d6065640236ac87fe472** (crate 0.2.0). Its final correction separates `CredentialExcluded` from `CredentialIdMismatch`, restoring NazoAuth's duplicate-registration HTTP 409 contract while preserving the accepted input set and verification order. Earlier complete CI runs for fa0f0c/787a717 remain historical evidence, not substitutes for running this revision. The [protocol matrix](protocol-compliance.md) gives source-level assessments, which are distinct from actual command outcomes.
 
 ## Environment and evidence
 
@@ -9,11 +9,19 @@ Local commands use Rust **1.100.0** (0ef1bc386, 2026-11-09), Linux x86_64, and d
 - [Local command evidence](evidence/local-validation.json) includes exit codes, test summaries and log digests. It distinguishes the initial dual-backend gate with AWS-LC 1.18.2 from the complete 1.19.0 all-target test rerun.
 - [Implementation CI evidence](evidence/ci-implementation-snapshot.json) records jobs, steps and final-implementation fuzz log excerpts for [run 44065263386](https://github.com/nazozero/passkey-auth-rs/actions/runs/44065263386).
 - [Windows failure and remediation evidence](evidence/ci-windows-aws-lc-setup.json) preserves the original failure; it is not relabeled as a successful test.
-- [Final library CI evidence](evidence/ci-final-validation.json) records all 12 successful jobs in run 44070479207, including both backends on macOS Intel and the exact tested PR merge commit.
+- [Historical complete library CI evidence](evidence/ci-validation-787a717.json) records all 12 successful jobs in run 44070479207, before the error-contract correction, including both backends on macOS Intel and the exact tested PR merge commit.
+- [Final error-contract local gates](evidence/credential-excluded-local-validation.json) record formatting, Clippy, both complete test suites and the documentation test after the correction in b3ecfa4.
+- [Final library CI evidence](evidence/ci-final-validation.json) records all 12 successful jobs in run 44074112339 for b3ecfa4, including the exact synthetic merge, core job steps, macOS test counts and both completed fuzz campaigns.
 - [Final four-lock audit summaries](evidence/audit-final-summary.json) preserve the database revision and findings.
 - [Performance report](performance.md) links separate raw timing and allocation records. Debug test runs and fuzz throughput are not performance benchmarks.
 
 ## Executed library gates
+
+The final b3ecfa4 hosted run reran the applicable workflow gates below on its
+own synthetic merge. Earlier local commands and four-lock audit records retain
+their original provenance. The separate b3ecfa4 local record also confirms
+formatting, Clippy, 104 default tests, 105 AWS-LC tests and one all-feature
+doctest passed after the final correction.
 
 | Command or scope | Observed outcome |
 |---|---|
@@ -39,7 +47,9 @@ The implementation run passed both Linux architectures and both backends, plus W
 
 In the [post-fix run 44067111623](https://github.com/nazozero/passkey-auth-rs/actions/runs/44067111623), Windows AWS-LC job **133983529674 passed**, as did Windows RustCrypto, both Linux architectures/backends, quality, audit, WASM and fuzz. The two macOS ARM64 jobs subsequently cancelled before acquiring a runner. GitHub's visible annotations explicitly reported ARM64 capacity constraints and repeated acquisition failure; this was not a compiler/test failure. [The original annotations and remediation](evidence/ci-macos-runner-capacity.json) are preserved. The workflow executes the identical backend/test commands on macos-15-intel, while keeping Linux ARM64 coverage. **macOS ARM64 itself remains unverified.**
 
-The [final library run 44070479207](https://github.com/nazozero/passkey-auth-rs/actions/runs/44070479207) completed successfully with **12 of 12 jobs passing**. It covers both backends on Linux x86_64, Linux ARM64, Windows x86_64 and macOS Intel, plus quality, audit, WASM and fuzz. macOS RustCrypto job **133995125663** ran **104 tests + 1 doctest**; macOS AWS-LC job **133995126042** ran **105 tests + 1 doctest**, with no failures or ignored tests. The PR head is **787a717ce7e3daeeb578a69a4b5c3dd8f9236024**; Actions checked out synthetic merge **51cd42793469ca7dc17ca1112bc637bd706060b3** against the pinned base. [The final snapshot](evidence/ci-final-validation.json) preserves those identities, every job outcome, core steps and macOS log digests. This is a library CI result; NazoAuth's separate dependency gate and integration CI are not covered by it.
+The [earlier complete library run 44070479207](https://github.com/nazozero/passkey-auth-rs/actions/runs/44070479207) passed **12 of 12 jobs**. It covered both backends on Linux x86_64, Linux ARM64, Windows x86_64 and macOS Intel, plus quality, audit, WASM and fuzz. macOS RustCrypto job **133995125663** ran **104 tests + 1 doctest**; macOS AWS-LC job **133995126042** ran **105 tests + 1 doctest**, with no failures or ignored tests. Its PR head was **787a717ce7e3daeeb578a69a4b5c3dd8f9236024**; Actions checked out synthetic merge **51cd42793469ca7dc17ca1112bc637bd706060b3** against the pinned base. [The historical snapshot](evidence/ci-validation-787a717.json) preserves those identities, every job outcome, core steps and macOS log digests. This result predates b3ecfa4.
+
+The final production revision's [run 44074112339](https://github.com/nazozero/passkey-auth-rs/actions/runs/44074112339) also completed successfully: **all 12 jobs passed**. The exact PR head is **b3ecfa40c8f626903f36d6065640236ac87fe472**, source tree **720707ed776e82db5ba6acc3f82c1437834cdddb**, and the Actions-tested synthetic merge is **961270ed1c4eecd555575e6ad422935fe580aad7**. Both backends passed all-target and documentation tests on Linux x86_64, Linux ARM64, Windows x86_64 and macOS Intel; quality, audit, WASM and fuzz passed too. macOS jobs **134007580167 / 134007580178** confirm **104 / 105 tests respectively, plus one doctest each**, with no failures or ignored tests. [The final snapshot](evidence/ci-final-validation.json) preserves outcomes, steps and log digests. The earlier ARM64 runner acquisition failure remains unverified macOS ARM64 coverage. Library CI results do not cover NazoAuth's separate dependency gate or integration CI.
 
 ## Independent vectors and negative tests
 
@@ -52,7 +62,7 @@ Locally generated real ES256 and Ed25519 signatures separately exercise positive
 The regression inventory includes:
 
 - Exact challenge/type/origin checks; crossOrigin/topOrigin policy; BOM parsing with hashing of original bytes; duplicate security JSON fields.
-- Strict and compatibility Base64; length limits before/after decoding; exact response/attested credential IDs and registration exclusions.
+- Strict and compatibility Base64; length limits before/after decoding; exact response/attested credential IDs and registration exclusions, including distinct `CredentialExcluded` and higher-priority `CredentialIdMismatch` errors.
 - UP/UV required/preferred behavior; unknown historical UV; immutable known BE; BS implies BE; AT/ED framing and complete extension parsing.
 - Zero/future/expired state, exact RP/policy context binding, account handles, username-first and discoverable credentials, wrong-account rejection.
 - CBOR duplicate keys, truncation, overflow, trailing data, nesting/item limits, canonical new keys and the bounded legacy-COSE compatibility path.
@@ -65,12 +75,21 @@ The regression inventory includes:
 
 The public-API fuzz harness has eight mutation modes and five independently signed fixture families. It preserves valid surrounding state and refreshes timestamps each iteration, so mutations reach intended binary, JSON, signature and account-binding paths instead of always failing on unrelated TTL or credential identity checks. The corpus includes original W3C bytes and malformed boundary cases.
 
-Final-implementation hosted CI completed:
+The earlier fa0f0c implementation hosted CI completed:
 
 | Backend | Requested duration | Observed executions | Outcome |
 |---|---:|---:|---|
 | RustCrypto | 60 seconds | **815,795** in 61 seconds | PASS, process exit 0. |
 | Native AWS-LC 1.19.0 | 60 seconds | **995,046** in 61 seconds | PASS, process exit 0. |
+
+The final b3ecfa4 run repeated both campaigns successfully, without the local
+leak-detection override. [Its log evidence](evidence/ci-final-validation.json)
+preserves these distinct results:
+
+| Backend | Requested duration | Observed executions | Outcome |
+|---|---:|---:|---|
+| RustCrypto | 60 seconds | **1,321,531** in 61 seconds | PASS, successful CI step. |
+| Native AWS-LC 1.19.0 | 60 seconds | **1,634,909** in 61 seconds | PASS, successful CI step. |
 
 An earlier local 120-second campaign executed **341,464** inputs but exited 1 during LeakSanitizer teardown because the managed environment does not support its required ptrace behavior. That run is **not PASS**. Replaying its empty artifact and rerunning with only local ASAN_OPTIONS=detect_leaks=0 succeeded; the latter completed **579,392** inputs in 121 seconds. AddressSanitizer remained enabled. Hosted CI ran both final backends without that local leak-detection override. These campaigns establish neither leak freedom nor absence of every memory or protocol defect.
 

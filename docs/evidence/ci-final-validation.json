@@ -1,22 +1,23 @@
 {
   "repository": "nazozero/passkey-auth-rs",
-  "run_id": 44070479207,
-  "run_number": 5,
+  "run_id": 44074112339,
+  "run_number": 7,
   "workflow": "CI",
-  "run_url": "https://github.com/nazozero/passkey-auth-rs/actions/runs/44070479207",
-  "head_sha": "787a717ce7e3daeeb578a69a4b5c3dd8f9236024",
-  "tested_pull_request_merge_sha": "51cd42793469ca7dc17ca1112bc637bd706060b3",
+  "run_url": "https://github.com/nazozero/passkey-auth-rs/actions/runs/44074112339",
+  "head_sha": "b3ecfa40c8f626903f36d6065640236ac87fe472",
+  "source_tree": "720707ed776e82db5ba6acc3f82c1437834cdddb",
+  "tested_pull_request_merge_sha": "961270ed1c4eecd555575e6ad422935fe580aad7",
   "base_sha": "d59b317998e56f4a16a69133d7a854c5c34f795b",
-  "production_implementation_sha": "fa0f0c869b88c8609fbd6097a8ecfefacff2a6b3",
-  "observed_at": "2026-11-17 11:13:08 UTC",
+  "production_implementation_sha": "b3ecfa40c8f626903f36d6065640236ac87fe472",
+  "observed_at": "2026-11-17 11:32:07 UTC",
   "status": "completed",
   "conclusion": "success",
   "jobs_total": 12,
   "jobs": [
     {
-      "id": 133995124298,
+      "id": 134007579287,
       "name": "wasm",
-      "url": "https://github.com/nazozero/passkey-auth-rs/actions/runs/44070479207/job/133995124298",
+      "url": "https://github.com/nazozero/passkey-auth-rs/actions/runs/44074112339/job/134007579287",
       "status": "completed",
       "conclusion": "success",
       "steps": [
@@ -47,144 +48,30 @@
       ]
     },
     {
-      "id": 133995124575,
-      "name": "test (windows-2022, aws-lc)",
-      "url": "https://github.com/nazozero/passkey-auth-rs/actions/runs/44070479207/job/133995124575",
+      "id": 134007579529,
+      "name": "audit",
+      "url": "https://github.com/nazozero/passkey-auth-rs/actions/runs/44074112339/job/134007579529",
       "status": "completed",
       "conclusion": "success",
       "steps": [
         {
           "number": 4,
-          "name": "Install NASM for native AWS-LC",
+          "name": "Run cargo install cargo-audit --version 0.23.0 --locked",
           "status": "completed",
           "conclusion": "success"
         },
         {
           "number": 5,
-          "name": "Run cargo test --locked --all-targets --features aws-lc",
-          "status": "completed",
-          "conclusion": "success"
-        },
-        {
-          "number": 6,
-          "name": "Run cargo test --locked --doc --features aws-lc",
+          "name": "Run cargo audit",
           "status": "completed",
           "conclusion": "success"
         }
       ]
     },
     {
-      "id": 133995124597,
-      "name": "test (ubuntu-24.04, aws-lc)",
-      "url": "https://github.com/nazozero/passkey-auth-rs/actions/runs/44070479207/job/133995124597",
-      "status": "completed",
-      "conclusion": "success",
-      "steps": [
-        {
-          "number": 4,
-          "name": "Install NASM for native AWS-LC",
-          "status": "completed",
-          "conclusion": "skipped"
-        },
-        {
-          "number": 5,
-          "name": "Run cargo test --locked --all-targets --features aws-lc",
-          "status": "completed",
-          "conclusion": "success"
-        },
-        {
-          "number": 6,
-          "name": "Run cargo test --locked --doc --features aws-lc",
-          "status": "completed",
-          "conclusion": "success"
-        }
-      ]
-    },
-    {
-      "id": 133995124702,
-      "name": "test (ubuntu-24.04-arm, aws-lc)",
-      "url": "https://github.com/nazozero/passkey-auth-rs/actions/runs/44070479207/job/133995124702",
-      "status": "completed",
-      "conclusion": "success",
-      "steps": [
-        {
-          "number": 4,
-          "name": "Install NASM for native AWS-LC",
-          "status": "completed",
-          "conclusion": "skipped"
-        },
-        {
-          "number": 5,
-          "name": "Run cargo test --locked --all-targets --features aws-lc",
-          "status": "completed",
-          "conclusion": "success"
-        },
-        {
-          "number": 6,
-          "name": "Run cargo test --locked --doc --features aws-lc",
-          "status": "completed",
-          "conclusion": "success"
-        }
-      ]
-    },
-    {
-      "id": 133995124932,
-      "name": "test (ubuntu-24.04, rustcrypto)",
-      "url": "https://github.com/nazozero/passkey-auth-rs/actions/runs/44070479207/job/133995124932",
-      "status": "completed",
-      "conclusion": "success",
-      "steps": [
-        {
-          "number": 4,
-          "name": "Install NASM for native AWS-LC",
-          "status": "completed",
-          "conclusion": "skipped"
-        },
-        {
-          "number": 5,
-          "name": "Run cargo test --locked --all-targets --no-default-features",
-          "status": "completed",
-          "conclusion": "success"
-        },
-        {
-          "number": 6,
-          "name": "Run cargo test --locked --doc --no-default-features",
-          "status": "completed",
-          "conclusion": "success"
-        }
-      ]
-    },
-    {
-      "id": 133995125030,
-      "name": "test (ubuntu-24.04-arm, rustcrypto)",
-      "url": "https://github.com/nazozero/passkey-auth-rs/actions/runs/44070479207/job/133995125030",
-      "status": "completed",
-      "conclusion": "success",
-      "steps": [
-        {
-          "number": 4,
-          "name": "Install NASM for native AWS-LC",
-          "status": "completed",
-          "conclusion": "skipped"
-        },
-        {
-          "number": 5,
-          "name": "Run cargo test --locked --all-targets --no-default-features",
-          "status": "completed",
-          "conclusion": "success"
-        },
-        {
-          "number": 6,
-          "name": "Run cargo test --locked --doc --no-default-features",
-          "status": "completed",
-          "conclusion": "success"
-        }
-      ]
-    },
-    {
-      "id": 133995125039,
+      "id": 134007579642,
       "name": "quality",
-      "url": "https://github.com/nazozero/passkey-auth-rs/actions/runs/44070479207/job/133995125039",
+      "url": "https://github.com/nazozero/passkey-auth-rs/actions/runs/44074112339/job/134007579642",
       "status": "completed",
       "conclusion": "success",
       "steps": [
@@ -215,30 +102,63 @@
       ]
     },
     {
-      "id": 133995125119,
-      "name": "audit",
-      "url": "https://github.com/nazozero/passkey-auth-rs/actions/runs/44070479207/job/133995125119",
+      "id": 134007579701,
+      "name": "test (ubuntu-24.04, rustcrypto)",
+      "url": "https://github.com/nazozero/passkey-auth-rs/actions/runs/44074112339/job/134007579701",
       "status": "completed",
       "conclusion": "success",
       "steps": [
         {
           "number": 4,
-          "name": "Run cargo install cargo-audit --version 0.23.0 --locked",
+          "name": "Install NASM for native AWS-LC",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "number": 5,
+          "name": "Run cargo test --locked --all-targets --no-default-features",
           "status": "completed",
           "conclusion": "success"
         },
         {
-          "number": 5,
-          "name": "Run cargo audit",
+          "number": 6,
+          "name": "Run cargo test --locked --doc --no-default-features",
           "status": "completed",
           "conclusion": "success"
         }
       ]
     },
     {
-      "id": 133995125479,
+      "id": 134007579796,
+      "name": "test (windows-2022, aws-lc)",
+      "url": "https://github.com/nazozero/passkey-auth-rs/actions/runs/44074112339/job/134007579796",
+      "status": "completed",
+      "conclusion": "success",
+      "steps": [
+        {
+          "number": 4,
+          "name": "Install NASM for native AWS-LC",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 5,
+          "name": "Run cargo test --locked --all-targets --features aws-lc",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 6,
+          "name": "Run cargo test --locked --doc --features aws-lc",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "id": 134007579798,
       "name": "fuzz",
-      "url": "https://github.com/nazozero/passkey-auth-rs/actions/runs/44070479207/job/133995125479",
+      "url": "https://github.com/nazozero/passkey-auth-rs/actions/runs/44074112339/job/134007579798",
       "status": "completed",
       "conclusion": "success",
       "steps": [
@@ -263,9 +183,9 @@
       ]
     },
     {
-      "id": 133995125564,
+      "id": 134007579811,
       "name": "test (windows-2022, rustcrypto)",
-      "url": "https://github.com/nazozero/passkey-auth-rs/actions/runs/44070479207/job/133995125564",
+      "url": "https://github.com/nazozero/passkey-auth-rs/actions/runs/44074112339/job/134007579811",
       "status": "completed",
       "conclusion": "success",
       "steps": [
@@ -290,9 +210,63 @@
       ]
     },
     {
-      "id": 133995125663,
+      "id": 134007579816,
+      "name": "test (ubuntu-24.04, aws-lc)",
+      "url": "https://github.com/nazozero/passkey-auth-rs/actions/runs/44074112339/job/134007579816",
+      "status": "completed",
+      "conclusion": "success",
+      "steps": [
+        {
+          "number": 4,
+          "name": "Install NASM for native AWS-LC",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "number": 5,
+          "name": "Run cargo test --locked --all-targets --features aws-lc",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 6,
+          "name": "Run cargo test --locked --doc --features aws-lc",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "id": 134007579995,
+      "name": "test (ubuntu-24.04-arm, rustcrypto)",
+      "url": "https://github.com/nazozero/passkey-auth-rs/actions/runs/44074112339/job/134007579995",
+      "status": "completed",
+      "conclusion": "success",
+      "steps": [
+        {
+          "number": 4,
+          "name": "Install NASM for native AWS-LC",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "number": 5,
+          "name": "Run cargo test --locked --all-targets --no-default-features",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 6,
+          "name": "Run cargo test --locked --doc --no-default-features",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "id": 134007580167,
       "name": "test (macos-15-intel, rustcrypto)",
-      "url": "https://github.com/nazozero/passkey-auth-rs/actions/runs/44070479207/job/133995125663",
+      "url": "https://github.com/nazozero/passkey-auth-rs/actions/runs/44074112339/job/134007580167",
       "status": "completed",
       "conclusion": "success",
       "steps": [
@@ -317,9 +291,36 @@
       ]
     },
     {
-      "id": 133995126042,
+      "id": 134007580178,
       "name": "test (macos-15-intel, aws-lc)",
-      "url": "https://github.com/nazozero/passkey-auth-rs/actions/runs/44070479207/job/133995126042",
+      "url": "https://github.com/nazozero/passkey-auth-rs/actions/runs/44074112339/job/134007580178",
+      "status": "completed",
+      "conclusion": "success",
+      "steps": [
+        {
+          "number": 4,
+          "name": "Install NASM for native AWS-LC",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "number": 5,
+          "name": "Run cargo test --locked --all-targets --features aws-lc",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 6,
+          "name": "Run cargo test --locked --doc --features aws-lc",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "id": 134007580201,
+      "name": "test (ubuntu-24.04-arm, aws-lc)",
+      "url": "https://github.com/nazozero/passkey-auth-rs/actions/runs/44074112339/job/134007580201",
       "status": "completed",
       "conclusion": "success",
       "steps": [
@@ -344,10 +345,10 @@
       ]
     }
   ],
-  "macos_test_logs": {
-    "rustcrypto": {
-      "job_id": 133995125663,
-      "log_file": "ci-final-macos-rustcrypto-job-133995125663.log",
+  "log_evidence": {
+    "macos-rustcrypto": {
+      "job_id": 134007580167,
+      "log_file": "ci-b3ecfa4-macos-rustcrypto-job-134007580167.log",
       "log_normalization": "CRLF converted to LF; one trailing newline",
       "all_targets": {
         "passed": 104,
@@ -359,12 +360,12 @@
         "failed": 0,
         "ignored": 0
       },
-      "log_bytes": 100846,
-      "log_sha256": "9ea042fda8afd636e18d4fdd79fca029ae08a7ccbc756629124b54fbe2877f9c"
+      "log_bytes": 60822,
+      "log_sha256": "068bccda43ed84b75e0bcfc09b4be5bdbfc85f46b7b38369d44057a554eb7c47"
     },
-    "aws-lc": {
-      "job_id": 133995126042,
-      "log_file": "ci-final-macos-aws-lc-job-133995126042.log",
+    "macos-aws-lc": {
+      "job_id": 134007580178,
+      "log_file": "ci-b3ecfa4-macos-aws-lc-job-134007580178.log",
       "log_normalization": "CRLF converted to LF; one trailing newline",
       "all_targets": {
         "passed": 105,
@@ -376,13 +377,46 @@
         "failed": 0,
         "ignored": 0
       },
-      "log_bytes": 101641,
-      "log_sha256": "5cf19684e6512974c1e96ced461908b22edca26858b0e88b3362a6f857fa9717"
+      "log_bytes": 63787,
+      "log_sha256": "b28a31db39251b1105483571f1056785c6437dd6816ede404036d3b21e83e6cf"
+    },
+    "fuzz": {
+      "job_id": 134007579798,
+      "log_file": "ci-b3ecfa4-fuzz-job-134007579798.log",
+      "log_normalization": "CRLF converted to LF; one trailing newline",
+      "campaigns": [
+        {
+          "backend": "RustCrypto",
+          "requested_seconds": 60,
+          "executions": 1321531,
+          "observed_seconds": 61,
+          "outcome": "success"
+        },
+        {
+          "backend": "AWS-LC 1.19.0",
+          "requested_seconds": 60,
+          "executions": 1634909,
+          "observed_seconds": 61,
+          "outcome": "success"
+        }
+      ],
+      "log_excerpt": [
+        "2026-11-17T11:27:13.8348011Z HEAD is now at 961270e Merge b3ecfa40c8f626903f36d6065640236ac87fe472 into d59b317998e56f4a16a69133d7a854c5c34f795b",
+        "2026-11-17T11:27:30.0426699Z ##[group]Run cargo +nightly-2026-11-17 fuzz run ceremonies -- -max_total_time=60 -rss_limit_mb=1024 -max_len=65540",
+        "2026-11-17T11:28:38.9614600Z INFO: Seed: 3803286177",
+        "2026-11-17T11:29:39.9816806Z Done 1321531 runs in 61 second(s)",
+        "2026-11-17T11:29:40.0961911Z ##[group]Run cargo +nightly-2026-11-17 fuzz run ceremonies --features aws-lc -- -max_total_time=60 -rss_limit_mb=1024 -max_len=65540",
+        "2026-11-17T11:30:26.9689749Z INFO: Seed: 142413913",
+        "2026-11-17T11:31:27.9807238Z Done 1634909 runs in 61 second(s)"
+      ],
+      "log_bytes": 3116142,
+      "log_sha256": "b5e2c8f84f8926f0b2d93d7600fc2f86f506d8ef1df3c89c0cf055d40ea028ab"
     }
   },
+  "historical_complete_ci": "ci-validation-787a717.json",
   "scope_limits": [
     "macOS x86_64 ran on macos-15-intel; macOS ARM64 did not execute due to runner capacity and remains unverified.",
-    "Earlier Windows NASM build failure and macOS ARM64 runner failure remain recorded separately.",
+    "Earlier complete 787a717 CI, Windows NASM build failure, macOS ARM64 runner failure and local LeakSanitizer failure remain recorded separately.",
     "This is the library workflow result; NazoAuth has a separate dependency gate and integration CI result."
   ]
 }
