@@ -1,0 +1,234 @@
+{
+  "environment": {
+    "utc": "2026-11-17T10:46:53Z",
+    "platform": "Linux-6.18.57-x86_64-with-glibc2.41",
+    "affinity": [
+      0
+    ],
+    "concurrency": 1,
+    "aws_lc_rs": "1.19.0",
+    "aws_lc_sys": "0.47.0",
+    "rustc": "rustc 1.100.0 (0ef1bc386 2026-11-09)\nbinary: rustc\ncommit-hash: 0ef1bc386059596dada8fb65b50425aab2ea637a\ncommit-date: 2026-11-09\nhost: x86_64-unknown-linux-gnu\nrelease: 1.100.0\nLLVM version: 23.1.5\n",
+    "binary_bytes": 3280616,
+    "binary_sha256": "d7815d9b372107f1b672ff4cab12d0fb639fe57d94d224d7f5196c4dfd252bd4",
+    "lock_sha256": "e3a69ed189f077fd5bc261f998897549ad18d6d94183807be6b321f994f548f4"
+  },
+  "runs": [
+    {
+      "round": 1,
+      "wall_seconds": 4.1582561880004505,
+      "cpu_seconds": 4.093061000000024,
+      "rows": [
+        {
+          "case": "es256.rustcrypto.parse_and_verify",
+          "iterations": 5000,
+          "p50_ns": 361576,
+          "p95_ns": 1236618,
+          "p99_ns": 2974983
+        },
+        {
+          "case": "es256.aws_lc.parse_and_verify",
+          "iterations": 5000,
+          "p50_ns": 63806,
+          "p95_ns": 183797,
+          "p99_ns": 419474
+        },
+        {
+          "case": "ed25519.rustcrypto.parse_and_verify_strict",
+          "iterations": 5000,
+          "p50_ns": 48864,
+          "p95_ns": 165050,
+          "p99_ns": 578113
+        },
+        {
+          "case": "ed25519.aws_lc.parse_and_verify",
+          "iterations": 5000,
+          "p50_ns": 46521,
+          "p95_ns": 200273,
+          "p99_ns": 563526
+        },
+        {
+          "aws_lc_rejects_small_order_forgery": false
+        }
+      ]
+    },
+    {
+      "round": 2,
+      "wall_seconds": 5.871535173000666,
+      "cpu_seconds": 5.421710999999973,
+      "rows": [
+        {
+          "case": "es256.rustcrypto.parse_and_verify",
+          "iterations": 5000,
+          "p50_ns": 433785,
+          "p95_ns": 2112361,
+          "p99_ns": 5097290
+        },
+        {
+          "case": "es256.aws_lc.parse_and_verify",
+          "iterations": 5000,
+          "p50_ns": 78318,
+          "p95_ns": 240213,
+          "p99_ns": 736723
+        },
+        {
+          "case": "ed25519.rustcrypto.parse_and_verify_strict",
+          "iterations": 5000,
+          "p50_ns": 49194,
+          "p95_ns": 188675,
+          "p99_ns": 936224
+        },
+        {
+          "case": "ed25519.aws_lc.parse_and_verify",
+          "iterations": 5000,
+          "p50_ns": 46500,
+          "p95_ns": 163827,
+          "p99_ns": 558744
+        },
+        {
+          "aws_lc_rejects_small_order_forgery": false
+        }
+      ]
+    },
+    {
+      "round": 3,
+      "wall_seconds": 4.197418842000843,
+      "cpu_seconds": 4.188217999999992,
+      "rows": [
+        {
+          "case": "es256.rustcrypto.parse_and_verify",
+          "iterations": 5000,
+          "p50_ns": 408818,
+          "p95_ns": 1135024,
+          "p99_ns": 2408539
+        },
+        {
+          "case": "es256.aws_lc.parse_and_verify",
+          "iterations": 5000,
+          "p50_ns": 63996,
+          "p95_ns": 228606,
+          "p99_ns": 487116
+        },
+        {
+          "case": "ed25519.rustcrypto.parse_and_verify_strict",
+          "iterations": 5000,
+          "p50_ns": 48914,
+          "p95_ns": 202346,
+          "p99_ns": 502229
+        },
+        {
+          "case": "ed25519.aws_lc.parse_and_verify",
+          "iterations": 5000,
+          "p50_ns": 46510,
+          "p95_ns": 198530,
+          "p99_ns": 442448
+        },
+        {
+          "aws_lc_rejects_small_order_forgery": false
+        }
+      ]
+    },
+    {
+      "round": 4,
+      "wall_seconds": 4.113222782999401,
+      "cpu_seconds": 4.039468999999983,
+      "rows": [
+        {
+          "case": "es256.rustcrypto.parse_and_verify",
+          "iterations": 5000,
+          "p50_ns": 409098,
+          "p95_ns": 1022395,
+          "p99_ns": 1873971
+        },
+        {
+          "case": "es256.aws_lc.parse_and_verify",
+          "iterations": 5000,
+          "p50_ns": 64377,
+          "p95_ns": 208665,
+          "p99_ns": 497171
+        },
+        {
+          "case": "ed25519.rustcrypto.parse_and_verify_strict",
+          "iterations": 5000,
+          "p50_ns": 58879,
+          "p95_ns": 192000,
+          "p99_ns": 580266
+        },
+        {
+          "case": "ed25519.aws_lc.parse_and_verify",
+          "iterations": 5000,
+          "p50_ns": 46540,
+          "p95_ns": 192080,
+          "p99_ns": 484863
+        },
+        {
+          "aws_lc_rejects_small_order_forgery": false
+        }
+      ]
+    },
+    {
+      "round": 5,
+      "wall_seconds": 4.00000143699981,
+      "cpu_seconds": 3.952202999999998,
+      "rows": [
+        {
+          "case": "es256.rustcrypto.parse_and_verify",
+          "iterations": 5000,
+          "p50_ns": 416519,
+          "p95_ns": 851947,
+          "p99_ns": 1990076
+        },
+        {
+          "case": "es256.aws_lc.parse_and_verify",
+          "iterations": 5000,
+          "p50_ns": 64237,
+          "p95_ns": 233142,
+          "p99_ns": 462729
+        },
+        {
+          "case": "ed25519.rustcrypto.parse_and_verify_strict",
+          "iterations": 5000,
+          "p50_ns": 48784,
+          "p95_ns": 189086,
+          "p99_ns": 515629
+        },
+        {
+          "case": "ed25519.aws_lc.parse_and_verify",
+          "iterations": 5000,
+          "p50_ns": 46501,
+          "p95_ns": 172501,
+          "p99_ns": 373554
+        },
+        {
+          "aws_lc_rejects_small_order_forgery": false
+        }
+      ]
+    }
+  ],
+  "median_by_case": {
+    "es256.rustcrypto.parse_and_verify": {
+      "iterations": 5000,
+      "p50_ns": 409098,
+      "p95_ns": 1135024,
+      "p99_ns": 2408539
+    },
+    "es256.aws_lc.parse_and_verify": {
+      "iterations": 5000,
+      "p50_ns": 64237,
+      "p95_ns": 228606,
+      "p99_ns": 487116
+    },
+    "ed25519.rustcrypto.parse_and_verify_strict": {
+      "iterations": 5000,
+      "p50_ns": 48914,
+      "p95_ns": 189086,
+      "p99_ns": 578113
+    },
+    "ed25519.aws_lc.parse_and_verify": {
+      "iterations": 5000,
+      "p50_ns": 46510,
+      "p95_ns": 192080,
+      "p99_ns": 484863
+    }
+  }
+}

@@ -1,67 +1,117 @@
 # Validation record
 
-This record covers the NazoAuth production baseline `d59b317998e56f4a16a69133d7a854c5c34f795b` and this proposed 0.2.0 revision. Source-level conformance assessments are in [protocol-compliance.md](protocol-compliance.md); the command outcomes below are separate evidence.
+The baseline is NazoAuth's actual pinned revision d59b317998e56f4a16a69133d7a854c5c34f795b. The final production implementation is **fa0f0c869b88c8609fbd6097a8ecfefacff2a6b3** (crate 0.2.0); subsequent commits add CI setup and evidence. The [protocol matrix](protocol-compliance.md) gives source-level assessments, which are distinct from actual command outcomes.
 
-## Environment
+## Environment and evidence
 
-Local validation uses Rust **1.100.0** (`0ef1bc386`, 2026-11-09), Linux x86_64, and a separate dated nightly **2026-11-17** for libFuzzer/AddressSanitizer. The browser WASM compile target is `wasm32-unknown-unknown`; executable WASI checks use `wasm32-wasip1` with Node **v24.22.1**. The public CI definition additionally requests Linux ARM64, macOS and Windows checks. A declared CI job is not a passing job.
+Local commands use Rust **1.100.0** (0ef1bc386, 2026-11-09), Linux x86_64, and dated nightly **2026-11-17** for libFuzzer/AddressSanitizer. The host exposes nine logical CPUs and about 9.7 GiB RAM. Browser compilation targets wasm32-unknown-unknown; executable WASI checks use wasm32-wasip1 and Node **v24.22.1**. Final AWS-enabled locks use **aws-lc-rs 1.19.0 / aws-lc-sys 0.47.0**. Ed25519 remains dalek strict in every configuration.
 
-The workspace exposes about 9.7 GiB RAM and nine logical CPUs. Early tool installation and NazoAuth Diesel compilation attempts were killed by the environment. Unused duplicate toolchains on a memory-backed filesystem were preserved on disk; subsequent commands use bounded build parallelism. No database feature or security check was removed to obtain a successful build.
+- [Local command evidence](evidence/local-validation.json) includes exit codes, test summaries and log digests. It distinguishes the initial dual-backend gate with AWS-LC 1.18.2 from the complete 1.19.0 all-target test rerun.
+- [Implementation CI evidence](evidence/ci-implementation-snapshot.json) records jobs, steps and final-implementation fuzz log excerpts for [run 44065263386](https://github.com/nazozero/passkey-auth-rs/actions/runs/44065263386).
+- [Windows failure and remediation evidence](evidence/ci-windows-aws-lc-setup.json) preserves the original failure; it is not relabeled as a successful test.
+- [Final four-lock audit summaries](evidence/audit-final-summary.json) preserve the database revision and findings.
+- [Performance report](performance.md) links separate raw timing and allocation records. Debug test runs and fuzz throughput are not performance benchmarks.
 
-## Executed local gates
+## Executed library gates
 
-| Scope / command | Observed outcome |
+| Command or scope | Observed outcome |
 |---|---|
-| Baseline `cargo test --all-targets` | PASS: 27 unit + 6 attestation + 13 ceremony tests; 46 total, zero failed/ignored. |
-| Candidate `cargo fmt --all -- --check` | PASS. |
-| Candidate `cargo test --locked --all-targets` | PASS: 49 unit + 15 attestation + 8 binary regressions + 20 ceremony + 1 official-vector test + 4 example tests; 97 total, zero failed/ignored. |
-| Candidate `cargo test --locked --doc` | PASS: 1 doctest. |
-| Candidate `cargo check --locked --all-targets --no-default-features` | PASS. |
-| Candidate `cargo clippy --locked --all-targets --all-features -- -D warnings` | PASS after correcting reported nested-condition and test-only clone lints. |
-| Candidate `RUSTDOCFLAGS="-D warnings" cargo doc --locked --no-deps` | PASS. |
-| Candidate `cargo audit --json` | PASS: zero vulnerabilities, zero warnings, zero ignored advisories. |
-| Minimal native and browser WASM library configurations | Final feature-selection verification in progress; see the final PR checks. |
-| WASI release build and execution | Baseline and candidate built and executed all 10 benchmark scenarios successfully; smoke measurements are not performance conclusions. |
-| Fuzz | Initial 120-second input campaign completed 341,464 iterations, but the process failed during unsupported LeakSanitizer teardown. The constrained-environment rerun and replay are in progress. |
-| NazoAuth | Identity unit suite: 63 PASS. PostgreSQL, Valkey and HTTP/MFA integration suites are in progress. |
-| Hosted cross-platform CI | Not yet run at this draft checkpoint. |
+| Baseline cargo test --all-targets | PASS: 27 unit + 6 attestation + 13 ceremony tests; **46** total. |
+| cargo fmt --all -- --check | PASS locally and in final-implementation CI. |
+| cargo check --locked --all-targets --no-default-features | PASS locally and in final-implementation CI. |
+| cargo check --locked --all-targets --all-features | PASS locally; final-version all-target compilation also occurs in CI Clippy/tests. |
+| cargo clippy --locked --all-targets --all-features -- -D warnings | PASS locally and in final-implementation CI. |
+| cargo test --locked --all-targets --no-default-features | PASS: **104** tests: 56 unit, 15 attestation, 8 binary regression, 20 ceremony, 1 official-vector suite, 4 example tests. Zero failures or ignored tests. |
+| cargo test --locked --all-targets --features aws-lc | PASS after rebuilding with **1.19.0 / 0.47.0**: **105** tests, including the additional ES256 backend-differential regression. Zero failures or ignored tests. |
+| cargo test --locked --doc with the applicable feature setting | PASS: **1** doctest per tested backend. |
+| RUSTDOCFLAGS="-D warnings" cargo doc --locked --no-deps | PASS; the local all-features documentation gate also passed. |
+| Browser WASM library check with --no-default-features | PASS locally and in final-implementation CI. |
+| Browser WASM library check with --all-features | PASS; AWS-LC is excluded from WASM by target dependencies and implementation cfg. |
+| WASI release build with --all-features, then Node execution | PASS: all **10** benchmark scenarios execute. Browser or hardware interoperability is not implied. |
+| cargo audit for main, perf, fuzz and backend-comparison locks | PASS: **0 vulnerabilities, 0 warnings, 0 ignored advisories** in each final lock. |
 
-A subsequent measured optimization removes redundant Ed25519 point recompression, with differential property checks against the original validation rule. An optional native AWS-LC ES256 backend is also now under full-matrix validation; its targeted crypto tests passed. The gate counts above refer to the preceding portable checkpoint until the final evidence update replaces them.
+### Hosted platform matrix
 
-The final evidence update will replace the explicitly unfinished rows. This draft does not count a failed or unfinished command as PASS.
+The workflow retains both backends on Linux x86_64, Linux ARM64, macOS and Windows, including all-target and documentation tests.
 
-## Independent vectors and regression inventory
+The implementation run passed both Linux architectures and both backends, plus Windows RustCrypto, quality, WASM, audit and fuzz. Windows AWS-LC initially failed before any protocol test because aws-lc-sys could not find NASM. Commit **0f2bf0061796a123f7b64adbe5ccc8ab649ae0a3** adds a pinned Windows-only NASM installation, checks installation status and verifies the executable. No assembly, platform or backend test was disabled.
 
-`tests/fixtures/w3c-level3.json` preserves the original bytes from the W3C Level 3 Recommendation's section 16, dated 2026-08-25, with source URL and document digest. `tests/official_vectors.rs` evaluates all 15 source cases: the six cases within the library's declared format/algorithm/origin scope must register and authenticate; unsupported algorithms/formats and cross-origin cases must reject. Each supported assertion is also tested with a corrupted signature. Supported cases include none ES256, packed self ES256, a 1,023-byte credential ID, packed x5c ES256, packed x5c with an Ed25519 credential, and FIDO U2F. Their signatures were not regenerated by this implementation.
+In the [post-fix run 44067111623](https://github.com/nazozero/passkey-auth-rs/actions/runs/44067111623), Windows AWS-LC job **133983529674 passed**, as did Windows RustCrypto, both Linux architectures/backends, quality, audit, WASM and fuzz. The two macOS ARM64 jobs subsequently cancelled before acquiring a runner. GitHub's visible annotations explicitly reported ARM64 capacity constraints and repeated acquisition failure; this was not a compiler/test failure. [The original annotations and remediation](evidence/ci-macos-runner-capacity.json) are preserved. The workflow now executes the identical backend/test commands on macos-15-intel, while keeping Linux ARM64 coverage. macOS ARM64 itself remains unverified. The final PR checks and subsequent evidence snapshot identify the Intel run outcome.
 
-An independent literal RFC 8032 section 7.1 TEST 1 verifies an Ed25519 signature and rejects changed message bytes. Locally generated ES256 and Ed25519 signatures separately exercise positive and negative attestation/authentication paths, including malformed signatures and invalid algorithm/curve combinations.
+## Independent vectors and negative tests
 
-Seven `proptest` tests exercise binary parsers with arbitrary bytes, valid-key round trips, prefix consumption, and malformed metadata. The ordinary unit run executes them; this is bounded property testing, not an exhaustive proof.
+The committed W3C fixture preserves original bytes from the Level 3 Recommendation dated 2026-08-25, section 16, with source URL and document digest. The official-vector suite evaluates **all 15 source cases**. The **six** within the declared format/algorithm/origin scope must register and authenticate; unsupported formats/algorithms and cross-origin cases must reject. Each supported assertion also rejects a corrupted signature.
 
-Targeted regressions cover strict and compatibility Base64, origin/challenge/type mismatch, crossOrigin/topOrigin, exact registration IDs and exclusions, immutable BE and invalid BS/BE combinations, AT/ED framing, CBOR duplicates/truncation/overflow/depth/trailing data, public-key point and algorithm checks, packed certificate profile/curve/AAGUID rules, zero/future/expired/mismatched state, required/preferred UV, unknown historical UV, bound user handles, discoverable legacy credentials, signature-counter replay, old credential JSON, and SQLite migration/concurrency.
+Supported cases include none ES256, packed self ES256, a 1,023-byte credential ID, packed x5c ES256, packed x5c with an Ed25519 credential, and FIDO U2F. These signatures were not regenerated by this implementation. An independent literal RFC 8032 section 7.1 TEST 1 verifies an Ed25519 signature and rejects changed message bytes.
 
-## Security advisory scope
+Locally generated real ES256 and Ed25519 signatures separately exercise positive and negative registration/authentication paths. Tests cover invalid DER/scalars, changed messages/signatures, algorithm/curve confusion, weak/noncanonical Ed25519 keys, and ordinary Ed25519 rather than an accidental prehashed variant. Native AWS-LC additionally checks agreement with the RustCrypto ES256 acceptance boundary.
 
-RustSec database revision: `02e2517f457a359fc6d3440ea4560c8ea188fee8` (1,509 advisories; last update 2026-11-15). The freshly resolved baseline development lock contained RUSTSEC-2026-0258 (`h2 0.3.27`) and RUSTSEC-2026-0459 (`libsqlite3-sys 0.30.1`). The candidate disables unneeded Rocket example HTTP/2 and uses `rusqlite 0.41.1` / `libsqlite3-sys 0.39.1`. The final main lock has no reported findings or suppressions.
+The regression inventory includes:
 
-These were example/development dependencies in this library's lock. This does not establish that NazoAuth's historical production lock or running process used either vulnerable component. Advisory absence also does not prove the absence of unknown vulnerabilities.
+- Exact challenge/type/origin checks; crossOrigin/topOrigin policy; BOM parsing with hashing of original bytes; duplicate security JSON fields.
+- Strict and compatibility Base64; length limits before/after decoding; exact response/attested credential IDs and registration exclusions.
+- UP/UV required/preferred behavior; unknown historical UV; immutable known BE; BS implies BE; AT/ED framing and complete extension parsing.
+- Zero/future/expired state, exact RP/policy context binding, account handles, username-first and discoverable credentials, wrong-account rejection.
+- CBOR duplicate keys, truncation, overflow, trailing data, nesting/item limits, canonical new keys and the bounded legacy-COSE compatibility path.
+- Packed/self/U2F signatures, certificate profile and curve rules, x5c bounds, duplicate X.509 extensions, AAGUID consistency and explicit untrusted evidence.
+- Counter anomalies, old credential JSON, SQLite lazy migration/CAS, and concurrent registration insertion checks in examples.
 
-## Reproducing the checks
+### Property testing and fuzzing
 
-```sh
-rustup toolchain install 1.100.0 --profile minimal --component rustfmt,clippy
-rustup target add --toolchain 1.100.0 wasm32-unknown-unknown wasm32-wasip1
-cargo fmt --all -- --check
-cargo check --locked --all-targets --no-default-features
-cargo clippy --locked --all-targets --all-features -- -D warnings
-cargo test --locked --all-targets
-cargo test --locked --doc
-RUSTDOCFLAGS="-D warnings" cargo doc --locked --no-deps
-cargo install cargo-audit --version 0.23.0 --locked
-cargo audit
-cargo check --locked --lib --target wasm32-unknown-unknown --no-default-features
-cargo build --locked --release --manifest-path perf/Cargo.toml --target wasm32-wasip1
-PERF_ITERATIONS=100 node perf/wasi.mjs perf/target/wasm32-wasip1/release/ceremony-bench.wasm
-```
+**Nine property tests** run in the ordinary suite. They exercise arbitrary binary inputs, valid-key round trips, prefix consumption, malformed metadata, strict Ed25519 real signatures, and equivalence of the optimized canonical-key predicate to the previous decompress/recompress predicate. The last property uses **2,048 cases**, supplemented by explicit noncanonical and small-order cases. This is bounded testing, not an exhaustive proof.
 
-See [fuzz/README.md](../fuzz/README.md) for the seeded public-API fuzz target and [performance.md](performance.md) for separately controlled release measurements. No browser user interaction, authenticator hardware certification, or formal verification is claimed by a WASM compile or a fuzz run.
+The public-API fuzz harness has eight mutation modes and five independently signed fixture families. It preserves valid surrounding state and refreshes timestamps each iteration, so mutations reach intended binary, JSON, signature and account-binding paths instead of always failing on unrelated TTL or credential identity checks. The corpus includes original W3C bytes and malformed boundary cases.
+
+Final-implementation hosted CI completed:
+
+| Backend | Requested duration | Observed executions | Outcome |
+|---|---:|---:|---|
+| RustCrypto | 60 seconds | **815,795** in 61 seconds | PASS, process exit 0. |
+| Native AWS-LC 1.19.0 | 60 seconds | **995,046** in 61 seconds | PASS, process exit 0. |
+
+An earlier local 120-second campaign executed **341,464** inputs but exited 1 during LeakSanitizer teardown because the managed environment does not support its required ptrace behavior. That run is **not PASS**. Replaying its empty artifact and rerunning with only local ASAN_OPTIONS=detect_leaks=0 succeeded; the latter completed **579,392** inputs in 121 seconds. AddressSanitizer remained enabled. Hosted CI ran both final backends without that local leak-detection override. These campaigns establish neither leak freedom nor absence of every memory or protocol defect.
+
+## Dependency advisory checks
+
+The final four-lock scan uses RustSec database **233155b4025b854c68a4b199c0e32d7fd53291a2**, **1,527 advisories**, updated 2026-11-17T11:14:35+01:00. Raw results: [main](evidence/audit-final-main.json), [perf](evidence/audit-final-perf.json), [fuzz](evidence/audit-final-fuzz.json), [backend comparison](evidence/audit-final-backends.json).
+
+The freshly resolved **baseline development lock**, not a reconstructed historical NazoAuth production lock, reported RUSTSEC-2026-0258 (h2 0.3.27) and RUSTSEC-2026-0459 (libsqlite3-sys 0.30.1). The candidate disables unneeded Rocket example HTTP/2 and updates the SQLite example dependency to rusqlite 0.41.1 / libsqlite3-sys 0.39.1. Both the failed baseline audit and the earlier 1,509-advisory checkpoint remain in docs/evidence.
+
+NazoAuth has a separate full application lock and audit record. Its later scan found three newly added actix-http advisories, corrected by the targeted **3.21.3** patch using the repository's documented urgent-patch exception. Its remaining **chrono 0.4.45 unmaintained advisory** is a cargo-audit warning but an **error in the existing cargo-deny supply-chain gate**. This blocks that integration check and its dependent CI job; it is not a green CI result. The advisory affects every Chrono version and has no upgrade fix. Baseline and candidate have the identical Chrono package and all 17 direct reverse dependencies, including 15 workspace crates, Diesel and the pinned mdoc-rs dependency. Removing it requires a separately validated migration of public DateTime types, timestamp persistence/serialization and dependencies. No advisory is ignored and the gate is not weakened. The integration PR preserves the exact baseline evidence and the blocked outcome.
+
+## Integration and practical limits
+
+The companion NazoAuth PR records exact Git-pinned commands and real PostgreSQL/Valkey service results for legacy JSONB, tenant/account/credential ownership, GETDEL/TTL/replay, metadata/counter CAS, required auditing, UV/MFA eligibility, session creation, remembered MFA, CSRF and HTTP handlers. Application-level claims depend on those integration results; pure library tests cannot establish transactional session or database behavior.
+
+Early local installation and NazoAuth Diesel builds were killed by the memory limit. Unused duplicate toolchains on a memory-backed filesystem were preserved on disk and build parallelism was bounded. Subsequent Diesel compilation succeeded without removing database features. Development compiler/lint errors were corrected before the passing gates; failures are not counted as passes.
+
+No browser interaction or hardware authenticator certification, vendor trust chain validation, FIDO MDS integration, public-suffix validation, formal proof, unbounded fuzz campaign, whole-NazoAuth performance claim or multi-user capacity claim is made. Protocol and integration limitations remain in the matrix and security review even when executable gates pass.
+
+## Reproduction
+
+Install Rust 1.100.0 with rustfmt and clippy, and add wasm32-unknown-unknown and wasm32-wasip1 targets. Run:
+
+    cargo fmt --all -- --check
+    cargo check --locked --all-targets --no-default-features
+    cargo check --locked --all-targets --all-features
+    cargo clippy --locked --all-targets --all-features -- -D warnings
+    cargo test --locked --all-targets --no-default-features
+    cargo test --locked --all-targets --features aws-lc
+    cargo test --locked --doc --no-default-features
+    cargo test --locked --doc --features aws-lc
+    RUSTDOCFLAGS="-D warnings" cargo doc --locked --no-deps --all-features
+    cargo install cargo-audit --version 0.23.0 --locked
+    cargo audit --file Cargo.lock
+    cargo audit --file perf/Cargo.lock
+    cargo audit --file fuzz/Cargo.lock
+    cargo audit --file perf/backend-comparison/Cargo.lock
+    cargo check --locked --lib --target wasm32-unknown-unknown --no-default-features
+    cargo check --locked --lib --target wasm32-unknown-unknown --all-features
+    cargo build --locked --release --manifest-path perf/Cargo.toml --target wasm32-wasip1 --all-features
+    PERF_ITERATIONS=100 node perf/wasi.mjs perf/target/wasm32-wasip1/release/ceremony-bench.wasm
+    rustup toolchain install nightly-2026-11-17 --profile minimal
+    cargo +nightly-2026-11-17 install cargo-fuzz --version 0.13.2 --locked
+    cargo +nightly-2026-11-17 fuzz run ceremonies -- -max_total_time=60 -rss_limit_mb=1024 -max_len=65540
+    cargo +nightly-2026-11-17 fuzz run ceremonies --features aws-lc -- -max_total_time=60 -rss_limit_mb=1024 -max_len=65540
+
+Windows AWS builds additionally need NASM as installed by the workflow. See [fuzz/README.md](../fuzz/README.md) for fixture/mutation details and [performance.md](performance.md) for release measurement commands.

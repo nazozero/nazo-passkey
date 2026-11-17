@@ -30,7 +30,7 @@ Where later levels intentionally change a rule (for example unsolicited
 extensions), this implementation follows Level 3 while retaining usable Level
 1/2 credentials; it does not claim to simulate every historical rule at once.
 
-Rows identify the applicable rule by section and, where useful, algorithm step.
+The 109 rows identify the applicable rule by section and, where useful, algorithm step.
 `MUST` includes an obligatory verification step under the RP conformance rule.
 `POLICY` identifies an implementation choice or integration obligation and does
 not promote a recommendation into a normative requirement.

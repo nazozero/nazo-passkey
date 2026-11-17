@@ -15,6 +15,9 @@ starts from its pinned revision
 not the upstream repository's older `main` branch. The revised crate is **0.2.0** because public Rust struct fields changed.
 The migration from the pinned 0.1.3 revision keeps existing credential JSON and
 signing keys usable; users do not need to register their passkeys again.
+The implementation and consumer changes are reviewed in
+[passkey-auth-rs PR #1](https://github.com/nazozero/passkey-auth-rs/pull/1) and
+[NazoAuth PR #287](https://github.com/nazozero/NazoAuth/pull/287).
 
 **Rust 1.100.0 / edition 2024** is the target toolchain. The default uses
 RustCrypto `p256`, `ed25519-dalek`, and `sha2`. The optional `aws-lc` feature
@@ -105,22 +108,40 @@ transcript, DER boundary, attestation policy, credential storage shape, or MFA
 decision. Selection happens at compile time, with no application-level runtime
 backend selector or shared-state wrapper. Native builds with the feature acquire an AWS-LC native
 build dependency; WASM does not build it.
+Follow the [AWS-LC build requirements](https://aws.github.io/aws-lc-rs/requirements/)
+for the target. In particular, an x86-64 Windows MSVC build needs the C/C++
+toolchain and NASM on PATH; the CI installs and checks NASM before compiling
+that feature. The default RustCrypto build has no AWS-LC build dependency.
 
 NazoAuth's baseline already locks `aws-lc-rs 1.19.0` / `aws-lc-sys 0.47.0`.
 The library's compatible version requirement preserves that resolution. An
 initial exact 1.18.2 constraint would have forced a consumer downgrade; integration
 review blocked it before merging or deployment and the constraint was corrected.
 
-The [initial backend measurements with AWS-LC 1.18.2](docs/evidence/performance-backends.json)
-motivated this option: on the recorded host, the median of five ES256
-parse-and-verify P50 measurements was 401.7 µs for RustCrypto and 81.1 µs for
-AWS-LC 1.18.2, a latency ratio of about 4.95:1. These are exploratory backend
-microbenchmarks for that version, not measurements of the final 1.19.0 lock or whole-ceremony
-speedups. The Ed25519 probe did not justify switching and accepted a small-order
-key fixture that dalek's strict policy rejects, so it is never selected for
-Ed25519. Full ceremony results and the exact tested feature combinations are
-reported separately in the performance and validation documents. Final 1.19.0
-performance measurements remain pending until their new results are recorded.
+The [final performance comparison](docs/performance.md) uses AWS-LC **1.19.0**
+and measures the public ceremony API against the exact pinned baseline. In the
+same five-round native comparison, complete ES256 authentication finish P50
+fell from **431.722 to 87.482 µs (79.7%)** with the feature enabled. Ed25519
+still uses dalek: its authentication P50 rose from **54.993 to 67.842 µs
+(23.4%)**, and registration finish from **4.366 to 10.005 µs (129.2%)**.
+The additional key-validity and strict-verification work remains enabled.
+These figures are medians of per-round P50s on the recorded Linux host with
+one concurrent operation, not application or multi-user capacity measurements.
+
+The native allocation measurement includes AWS-LC's C allocator requests:
+ES256 authentication uses **23 requests / 1,327 bytes** per operation, compared
+with baseline **16 / 1,363**. Reporting only the Rust allocator's **6 / 324**
+would omit C-side work. Portable RustCrypto reduces parser allocations, but
+host scheduling noise prevents attributing its small ES256 latency change to
+the code. WASI uses RustCrypto and shows no general latency improvement.
+The performance report retains every round, P95/P99, throughput, CPU and
+artifact-size results, along with measurement boundaries and regressions.
+
+The [initial AWS-LC 1.18.2 experiment](docs/evidence/performance-backends.json)
+is retained as exploratory evidence. The final 1.19.0 probe also accepted a
+small-order Ed25519 fixture that dalek's strict policy rejects; this acceptance
+policy difference is why AWS-LC is never selected for Ed25519. Actual tested
+feature/target combinations are recorded in [validation](docs/validation.md).
 
 ## Registration and username-first authentication
 

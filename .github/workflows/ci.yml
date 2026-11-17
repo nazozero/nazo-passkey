@@ -27,7 +27,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        runner: [ubuntu-24.04, ubuntu-24.04-arm, macos-15, windows-2022]
+        # macOS arm64 capacity repeatedly failed before a runner was acquired.
+        # Keep both backend tests on the available Intel macOS image; Linux
+        # arm64 still provides a separate native architecture check.
+        runner: [ubuntu-24.04, ubuntu-24.04-arm, macos-15-intel, windows-2022]
         backend: [rustcrypto, aws-lc]
         include:
           - backend: rustcrypto

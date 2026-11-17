@@ -369,7 +369,7 @@ are discovery hints, and AAGUID / certificate subjects without trust anchors
 are not hardware provenance. Existing rejection semantics stay unchanged; only
 unsupported claims are removed. See [W3] §7.2 and the README caller contract.
 
-### S-19 — Example development dependencies contain published vulnerabilities
+### S-19 — Dependency advisory findings and fixes
 
 **Observed audit results:** the audit of a separately resolved baseline lockfile
 for `d59b317` reported two vulnerabilities. The intermediate candidate audit,
@@ -409,6 +409,24 @@ migration/CAS tests. Exact commands and logs are recorded in the validation
 artifact. An advisory-clean lockfile does not itself prove runtime correctness
 or permanent freedom from future advisories.
 
+The final audit also covers the library, performance harness, fuzz harness and
+backend-comparison lockfiles after all four selected AWS-LC 1.19.0. Each command
+exited 0 with **zero vulnerabilities and zero warnings**, against the newer
+RustSec revision `233155b4025b854c68a4b199c0e32d7fd53291a2` with 1,527 advisories.
+The [final audit summary](evidence/audit-final-summary.json) and four separate
+JSON reports preserve this later evidence; it does not overwrite the failed
+baseline/intermediate audits or confuse their earlier database revision.
+
+NazoAuth's application audit is separate. The updated database reported three
+vulnerabilities in its previously locked `actix-http 3.21.0`; the integration
+updated that dependency to 3.21.3 through its existing reviewed security-fix
+process. Its subsequent audit exited 0 with no vulnerabilities and **one
+remaining warning**: `chrono 0.4.45`, unmaintained advisory
+`RUSTSEC-2026-0543`. That warning is retained, not suppressed or represented as
+a vulnerability-free-and-warning-free application. Replacing time types across
+the application is outside this protocol change. The integration evidence in
+the validation record identifies both application audit runs.
+
 ## Persistence and integration contract
 
 The 0.2.0 credential adds optional metadata through serde defaults; the
@@ -418,7 +436,9 @@ usable. The Rust source API does require updating external struct literals.
 Old pending states are intentionally invalidated rather than accepting an
 unbound compatibility fallback.
 
-The NazoAuth integration touches these boundaries:
+The [companion NazoAuth PR #287](https://github.com/nazozero/NazoAuth/pull/287)
+updates the consumer alongside [library PR #1](https://github.com/nazozero/passkey-auth-rs/pull/1).
+The integration touches these boundaries:
 
 | Boundary | Preserved / revised behavior | Regression evidence |
 |---|---|---|
@@ -494,19 +514,44 @@ relaxed and the lockfiles updated to preserve 1.19.0; no NazoAuth production
 downgrade was merged or deployed. This distinction also applies to benchmark
 provenance: the earlier measurements do not describe 1.19.0.
 
-The choice follows a measured comparison, rather than an assumption about
-native code. The [initial five-round backend experiment](evidence/performance-backends.json)
-used **AWS-LC 1.18.2** and 5,000 samples per case. Its median of per-round ES256
-parse-and-verify P50s was 401.7 µs for RustCrypto and 81.1 µs for AWS-LC 1.18.2,
-a ratio of about 4.95:1. Ed25519 timings were similar, around 60 µs. That version's Ed25519 primitive also
-accepted the experiment's identity-key/small-order forgery fixture. This
-demonstrates that it cannot replace the existing strict RP acceptance policy
-without additional validation; the crate does not select it. These measurements
-are backend evidence only. They do not establish whole-ceremony gains, total
-native allocation counts, or performance on another host; those require the
-separate production-path measurements. Final measurements with the production
-and acceptance lock at 1.19.0 remain pending; the exploratory figures are not
-substitutes for that rerun.
+The choice follows measurements of the final production dependency and public
+API. In the [five-round native AWS-LC 1.19.0 comparison](evidence/performance-final-native-aws-lc.json),
+complete ES256 authentication finish P50 changed from **431.722 to 87.482 µs**,
+a **79.7%** reduction. That includes decoding, policy checks, COSE parsing and
+real signature verification. In that same comparison window, strict Ed25519
+authentication changed from **54.993 to 67.842 µs (+23.4%)**, and registration
+finish from **4.366 to 10.005 µs (+129.2%)**. None-attestation registration now
+checks the point, and authentication applies canonical/weak-key checks and
+dalek strict verification. The slower paths retain those security checks.
+The experiment does not isolate an exact cost for each individual check.
+
+The [separate native allocation measurement](evidence/allocations-native.json)
+includes C-side requests observed through glibc, as well as Rust allocations:
+AWS-LC ES256 authentication uses **23 requests / 1,327 bytes** per operation
+against baseline **16 / 1,363**. Its Rust-only **6 / 324** count is not a total;
+17 requests occur through C. These are cumulative allocation/reallocation
+requests, not peak memory, and mechanisms bypassing the glibc hooks remain
+outside that experiment. The linked benchmark artifact also grows. Timing
+measurements run without the allocation tracer.
+
+The portable backend removes substantial parser allocation overhead, but host
+noise in the unchanged ES256 control prevents an attributable small latency
+improvement claim. WASI has no AWS-LC backend and shows no general latency win.
+All rounds, separate comparison windows, tails, throughput, CPU, artifact
+sizes and limitations remain in [performance.md](performance.md). The displayed
+quantiles are medians of five per-round quantiles, not pooled percentiles;
+these single-concurrency verifier measurements do not establish HTTP/database
+or multi-user performance.
+
+The [initial backend experiment](evidence/performance-backends.json) used
+**AWS-LC 1.18.2** and remains exploratory evidence. The
+[final parsed-key experiment](evidence/performance-final-backends.json) uses
+**1.19.0**. Both versions' Ed25519 probes accepted the identity-key/small-order
+fixture that dalek strict rejects. This is an acceptance-policy difference,
+not evidence of a newly established AWS-LC vulnerability. It prevents a direct
+replacement of the existing strict RP policy; the crate never selects AWS-LC
+for Ed25519. Primitive results supplement the complete API measurements rather
+than substituting for them.
 
 Both ES256 paths retain RustCrypto's DER/scalar parser before verification.
 AWS-LC uses the fixed P-256/SHA-256/ASN.1 algorithm with the 65-byte uncompressed
@@ -578,15 +623,22 @@ backend or build configuration not run is listed as unmeasured.
 
 ## Validation snapshot
 
-Before the optional AWS-LC backend and final Ed25519 encoding optimization, the
-local formatting, check, Clippy, 97-test suite, one documentation test and
-rustdoc gates passed. Minimal native and browser-target WASM builds
-passed, and the WASI executable ran successfully. These distinguish compilation
-and WASI execution from real browser/authenticator interoperability; the latter
-is not established by a target build. The complete commands and environment
-appear in [validation.md](validation.md). That checkpoint is not a claim that
-the new backend or encoding changes have already passed the complete suite;
-their final feature-matrix and regression results are recorded separately.
+The final implementation has **104 passing native RustCrypto tests and 105
+passing native AWS-LC tests**, plus one documentation test in each backend
+configuration. These supersede the earlier 97-test portable checkpoint.
+Formatting, check, Clippy and rustdoc gates passed. The implementation CI at
+`fa0f0c869b88c8609fbd6097a8ecfefacff2a6b3` also passed both backend configurations
+on Linux x86-64 and ARM64, Windows RustCrypto, browser-target WASM compilation
+with either feature setting, and WASI execution. That run uses the final
+AWS-LC 1.19.0 lock. The
+[implementation CI snapshot](evidence/ci-implementation-snapshot.json) records
+individual job outcomes, including the Windows AWS-LC failure described below
+and the then-queued macOS jobs. Those ARM64 jobs later failed to acquire runners
+because of GitHub capacity constraints, before any code executed. The workflow
+keeps the same tests on macOS Intel instead; [the original annotations](evidence/ci-macos-runner-capacity.json)
+are preserved and macOS ARM64 is not counted as tested. A completed target build or WASI run does not
+establish real browser/authenticator interoperability. Exact commands, later
+CI outcomes and integration results appear in [validation.md](validation.md).
 
 The first fuzz run completed 341,464 executions before LeakSanitizer failed under
 the environment's ptrace restriction, leaving the overall command at exit 1.
@@ -595,6 +647,38 @@ with exit 0. A second run disabled leak detection only, retained ASan, and
 completed 579,392 executions in 121 seconds with exit 0. Leak checking remains
 unavailable in this environment; the successful bounded fuzz run does not
 replace it or prove the absence of every parser defect.
+
+The final implementation CI additionally completed **815,795 RustCrypto fuzz
+executions and 995,046 AWS-LC fuzz executions**, each in 61 seconds with a
+successful command result. Their command lines and completion excerpts are
+preserved in the implementation CI snapshot. This later success does not erase
+the local LeakSanitizer failure or expand finite fuzzing into an exhaustive
+parser proof.
+
+### Windows AWS-LC build failure and correction
+
+In [run 44065263386, job 133977227744](https://github.com/nazozero/passkey-auth-rs/actions/runs/44065263386/job/133977227744),
+the AWS-LC build failed before protocol tests ran: `aws-lc-sys 0.47.0` could
+not execute NASM and exited with code 1. The following documentation-test step
+was skipped as a consequence. MSVC had already compiled C sources; the missing
+assembler was the observed blocker. This is retained as a failed CI job.
+
+The [official Windows build requirements](https://aws.github.io/aws-lc-rs/requirements/windows)
+identify NASM and its PATH entry for x86-64 MSVC builds. Workflow commit
+`0f2bf0061796a123f7b64adbe5ccc8ab649ae0a3` adds a Windows/AWS-LC-only setup step
+that installs Chocolatey package `nasm 3.2.0` (NASM 3.02), checks the install
+exit code, adds its directory to `GITHUB_PATH`, and executes the assembler's
+version command. All eight native matrix entries and their original all-targets
+and documentation-test commands remain enabled. The fix does not disable
+assembly, select prebuilt objects, or alter production verification. YAML
+parsing, matrix/command preservation checks and `git diff --check` passed
+locally. The corrected [run 44067111623, job 133983529674](https://github.com/nazozero/passkey-auth-rs/actions/runs/44067111623/job/133983529674)
+then passed: the log confirms NASM 3.02, **105 all-target tests and one
+documentation test**, with zero failures or ignored tests. This resolves the
+observed Windows build blocker. The [failure and remediation evidence](evidence/ci-windows-aws-lc-setup.json)
+preserves both outcomes and their separate log digests. Linux x86-64/ARM64 with
+both backends, Windows RustCrypto, quality, audit, WASM and fuzz also passed in
+that corrected run; the two macOS jobs were still queued at the checkpoint.
 
 ## Remaining limitations and operational risks
 
@@ -632,6 +716,10 @@ replace it or prove the absence of every parser defect.
 - The examples still lack production session limits, comprehensive start-route
   CSRF handling, rate limiting and account recovery. Fixed example defects
   should not be misread as a complete web-application security review.
+- NazoAuth still carries the `chrono 0.4.45` unmaintained warning from the latest
+  advisory database. The four library-related lockfiles have no advisory
+  findings in that same database snapshot; the application's remaining warning
+  is a separate maintenance obligation.
 - Real hardware/browser interoperability, additional operating systems,
   long-running fuzzing, leak detection, independent review and unmeasured
   performance dimensions remain outside the successful local gates. WASI

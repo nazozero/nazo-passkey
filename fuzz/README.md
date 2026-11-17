@@ -1,6 +1,17 @@
 # Fuzzing
 
-Run `cargo +nightly fuzz run ceremonies -- -max_total_time=120 -rss_limit_mb=1024`.
+Use the same dated nightly as CI:
+
+```sh
+cargo +nightly-2026-11-17 fuzz run ceremonies -- -max_total_time=120 -rss_limit_mb=1024 -max_len=65540
+cargo +nightly-2026-11-17 fuzz run ceremonies --features aws-lc -- -max_total_time=120 -rss_limit_mb=1024 -max_len=65540
+```
+
+The second command exercises the optional native ES256 backend. On WASM,
+the feature always selects the RustCrypto fallback. The [validation record](../docs/validation.md)
+distinguishes successful hosted runs from the managed local environment's
+unsupported LeakSanitizer teardown. Only that constrained local rerun used
+`ASAN_OPTIONS=detect_leaks=0`; CI retains its default sanitizer behavior.
 
 The checked-in corpus contains unmodified W3C §16 public test bytes and
 boundary cases. `python3 fuzz/seed_corpus.py` regenerates the 45 named W3C

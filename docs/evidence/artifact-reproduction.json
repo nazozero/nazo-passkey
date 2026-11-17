@@ -1,0 +1,36 @@
+[
+  {
+    "backend": "rustcrypto",
+    "command": [
+      "cargo",
+      "build",
+      "--locked",
+      "--release",
+      "--manifest-path",
+      "perf/Cargo.toml",
+      "--no-default-features"
+    ],
+    "exit_code": 0,
+    "measured_sha256": "a69284f615374ec9ef67deddfdd50f610fdc1ba397dde496d931dbf1e37b36b1",
+    "rebuilt_sha256": "a69284f615374ec9ef67deddfdd50f610fdc1ba397dde496d931dbf1e37b36b1",
+    "byte_identical": true
+  },
+  {
+    "backend": "wasi",
+    "command": [
+      "cargo",
+      "build",
+      "--locked",
+      "--release",
+      "--manifest-path",
+      "perf/Cargo.toml",
+      "--target",
+      "wasm32-wasip1",
+      "--all-features"
+    ],
+    "exit_code": 0,
+    "measured_sha256": "53570d17532dcdb4dbc0aa7e5edb3ad7b85671c04312f68d7b6ac2826e083fee",
+    "rebuilt_sha256": "53570d17532dcdb4dbc0aa7e5edb3ad7b85671c04312f68d7b6ac2826e083fee",
+    "byte_identical": true
+  }
+]
