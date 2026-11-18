@@ -914,14 +914,26 @@ mod tests {
         let wa = Webauthn::new("example.com", "Example", "https://example.com");
         for length in [0, 65] {
             assert!(
-                wa.try_start_registration(&vec![7; length], "user", "User", &[], Default::default())
-                    .is_err()
+                wa.try_start_registration(
+                    &vec![7; length],
+                    "user",
+                    "User",
+                    &[],
+                    Default::default()
+                )
+                .is_err()
             );
         }
         for length in [1, 64] {
             assert!(
-                wa.try_start_registration(&vec![7; length], "user", "User", &[], Default::default())
-                    .is_ok()
+                wa.try_start_registration(
+                    &vec![7; length],
+                    "user",
+                    "User",
+                    &[],
+                    Default::default()
+                )
+                .is_ok()
             );
         }
     }

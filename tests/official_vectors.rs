@@ -125,13 +125,8 @@ fn official_registration_assertion_vectors_and_wrong_signatures() {
     for vector in vectors["vectors"].as_array().unwrap() {
         let name = vector["name"].as_str().unwrap();
         let registration = &vector["registration"];
-        let (_, mut state) = wa.start_registration(
-            b"w3c-test-user",
-            "user",
-            "User",
-            &[],
-            Default::default(),
-        );
+        let (_, mut state) =
+            wa.start_registration(b"w3c-test-user", "user", "User", &[], Default::default());
         state.challenge = Challenge(bytes(registration, "challenge"));
         let response = RegistrationResponse {
             id: CredentialId(bytes(registration, "credential_id")),

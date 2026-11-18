@@ -1301,7 +1301,9 @@ fn invalid_certificate_evidence_never_reaches_application_policy() {
 
         let (wa, mut state, mut response) =
             registration_with_chain(format, &cert, vec![cert.cert_der.clone()], [0; 16]);
-        let bytes = B64URL.decode(&response.response.attestation_object).unwrap();
+        let bytes = B64URL
+            .decode(&response.response.attestation_object)
+            .unwrap();
         let original: CborValue = ciborium::de::from_reader(bytes.as_slice()).unwrap();
         let wrong_signature: EsSig = cert.signing_key.sign(b"another registration transcript");
         for missing_chain in [false, true] {
@@ -1499,7 +1501,9 @@ fn u2f_aaguid_remains_informational_after_statement_verification() {
         [0; 16]
     );
 
-    let bytes = B64URL.decode(&response.response.attestation_object).unwrap();
+    let bytes = B64URL
+        .decode(&response.response.attestation_object)
+        .unwrap();
     let mut envelope: CborValue = ciborium::de::from_reader(bytes.as_slice()).unwrap();
     let CborValue::Map(fields) = &mut envelope else {
         unreachable!()

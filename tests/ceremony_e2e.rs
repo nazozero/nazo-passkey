@@ -343,13 +343,8 @@ fn signed_challenges_reject_padding_in_both_ceremonies() {
     let mut auth = FakeAuthenticator::new();
     let credential = do_register(&wa, &mut auth);
 
-    let (_, registration) = wa.start_registration(
-        USER_HANDLE,
-        "alice",
-        "Alice",
-        &[],
-        Default::default(),
-    );
+    let (_, registration) =
+        wa.start_registration(USER_HANDLE, "alice", "Alice", &[], Default::default());
     let padded =
         base64::engine::general_purpose::URL_SAFE.encode(registration.challenge.as_bytes());
     assert!(padded.ends_with('='));
@@ -610,13 +605,8 @@ fn registration_outer_id_and_exclusion_are_enforced() {
     let wa = Webauthn::new(RP_ID, "Example", ORIGIN);
     let mut auth = FakeAuthenticator::new();
     let existing = do_register(&wa, &mut auth);
-    let (chal, state) = wa.start_registration(
-        USER_HANDLE,
-        "alice",
-        "Alice",
-        &[],
-        Default::default(),
-    );
+    let (chal, state) =
+        wa.start_registration(USER_HANDLE, "alice", "Alice", &[], Default::default());
     let (_, client_data_json) = client_data("webauthn.create", &chal.challenge, ORIGIN);
     let mut response = RegistrationResponse {
         id: CredentialId(b"other-id".to_vec()),
@@ -739,13 +729,8 @@ fn uv_preferred_false_and_required_registration_behavior() {
         .unwrap();
     assert!(!result.user_verified && !result.user_verification_eligible);
     let required = wa.require_user_verification(true);
-    let (chal, state) = required.start_registration(
-        USER_HANDLE,
-        "alice",
-        "Alice",
-        &[],
-        Default::default(),
-    );
+    let (chal, state) =
+        required.start_registration(USER_HANDLE, "alice", "Alice", &[], Default::default());
     let (_, client_data_json) = client_data("webauthn.create", &chal.challenge, ORIGIN);
     let response = RegistrationResponse {
         id: CredentialId(auth.credential_id.clone()),

@@ -51,13 +51,8 @@ fn envelope(ad: &[u8], statement: Value) -> Value {
 
 fn fixture() -> (Webauthn, RegistrationState, RegistrationResponse, Vec<u8>) {
     let wa = Webauthn::new("example.com", "Test", "https://example.com");
-    let (challenge, state) = wa.start_registration(
-        b"user",
-        "alice",
-        "Alice",
-        &[],
-        Default::default(),
-    );
+    let (challenge, state) =
+        wa.start_registration(b"user", "alice", "Alice", &[], Default::default());
     let client_data = serde_json::json!({
         "type": "webauthn.create", "challenge": challenge.challenge,
         "origin": "https://example.com", "crossOrigin": false,

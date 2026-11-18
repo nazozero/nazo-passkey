@@ -39,8 +39,8 @@ use tokio::sync::Mutex;
 use tower_http::services::ServeDir;
 
 use nazo_passkey::{
-    Attachment, AuthenticationResponse, AuthenticationState, PasskeyCredential, RegistrationOptions,
-    RegistrationResponse, RegistrationState, ResidentKeyRequirement, Webauthn,
+    Attachment, AuthenticationResponse, AuthenticationState, PasskeyCredential,
+    RegistrationOptions, RegistrationResponse, RegistrationState, ResidentKeyRequirement, Webauthn,
 };
 
 // ---------- in-memory state -----------------------------------------------
