@@ -111,7 +111,7 @@
     "tests/ceremony_e2e.rs": "7f759f0c74b4d9d483a6f793f51ee9096d31bf43e5c669a91e458f4838221a14",
     "tests/official_vectors.rs": "4c455483cd8d796f3c76af4cb48f173e02484a47146972d0c21c693443631c81",
     "examples/axum_passwordless.rs": "f3cec4135dbb708957cefc48d9ee7e230e69ed30bda7dee6985a12656b113579",
-    "examples/axum_server.rs": "5d0ccf7b881888ead8053d04913e9c65caa31f78d60a102825a95e00f89748ed",
+    "examples/axum_server.rs": "f708324fa9df2154007dfdebe71ed776730fa75b5bb97d7554fe5f183da51259",
     "examples/axum_sqlite.rs": "8c80402102b62c9845d8f1c476f2712902c57a85937cf3454c9004899633799b",
     "examples/rocket_credential_manager.rs": "05438cbca865b18193db74fd9d85a14c60ee06a80d7ff2ab4c7d6c3d20fc4ac8",
     "examples/rocket_server.rs": "38dc554120c612643004bf38e6715ae13a153eb553a62be6ffefcd1f7b15b1d8",
@@ -125,5 +125,8 @@
     "perf/backend-comparison/Cargo.lock": "8c9bfc5dab3acd5bfe6f7df24446a411a40f8b1ffa8e509063ed8d25b23bdaee",
     "fuzz/Cargo.toml": "e4bb123ff522e726e31cdff6c21a9bf6a7f928c5a94ba5d2025535087c267b01",
     "fuzz/Cargo.lock": "13ad7eff067e412c0a69592ca82e0f1db533a05ad20c341ac803feb3ae9e5a0d"
-  }
+  },
+  "post_test_changes": [
+    "Documentation and example display names only; executable Rust behavior unchanged."
+  ]
 }

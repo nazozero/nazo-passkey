@@ -16,7 +16,7 @@
 //!   - Listens on http://localhost (passkeys also work without TLS
 //!     on localhost specifically; in production you MUST use HTTPS).
 //!
-//! Use this as a reference for wiring `passkey-auth` into your own
+//! Use this as a reference for wiring `nazo-passkey` into your own
 //! server, not as a copy-paste production starter.
 
 use std::collections::HashMap;
