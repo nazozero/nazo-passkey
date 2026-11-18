@@ -24,3 +24,5 @@ fuzz/corpus/ceremonies/*
 !fuzz/corpus/ceremonies/regression-*
 
 !/.gitattributes
+!/.mailmap
+__pycache__/

@@ -46,7 +46,7 @@ use tokio::sync::Mutex;
 // See axum_server.rs for why we do NOT install CorsLayer::permissive().
 use tower_http::services::ServeDir;
 
-use passkey_auth::{
+use nazo_passkey::{
     Attachment, AuthenticationResponse, AuthenticationState, CredentialId, PasskeyCredential,
     RegistrationResponse, RegistrationState, Webauthn,
 };
@@ -353,9 +353,8 @@ fn json_with_sid<T: Serialize>(body: &T, sid: &str) -> Response {
 }
 
 fn hex_random(n: usize) -> String {
-    use rand::RngCore;
     let mut buf = vec![0u8; n];
-    rand::thread_rng().fill_bytes(&mut buf);
+    rand::fill(&mut buf);
     hex::encode(buf)
 }
 

@@ -1,38 +1,79 @@
-# Current validation record — 2026-11-18
+# Validation — 2026-11-18
 
-Runtime revision: **84938674306a2ca0b84319e8ee499b61b8f32e84**. Measured/documented library revision: **6b05844a0cc5f7443e0bec378f904b2c3d39f387**. This record supersedes descriptions of 8260480 as the current production source. The [historical record](validation-checkpoint-8260480.md) remains intact.
+Package: **nazo-passkey 0.2.0**. Review input: PR #1 at
+`4652c67b1bdea01163296cfd5735d4b0bebeac18`. This review adds three ceremony
+corrections, current dependencies, an independent package identity, and revised
+public documentation. The protocol and binary paths received separate reviews.
 
-## Fresh hosted CI
+## Executed local gates
 
-[Run 44130880569](https://github.com/nazozero/passkey-auth-rs/actions/runs/44130880569) completed successfully: **12 of 12 jobs**. The exact run and job/step payloads are retained in [ci-run.json](evidence/continuation-20261118/ci-run.json) and [ci-jobs.json](evidence/continuation-20261118/ci-jobs.json).
+Toolchain: Rust 1.100.0, Linux x86-64. Native tests use the updated lockfile.
 
-| Job | Result |
-|---|---|
-| quality | success |
-| wasm | success |
-| test (ubuntu-24.04-arm, rustcrypto) | success |
-| test (macos-15-intel, aws-lc) | success |
-| test (windows-2022, rustcrypto) | success |
-| test (windows-2022, aws-lc) | success |
-| test (ubuntu-24.04-arm, aws-lc) | success |
-| test (ubuntu-24.04, aws-lc) | success |
-| audit | success |
-| test (ubuntu-24.04, rustcrypto) | success |
-| fuzz | success |
-| test (macos-15-intel, rustcrypto) | success |
+| Command / gate | Outcome |
+| --- | --- |
+| `cargo test --locked --offline --all-targets` | 128 tests passed, zero failures; benchmark smoke program also completed |
+| `cargo test --locked --offline --all-targets --features aws-lc` | 129 tests passed, zero failures; benchmark smoke program also completed |
+| `cargo test --locked --offline --doc --all-features` | One documentation test passed |
+| `cargo clippy --locked --offline --all-targets --all-features -- -D warnings` | Passed |
+| `RUSTDOCFLAGS='-D warnings' cargo doc --locked --offline --no-deps --all-features` | Passed |
+| Browser WASM library check, no default features | Passed |
+| Browser WASM library check, all features | Passed |
+| `cargo check --locked --offline --manifest-path perf/backend-comparison/Cargo.toml` | Passed |
+| `python -m unittest discover -s perf -p 'test_*.py' -v` | 22 tests passed |
+| `cargo package --locked --allow-dirty --offline` | Archive creation and compilation from extracted package passed |
 
-This covers the workflow's two backends on Linux x86_64, Linux ARM64, Windows x86_64 and macOS Intel, warnings-denied Clippy/rustdoc and formatting, measurement-driver contracts, browser-target WASM compilation, executable WASI checks, dependency audit and both backend fuzz smoke campaigns. macOS ARM64 and physical-device/browser interoperability are not established by these jobs. A bounded fuzz campaign is not proof that no defect exists.
+The native totals comprise 68 / 69 library tests, 24 attestation tests, eight
+binary regression tests, 23 ceremony tests, one official-vector corpus test,
+and four example persistence / account-race tests. All five examples compiled.
+The Ed25519 unit suite includes 914 independent C2SP/CCTV vectors, every message
+split, strict-oracle comparisons, and point/scalar boundary properties.
 
-## Performance and memory
+The review's new regressions cover canonical signed challenges, WebAuthn UTF-8
+replacement decoding, signatures over exact original client-data bytes, and
+preidentified accounts with an empty allow list. Existing malformed-certificate
+tests were preserved through the x509-cert 0.3 migration.
 
-The [new three-way report](performance.md) compares original baseline d59b317, calibrated checkpoint 8260480 and current runtime on one host. All three modes, six balanced rounds, and the separate Rust/native allocation collection completed successfully. The report explicitly retains the original-baseline registration cost and several other tail regressions; successful measurement is not an all-cases performance PASS.
+## Dependency checks
 
-## Protocol and deployment boundary
+All direct dependencies were checked against their latest stable published
+versions. Four active lockfiles were refreshed. The root runtime and tests now
+share x509-cert 0.3; older Base64, Rand, Axum, tower-http, and rusqlite direct
+dependencies were upgraded. The backend comparison uses dalek 3.
 
-The [protocol matrix](protocol-compliance.md) describes the supported RP profile, not full implementation of every optional WebAuthn feature. Passing signature verification is not attestation trust. Certificate issuer/root/revocation/MDS policy, unsupported algorithms/formats and unsupported extension enforcement remain outside the stated profile. The caller must still provide correct origin/RP-ID policy, trusted state storage, user binding and atomic credential updates.
+| Lockfile | Packages audited | Vulnerabilities | Warnings |
+| --- | ---: | ---: | ---: |
+| Root | 302 | 0 | 0 |
+| Performance | 131 | 0 | 0 |
+| Backend comparison | 72 | 0 | 0 |
+| Fuzz | 126 | 0 | 0 |
 
-The current implementation retains strict Ed25519 acceptance checks while verifying borrowed transcript parts. It does not replace ordinary Ed25519 with Ed25519ph. `legacy_compatibility` remains unsupported. Correct `authors` attribution is retained in Cargo.toml.
+RustSec database commit: `233155b4025b854c68a4b199c0e32d7fd53291a2`.
+The [dependency inventory](https://github.com/nazozero/nazo-passkey/blob/main/docs/evidence/merge-review-20261118/dependencies.json)
+records versions and source links. Transitive versions follow their upstream
+compatibility constraints.
 
-## Consumer integration is separate
+## Hosted merge gates
 
-NazoAuth PR #287 pins runtime 8493867, but its earlier dependency-policy failure is not erased by this library CI. The native Jiff migration is being verified on `nazozero/NazoAuth:validation/jiff-continuation-20261118`, based on the independent mdoc/passkey joint branch. Until that branch passes its own full compile, semantic, database, WASM and security gates, it is not integration-ready. No PR was merged and no deployment was performed by this continuation.
+[PR #1](https://github.com/nazozero/nazo-passkey/pull/1) targets `main`.
+The [CI workflow](https://github.com/nazozero/nazo-passkey/actions/workflows/ci.yml)
+checks both backends on Linux x86-64 / ARM64, Windows x86-64, and macOS Intel,
+plus formatting, Clippy, rustdoc, package verification, browser WASM compilation,
+WASI execution, all four dependency audits, and both bounded fuzz campaigns.
+The final PR head must pass these jobs before merge. Run results identify the
+tested commit; workflow configuration describes the required coverage.
+
+macOS ARM64 and physical-authenticator / browser interoperability require
+separate validation. The [protocol matrix](protocol-compliance.md) defines the
+supported algorithms, formats, and application responsibilities.
+
+## Performance evidence
+
+The benchmark run during `--all-targets` is a smoke check with ten operations
+per case. The [historical performance report](performance.md) retains the
+full six-round comparison and its original source / lockfile identities.
+This review does not assign those historical latency measurements to the new
+dependency graph.
+
+Earlier validation remains in
+[the 8493867 record](https://github.com/nazozero/nazo-passkey/blob/main/docs/validation-checkpoint-8493867.md)
+and [the 8260480 record](https://github.com/nazozero/nazo-passkey/blob/main/docs/validation-checkpoint-8260480.md).

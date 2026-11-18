@@ -1,0 +1,129 @@
+{
+  "review_date": "2026-11-18",
+  "input_head": "4652c67b1bdea01163296cfd5735d4b0bebeac18",
+  "package": "nazo-passkey",
+  "version": "0.2.0",
+  "toolchain": "1.100.0",
+  "local_results": {
+    "all_targets_default": {
+      "passed": 128,
+      "failed": 0
+    },
+    "all_targets_aws_lc": {
+      "passed": 129,
+      "failed": 0
+    },
+    "doc_all_features": {
+      "passed": 1,
+      "failed": 0
+    },
+    "python_perf_driver": {
+      "passed": 22,
+      "failed": 0
+    },
+    "clippy_all_targets_all_features": "passed",
+    "rustdoc_all_features_warnings_denied": "passed",
+    "browser_wasm_default": "passed",
+    "browser_wasm_all_features": "passed",
+    "backend_comparison_check": "passed",
+    "package_build_and_verify": "passed"
+  },
+  "advisory_results": {
+    "root": {
+      "database": {
+        "advisory-count": 1527,
+        "last-commit": "233155b4025b854c68a4b199c0e32d7fd53291a2",
+        "last-updated": "2026-11-17T11:14:35+01:00"
+      },
+      "lockfile": {
+        "dependency-count": 302
+      },
+      "vulnerabilities": {
+        "found": false,
+        "count": 0,
+        "list": []
+      },
+      "warnings": {}
+    },
+    "perf": {
+      "database": {
+        "advisory-count": 1527,
+        "last-commit": null,
+        "last-updated": null
+      },
+      "lockfile": {
+        "dependency-count": 131
+      },
+      "vulnerabilities": {
+        "found": false,
+        "count": 0,
+        "list": []
+      },
+      "warnings": {}
+    },
+    "backend": {
+      "database": {
+        "advisory-count": 1527,
+        "last-commit": null,
+        "last-updated": null
+      },
+      "lockfile": {
+        "dependency-count": 72
+      },
+      "vulnerabilities": {
+        "found": false,
+        "count": 0,
+        "list": []
+      },
+      "warnings": {}
+    },
+    "fuzz": {
+      "database": {
+        "advisory-count": 1527,
+        "last-commit": null,
+        "last-updated": null
+      },
+      "lockfile": {
+        "dependency-count": 126
+      },
+      "vulnerabilities": {
+        "found": false,
+        "count": 0,
+        "list": []
+      },
+      "warnings": {}
+    }
+  },
+  "source_sha256": {
+    "src/attestation.rs": "f39d289c8fdbba76752a52996baba19331112009b44c0356e96341c6339ec191",
+    "src/auth_data.rs": "56954737b47d5617537937f1307904e577d80b27a2291d987d9fda64dbdb2b79",
+    "src/cbor.rs": "296feb56bf3d9d0f81e9466b3e20f9e503a17badfa9a2a0b887f9942e2d3b018",
+    "src/ceremony.rs": "62cb70392db82cf6451d4cd9acf71ffe783c82945b140db670e7c799dc11f455",
+    "src/client_data.rs": "b1308956616b2b773b61ab828efa198265176eaecbdb70a41122e8bb1882f785",
+    "src/cose.rs": "40146475e93e09db19bb20914d03469a8c6954bb5b40ed2d8a3ea0531b65d7f8",
+    "src/crypto.rs": "eb62efdc1190452b815081fab95f593a08427c17023570c917c04c2d7f5aff00",
+    "src/error.rs": "15758d3d5758fe10201cc7e4fb26f8fc3096aa415f07c9f6acb435ef394f0ac7",
+    "src/lib.rs": "474d1d4c19c0228a8859c4a2a940f9fe5ab3c9c6392e79a50c91c05caa839890",
+    "src/types.rs": "e4aa4a20137751605f9b7d4fffd4ae3afc7367eeec817f127f05459237f06d5b",
+    "src/x509.rs": "45ed3ba486e8587e1b5d99511187f9ab23d4a8eea560707ebf6b466f8484aa6c",
+    "tests/attestation_e2e.rs": "9d0cb544f8af22ff3db8a5e9f8d1301126779a49b02db2956c1e8b8c856975cb",
+    "tests/binary_regressions.rs": "f3367dbc9c158ff8c132eda456e73a66672fceb087a99c22826c7bcb077fdf28",
+    "tests/ceremony_e2e.rs": "7f759f0c74b4d9d483a6f793f51ee9096d31bf43e5c669a91e458f4838221a14",
+    "tests/official_vectors.rs": "4c455483cd8d796f3c76af4cb48f173e02484a47146972d0c21c693443631c81",
+    "examples/axum_passwordless.rs": "f3cec4135dbb708957cefc48d9ee7e230e69ed30bda7dee6985a12656b113579",
+    "examples/axum_server.rs": "5d0ccf7b881888ead8053d04913e9c65caa31f78d60a102825a95e00f89748ed",
+    "examples/axum_sqlite.rs": "8c80402102b62c9845d8f1c476f2712902c57a85937cf3454c9004899633799b",
+    "examples/rocket_credential_manager.rs": "05438cbca865b18193db74fd9d85a14c60ee06a80d7ff2ab4c7d6c3d20fc4ac8",
+    "examples/rocket_server.rs": "38dc554120c612643004bf38e6715ae13a153eb553a62be6ffefcd1f7b15b1d8",
+    "benches/ceremony.rs": "b263abec0d5900e0438000b2b6127424f508eff130d7b0ce455df6baaa44240a",
+    "fuzz/fuzz_targets/ceremonies.rs": "e54ddf43145178695b1eb3f79f35bde49999e1fb2e51aee9ddb5e38f2dfd0562",
+    "Cargo.toml": "89c26f9497833452f7b753fda7fbdb964cf59d143fab5e14586ccac9b0e4c729",
+    "Cargo.lock": "237b1ef9d9ee0226bdef25090abdf053dddae999c705b385b6f77cd711128d7f",
+    "perf/Cargo.toml": "7640032c8b99f8d130e1a9444cbe5951f6e6129f57da07d8519f707bbbf0b669",
+    "perf/Cargo.lock": "c14c31703e429a47957086e776dab8171455375ba3d0fc65d60714886624f5a8",
+    "perf/backend-comparison/Cargo.toml": "e1ebca2780160fdb125f49c44ee41cf11809813fc71ccd396d662b968d0d4d18",
+    "perf/backend-comparison/Cargo.lock": "8c9bfc5dab3acd5bfe6f7df24446a411a40f8b1ffa8e509063ed8d25b23bdaee",
+    "fuzz/Cargo.toml": "e4bb123ff522e726e31cdff6c21a9bf6a7f928c5a94ba5d2025535087c267b01",
+    "fuzz/Cargo.lock": "13ad7eff067e412c0a69592ca82e0f1db533a05ad20c341ac803feb3ae9e5a0d"
+  }
+}

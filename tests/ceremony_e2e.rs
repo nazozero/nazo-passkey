@@ -22,7 +22,7 @@ use ciborium::value::Value as CborValue;
 use ed25519_dalek::{Signer, SigningKey};
 use sha2::{Digest, Sha256};
 
-use passkey_auth::{AuthenticationResponse, Error, RegistrationResponse, Webauthn};
+use nazo_passkey::{AuthenticationResponse, Error, RegistrationResponse, Webauthn};
 
 const RP_ID: &str = "example.com";
 const ORIGIN: &str = "https://example.com";
@@ -50,7 +50,7 @@ const FLAG_AT: u8 = 1 << 6;
 impl FakeAuthenticator {
     fn new() -> Self {
         let mut seed = [0u8; 32];
-        rand::Rng::fill(&mut rand::thread_rng(), &mut seed);
+        getrandom::fill(&mut seed).unwrap();
         Self {
             sk: SigningKey::from_bytes(&seed),
             credential_id: b"test-credential-0001".to_vec(),
@@ -317,6 +317,68 @@ fn wrong_challenge_rejected() {
 }
 
 #[test]
+fn signed_challenges_reject_padding_in_both_ceremonies() {
+    let wa = Webauthn::new(RP_ID, "Example", ORIGIN);
+    let mut auth = FakeAuthenticator::new();
+    let credential = do_register(&wa, &mut auth);
+
+    let (_, registration) = wa.start_registration(USER_HANDLE, "alice", "Alice", &[]);
+    let padded =
+        base64::engine::general_purpose::URL_SAFE.encode(registration.challenge.as_bytes());
+    assert!(padded.ends_with('='));
+    let (_, client_data_json) = client_data("webauthn.create", &padded, ORIGIN);
+    let response = RegistrationResponse {
+        id: credential.id.to_b64url(),
+        transports: vec![],
+        attestation_object: B64URL.encode(auth.attestation_object()),
+        client_data_json,
+    };
+    assert!(matches!(
+        wa.finish_registration(&registration, &response),
+        Err(Error::Base64(_))
+    ));
+
+    let (_, authentication) = wa.start_authentication(std::slice::from_ref(&credential.id));
+    let padded =
+        base64::engine::general_purpose::URL_SAFE.encode(authentication.challenge.as_bytes());
+    let response = make_assertion(&mut auth, &padded, None);
+    assert!(matches!(
+        wa.finish_authentication(&authentication, &response, &credential),
+        Err(Error::Base64(_))
+    ));
+}
+
+#[test]
+fn client_data_utf8_decoding_preserves_the_signed_transcript() {
+    let wa = Webauthn::new(RP_ID, "Example", ORIGIN);
+    let mut auth = FakeAuthenticator::new();
+    let credential = do_register(&wa, &mut auth);
+    let (challenge, state) = wa.start_authentication(std::slice::from_ref(&credential.id));
+    let (mut json, _) = client_data("webauthn.get", &challenge.challenge, ORIGIN);
+    assert_eq!(json.pop(), Some(b'}'));
+    json.extend_from_slice(b",\"future\xff\":true}");
+    let mut raw = vec![0xef, 0xbb, 0xbf];
+    raw.extend_from_slice(&json);
+    let auth_data = auth.auth_data_authenticate(None);
+    let mut response = AuthenticationResponse {
+        id: credential.id.to_b64url(),
+        authenticator_data: B64URL.encode(&auth_data),
+        signature: B64URL.encode(auth.sign_assertion(&auth_data, &raw)),
+        client_data_json: B64URL.encode(&raw),
+        user_handle: None,
+    };
+    wa.finish_authentication(&state, &response, &credential)
+        .unwrap();
+
+    let decoded = String::from_utf8_lossy(&json);
+    response.signature = B64URL.encode(auth.sign_assertion(&auth_data, decoded.as_bytes()));
+    assert!(matches!(
+        wa.finish_authentication(&state, &response, &credential),
+        Err(Error::BadSignature)
+    ));
+}
+
+#[test]
 fn expired_ceremony_rejected() {
     let wa = Webauthn::new(RP_ID, "Example", ORIGIN);
     let mut auth = FakeAuthenticator::new();
@@ -492,6 +554,32 @@ fn user_handle_absent_in_response_is_accepted_by_default() {
 }
 
 #[test]
+fn preidentified_account_allows_an_empty_allow_list_without_a_response_handle() {
+    let wa = Webauthn::new(RP_ID, "Example", ORIGIN);
+    let mut auth = FakeAuthenticator::new();
+    let credential = do_register(&wa, &mut auth);
+    let (challenge, state) = wa.start_authentication_for_user(USER_HANDLE, &[]);
+    let response = make_assertion(&mut auth, &challenge.challenge, None);
+    wa.finish_authentication(&state, &response, &credential)
+        .unwrap();
+
+    let mut other_account = credential.clone();
+    other_account.user_handle = Some(OTHER_USER_HANDLE.to_vec());
+    assert!(matches!(
+        wa.finish_authentication(&state, &response, &other_account),
+        Err(Error::UserHandleMismatch)
+    ));
+
+    let required = wa.require_user_handle(true);
+    let (challenge, state) = required.start_authentication_for_user(USER_HANDLE, &[]);
+    let response = make_assertion(&mut auth, &challenge.challenge, None);
+    assert!(matches!(
+        required.finish_authentication(&state, &response, &credential),
+        Err(Error::UserHandleMismatch)
+    ));
+}
+
+#[test]
 fn require_user_handle_rejects_absent_response_handle() {
     // start_authentication_for_user + response.user_handle = None +
     // require_user_handle(true) → reject. This is the tighter mode for
@@ -513,15 +601,12 @@ fn require_user_handle_rejects_absent_response_handle() {
 
 #[test]
 fn stored_user_handle_is_checked_without_username_first_state() {
-    // The simpler entry point still works exactly as before — even
-    // when the response includes a user_handle. The check only runs
-    // when state.user_handle is Some.
+    // The credential's stored account handle binds the generic entry point.
     let wa = Webauthn::new(RP_ID, "Example", ORIGIN).require_user_handle(true);
     let mut auth = FakeAuthenticator::new();
     let credential = do_register(&wa, &mut auth);
 
     let (chal, state) = wa.start_authentication(std::slice::from_ref(&credential.id));
-    // Response carries SOME user_handle, but state has None → skipped.
     let response = make_assertion(&mut auth, &chal.challenge, Some(b"anything"));
 
     assert!(matches!(
@@ -532,7 +617,7 @@ fn stored_user_handle_is_checked_without_username_first_state() {
 
 // ---------- helper ---------------------------------------------------------
 
-fn do_register(wa: &Webauthn, auth: &mut FakeAuthenticator) -> passkey_auth::PasskeyCredential {
+fn do_register(wa: &Webauthn, auth: &mut FakeAuthenticator) -> nazo_passkey::PasskeyCredential {
     let (chal, state) = wa.start_registration(USER_HANDLE, "alice@example.com", "Alice", &[]);
     let (_cdj_raw, cdj_b64) = client_data("webauthn.create", &chal.challenge, ORIGIN);
     let attestation = B64URL.encode(auth.attestation_object());
@@ -575,7 +660,7 @@ fn registration_outer_id_and_exclusion_are_enforced() {
     response.id = B64URL.encode(b"other-id");
     excluded
         .exclude_credentials
-        .push(passkey_auth::CredentialId(b"other-id".to_vec()));
+        .push(nazo_passkey::CredentialId(b"other-id".to_vec()));
     assert!(matches!(
         wa.finish_registration(&excluded, &response),
         Err(Error::CredentialIdMismatch)
@@ -644,11 +729,11 @@ fn uv_fact_and_factor_eligibility_are_distinct_and_legacy_json_is_readable() {
     ] {
         old.as_object_mut().unwrap().remove(field);
     }
-    let legacy: passkey_auth::PasskeyCredential = serde_json::from_value(old).unwrap();
+    let legacy: nazo_passkey::PasskeyCredential = serde_json::from_value(old).unwrap();
     assert!(legacy.uv_initialized.is_none());
     assert_eq!(
         legacy.attestation,
-        passkey_auth::AttestationEvidence::Unknown
+        nazo_passkey::AttestationEvidence::Unknown
     );
     let result = wa
         .finish_authentication(&state, &response, &legacy)
@@ -748,6 +833,6 @@ fn registration_attestation_evidence_is_explicit() {
     let credential = do_register(&wa, &mut FakeAuthenticator::new());
     assert_eq!(
         credential.attestation,
-        passkey_auth::AttestationEvidence::None
+        nazo_passkey::AttestationEvidence::None
     );
 }

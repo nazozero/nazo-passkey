@@ -17,15 +17,15 @@ use ciborium::value::Value as CborValue;
 use p256::ecdsa::{Signature as EsSig, SigningKey, signature::Signer};
 use p256::pkcs8::EncodePublicKey;
 use sha2::{Digest, Sha256};
-use x509_cert_test::builder::{Builder, CertificateBuilder, profile::BuilderProfile};
-use x509_cert_test::der::asn1::OctetString;
-use x509_cert_test::der::{Encode, oid::AssociatedOid};
-use x509_cert_test::ext::pkix::BasicConstraints;
-use x509_cert_test::ext::{Criticality, Extension};
-use x509_cert_test::name::Name;
-use x509_cert_test::serial_number::SerialNumber;
-use x509_cert_test::spki::SubjectPublicKeyInfoOwned;
-use x509_cert_test::time::Validity;
+use x509_cert::builder::{Builder, CertificateBuilder, profile::BuilderProfile};
+use x509_cert::der::asn1::OctetString;
+use x509_cert::der::{Encode, oid::AssociatedOid};
+use x509_cert::ext::pkix::BasicConstraints;
+use x509_cert::ext::{Criticality, Extension};
+use x509_cert::name::Name;
+use x509_cert::serial_number::SerialNumber;
+use x509_cert::spki::SubjectPublicKeyInfoOwned;
+use x509_cert::time::Validity;
 
 // ---------- AAGUID extension (custom) ----------------------------------------
 
@@ -37,18 +37,15 @@ use x509_cert_test::time::Validity;
 struct FidoAaguid([u8; 16]);
 
 impl AssociatedOid for FidoAaguid {
-    const OID: x509_cert_test::der::oid::ObjectIdentifier =
-        x509_cert_test::der::oid::ObjectIdentifier::new_unwrap("1.3.6.1.4.1.45724.1.1.4");
+    const OID: x509_cert::der::oid::ObjectIdentifier =
+        x509_cert::der::oid::ObjectIdentifier::new_unwrap("1.3.6.1.4.1.45724.1.1.4");
 }
 
-impl x509_cert_test::der::Encode for FidoAaguid {
-    fn encoded_len(&self) -> x509_cert_test::der::Result<x509_cert_test::der::Length> {
+impl x509_cert::der::Encode for FidoAaguid {
+    fn encoded_len(&self) -> x509_cert::der::Result<x509_cert::der::Length> {
         OctetString::new(self.0.to_vec()).unwrap().encoded_len()
     }
-    fn encode(
-        &self,
-        encoder: &mut impl x509_cert_test::der::Writer,
-    ) -> x509_cert_test::der::Result<()> {
+    fn encode(&self, encoder: &mut impl x509_cert::der::Writer) -> x509_cert::der::Result<()> {
         OctetString::new(self.0.to_vec()).unwrap().encode(encoder)
     }
 }
@@ -67,21 +64,18 @@ impl Criticality for FidoAaguid {
 struct MalformedAaguid;
 
 impl AssociatedOid for MalformedAaguid {
-    const OID: x509_cert_test::der::oid::ObjectIdentifier =
-        x509_cert_test::der::oid::ObjectIdentifier::new_unwrap("1.3.6.1.4.1.45724.1.1.4");
+    const OID: x509_cert::der::oid::ObjectIdentifier =
+        x509_cert::der::oid::ObjectIdentifier::new_unwrap("1.3.6.1.4.1.45724.1.1.4");
 }
 
-impl x509_cert_test::der::Encode for MalformedAaguid {
-    fn encoded_len(&self) -> x509_cert_test::der::Result<x509_cert_test::der::Length> {
+impl x509_cert::der::Encode for MalformedAaguid {
+    fn encoded_len(&self) -> x509_cert::der::Result<x509_cert::der::Length> {
         // 7 bytes of attacker-chosen junk inside the outer OCTET STRING.
         OctetString::new(vec![0xDE, 0xAD, 0xBE, 0xEF, 0x00, 0x11, 0x22])
             .unwrap()
             .encoded_len()
     }
-    fn encode(
-        &self,
-        encoder: &mut impl x509_cert_test::der::Writer,
-    ) -> x509_cert_test::der::Result<()> {
+    fn encode(&self, encoder: &mut impl x509_cert::der::Writer) -> x509_cert::der::Result<()> {
         OctetString::new(vec![0xDE, 0xAD, 0xBE, 0xEF, 0x00, 0x11, 0x22])
             .unwrap()
             .encode(encoder)
@@ -94,7 +88,7 @@ impl Criticality for MalformedAaguid {
     }
 }
 
-use passkey_auth::{RegistrationResponse, Webauthn};
+use nazo_passkey::{RegistrationResponse, Webauthn};
 
 const RP_ID: &str = "example.com";
 const ORIGIN: &str = "https://example.com";
@@ -109,10 +103,10 @@ impl BuilderProfile for TestProfile {
     }
     fn build_extensions(
         &self,
-        _: x509_cert_test::spki::SubjectPublicKeyInfoRef<'_>,
-        _: x509_cert_test::spki::SubjectPublicKeyInfoRef<'_>,
-        _: &x509_cert_test::certificate::TbsCertificate,
-    ) -> x509_cert_test::builder::Result<Vec<Extension>> {
+        _: x509_cert::spki::SubjectPublicKeyInfoRef<'_>,
+        _: x509_cert::spki::SubjectPublicKeyInfoRef<'_>,
+        _: &x509_cert::certificate::TbsCertificate,
+    ) -> x509_cert::builder::Result<Vec<Extension>> {
         Ok(Vec::new())
     }
 }
@@ -197,7 +191,7 @@ impl CertBundle {
             }
         }
 
-        let cert: x509_cert_test::Certificate = builder
+        let cert: x509_cert::Certificate = builder
             .build::<_, p256::ecdsa::DerSignature>(&signing_key)
             .expect("cert build");
         let cert_der = cert.to_der().expect("cert to DER");
@@ -216,7 +210,7 @@ trait FromDerSlice: Sized {
 }
 impl FromDerSlice for Name {
     fn from_der_slice(der: &[u8]) -> Self {
-        use x509_cert_test::der::Decode;
+        use x509_cert::der::Decode;
         Self::from_der(der).expect("Name from DER")
     }
 }
@@ -481,7 +475,7 @@ fn packed_x5c_bad_signature_rejected() {
     let err = wa
         .finish_registration(&state, &response)
         .expect_err("bad x5c sig must reject");
-    assert!(matches!(err, passkey_auth::Error::BadSignature,));
+    assert!(matches!(err, nazo_passkey::Error::BadSignature,));
 }
 
 // ---------- fido-u2f tests -------------------------------------------------
@@ -687,13 +681,41 @@ fn packed_x5c_malformed_aaguid_rejected() {
 
 // ---------- certificate profile and format-confusion regressions -----------
 
+// Mutable DER fixtures let negative tests construct invalid certificates while
+// x509-cert keeps the production certificate model immutable. Parsing and
+// encoding still use RustCrypto DER; these types never enter the library.
+#[derive(x509_cert::der::Sequence)]
+struct CertificateFixture {
+    tbs_certificate: TbsCertificateFixture,
+    signature_algorithm: x509_cert::spki::AlgorithmIdentifierOwned,
+    signature: x509_cert::der::asn1::BitString,
+}
+
+#[derive(x509_cert::der::Sequence)]
+struct TbsCertificateFixture {
+    #[asn1(context_specific = "0", default = "Default::default")]
+    version: x509_cert::certificate::Version,
+    serial_number: SerialNumber,
+    signature: x509_cert::spki::AlgorithmIdentifierOwned,
+    issuer: Name,
+    validity: Validity,
+    subject: Name,
+    subject_public_key_info: SubjectPublicKeyInfoOwned,
+    #[asn1(context_specific = "1", tag_mode = "IMPLICIT", optional = "true")]
+    issuer_unique_id: Option<x509_cert::der::asn1::BitString>,
+    #[asn1(context_specific = "2", tag_mode = "IMPLICIT", optional = "true")]
+    subject_unique_id: Option<x509_cert::der::asn1::BitString>,
+    #[asn1(context_specific = "3", tag_mode = "EXPLICIT", optional = "true")]
+    extensions: Option<Vec<Extension>>,
+}
+
 impl CertBundle {
     /// Attestation verification does not authenticate the certificate issuer.
     /// Mutating a certificate's profile does not change the key that signs the
     /// attestation, which isolates these checks from the signature check.
-    fn modify(&mut self, change: impl FnOnce(&mut x509_cert::Certificate)) {
+    fn modify(&mut self, change: impl FnOnce(&mut CertificateFixture)) {
         use x509_cert::der::{Decode, Encode};
-        let mut certificate = x509_cert::Certificate::from_der(&self.cert_der).unwrap();
+        let mut certificate = CertificateFixture::from_der(&self.cert_der).unwrap();
         change(&mut certificate);
         self.cert_der = certificate.to_der().unwrap();
     }
@@ -721,7 +743,7 @@ fn registration_with_chain(
     aaguid: [u8; 16],
 ) -> (
     Webauthn,
-    passkey_auth::RegistrationState,
+    nazo_passkey::RegistrationState,
     RegistrationResponse,
 ) {
     let credential = CredKey::new();
@@ -781,7 +803,7 @@ fn packed_certificate_subject_version_and_constraints_are_checked() {
     use x509_cert::certificate::Version;
     use x509_cert::der::asn1::OctetString;
     use x509_cert::name::Name;
-    let cases: [fn(&mut x509_cert::Certificate); 7] = [
+    let cases: [fn(&mut CertificateFixture); 7] = [
         |cert| cert.tbs_certificate.version = Version::V2,
         |cert| cert.tbs_certificate.subject = Name::from_str("CN=Only Common Name").unwrap(),
         |cert| {
@@ -860,7 +882,7 @@ fn packed_country_is_structural_and_does_not_claim_vendor_jurisdiction() {
         let credential = wa.finish_registration(&state, &response).unwrap();
         assert_eq!(
             credential.attestation,
-            passkey_auth::AttestationEvidence::UntrustedCertificate
+            nazo_passkey::AttestationEvidence::UntrustedCertificate
         );
     }
     for code in ["USX", "us", "U1"] {
@@ -925,7 +947,7 @@ fn packed_firmware_version_accepts_nonnegative_der_integers() {
             .unwrap_or_else(|error| panic!("firmware case {index}: {error}"));
         assert_eq!(
             credential.attestation,
-            passkey_auth::AttestationEvidence::UntrustedCertificate
+            nazo_passkey::AttestationEvidence::UntrustedCertificate
         );
     }
 }
@@ -952,7 +974,7 @@ fn packed_firmware_version_rejects_invalid_der() {
         assert!(
             matches!(
                 wa.finish_registration(&state, &response),
-                Err(passkey_auth::Error::Cbor(message))
+                Err(nazo_passkey::Error::Cbor(message))
                     if message == "firmware version must be a non-negative DER INTEGER"
             ),
             "invalid firmware encoding: {name}"
@@ -977,7 +999,7 @@ fn packed_firmware_version_cannot_be_critical_or_duplicated() {
         };
         assert!(matches!(
             wa.finish_registration(&state, &response),
-            Err(passkey_auth::Error::Cbor(message)) if message == expected
+            Err(nazo_passkey::Error::Cbor(message)) if message == expected
         ));
     }
 }
@@ -994,7 +1016,7 @@ fn ordinary_packed_attestation_rejects_enterprise_serial_numbers() {
                 registration_with_chain("packed", &cert, vec![cert.cert_der.clone()], [0; 16]);
             assert!(matches!(
                 wa.finish_registration(&state, &response),
-                Err(passkey_auth::Error::Cbor(message))
+                Err(nazo_passkey::Error::Cbor(message))
                     if message == "enterprise serial number attestation is not enabled"
             ));
         }
@@ -1006,12 +1028,12 @@ fn excluded_registration_still_verifies_packed_signature_and_certificate() {
     let mut cert = CertBundle::new(AaguidExt::None);
     let (wa, mut state, mut response) =
         registration_with_chain("packed", &cert, vec![cert.cert_der.clone()], [0; 16]);
-    state.exclude_credentials.push(passkey_auth::CredentialId(
+    state.exclude_credentials.push(nazo_passkey::CredentialId(
         B64URL.decode(&response.id).unwrap(),
     ));
     assert!(matches!(
         wa.finish_registration(&state, &response),
-        Err(passkey_auth::Error::CredentialExcluded)
+        Err(nazo_passkey::Error::CredentialExcluded)
     ));
 
     let bytes = B64URL.decode(&response.attestation_object).unwrap();
@@ -1032,7 +1054,7 @@ fn excluded_registration_still_verifies_packed_signature_and_certificate() {
     response.attestation_object = B64URL.encode(bytes);
     assert!(matches!(
         wa.finish_registration(&state, &response),
-        Err(passkey_auth::Error::BadSignature)
+        Err(nazo_passkey::Error::BadSignature)
     ));
 
     // Restore the valid statement signature and keep the same credential,
@@ -1051,7 +1073,7 @@ fn excluded_registration_still_verifies_packed_signature_and_certificate() {
     response.attestation_object = B64URL.encode(bytes);
     assert!(matches!(
         wa.finish_registration(&state, &response),
-        Err(passkey_auth::Error::Cbor(message))
+        Err(nazo_passkey::Error::Cbor(message))
             if message == "firmware version extension must not be critical"
     ));
 }
@@ -1092,7 +1114,7 @@ fn compressed_attestation_certificate_points_are_supported_without_trust_promoti
         let credential = wa.finish_registration(&state, &response).unwrap();
         assert_eq!(
             credential.attestation,
-            passkey_auth::AttestationEvidence::UntrustedCertificate
+            nazo_passkey::AttestationEvidence::UntrustedCertificate
         );
     }
 }
@@ -1146,7 +1168,7 @@ fn u2f_does_not_apply_the_packed_certificate_profile() {
     let credential = wa.finish_registration(&state, &response).unwrap();
     assert_eq!(
         credential.attestation,
-        passkey_auth::AttestationEvidence::UntrustedCertificate
+        nazo_passkey::AttestationEvidence::UntrustedCertificate
     );
     // The same noncritical extension and subject still fail the packed
     // profile. U2F did not vouch for their semantics or the certificate issuer.
@@ -1181,7 +1203,7 @@ fn u2f_nonzero_aaguid_is_not_an_unsupported_extra_requirement() {
     let credential = wa.finish_registration(&state, &response).unwrap();
     assert_eq!(
         credential.attestation,
-        passkey_auth::AttestationEvidence::UntrustedCertificate
+        nazo_passkey::AttestationEvidence::UntrustedCertificate
     );
 }
 
@@ -1193,7 +1215,7 @@ fn checked_attestation_signature_does_not_claim_certificate_trust() {
     let credential = wa.finish_registration(&state, &response).unwrap();
     assert_eq!(
         credential.attestation,
-        passkey_auth::AttestationEvidence::UntrustedCertificate
+        nazo_passkey::AttestationEvidence::UntrustedCertificate
     );
 }
 
@@ -1202,7 +1224,7 @@ fn self_attestation_response(
     mutation: u8,
 ) -> (
     Webauthn,
-    passkey_auth::RegistrationState,
+    nazo_passkey::RegistrationState,
     RegistrationResponse,
 ) {
     use ed25519_dalek::Signer as _;
@@ -1289,7 +1311,7 @@ fn es256_self_attestation_uses_the_registered_algorithm_and_real_signature() {
         if mutation == 0 {
             assert_eq!(
                 result.unwrap().attestation,
-                passkey_auth::AttestationEvidence::SelfAttestation
+                nazo_passkey::AttestationEvidence::SelfAttestation
             );
         } else {
             assert!(result.is_err(), "mutation {mutation}");
@@ -1305,7 +1327,7 @@ fn ed25519_self_attestation_uses_the_registered_algorithm_and_real_signature() {
         if mutation == 0 {
             assert_eq!(
                 result.unwrap().attestation,
-                passkey_auth::AttestationEvidence::SelfAttestation
+                nazo_passkey::AttestationEvidence::SelfAttestation
             );
         } else {
             assert!(result.is_err(), "mutation {mutation}");

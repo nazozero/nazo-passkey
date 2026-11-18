@@ -1,4 +1,6 @@
-# Passkey continuation: same-host three-way comparison
+# Historical performance: same-host three-way comparison
+
+Measured runtime: `8493867`. The 2026-11-18 package review updates dependencies and ceremony edge cases after this measurement.
 
 Workflow run: 44135648844
 
@@ -54,7 +56,7 @@ Baseline: d59b317998e56f4a16a69133d7a854c5c34f795b. Checkpoint: 8260480634fac09e
 
 ## Interpretation and limits
 
-The optimized Ed25519 finish paths improve P50/P95/P99 against the fully calibrated 8260480 checkpoint in all three execution modes. This does not mean every case improved, or that all original-baseline regressions disappeared. Native Ed25519 registration remains about 77% above the original baseline, and WASI registration about 129% above it. Begin operations also remain above the original baseline. Required state and public-key checks were not removed to reproduce an older acceptance boundary.
+The optimized Ed25519 finish paths improve P50/P95/P99 against the fully calibrated 8260480 checkpoint in all three execution modes. Native Ed25519 registration remains about 77% above the original baseline, and WASI registration about 129% above it. Begin operations also remain above the original baseline. Required state and public-key checks were not removed to reproduce an older acceptance boundary.
 
 Native portable ES256 registration P99 is +17.45%; AWS-LC ES256 authentication P99 is +5.28%; WASI ES256 registration P95 is +37.63% and P99 +4.52%, all versus the checkpoint. These observations remain in the report. One hosted runner and six rounds do not establish whether each tail difference is reproducible across deployments. The primitive controls are not uniformly faster either; this is a whole-library/API comparison, not proof of a faster Ed25519 primitive.
 
@@ -64,7 +66,7 @@ All timing modes have concurrency one. No claim is made about saturation, multi-
 
 The following values are requests and cumulative requested bytes per API call, including returned-value destruction. They are not live memory or RSS. Native glibc hooks count C allocations as well as Rust allocations; direct mmap or custom allocators bypassing the hook remain outside its scope. The raw report retains the Rust-only and native-minus-Rust breakdown.
 
-| Case | Original requests / bytes | Checkpoint Rust | Current Rust | Checkpoint AWS-LC | Current AWS-LC |
+| Case | Original requests / bytes | Checkpoint Rust | Measured Rust | Checkpoint AWS-LC | Measured AWS-LC |
 |---|---:|---:|---:|---:|---:|
 | ed25519.authentication_begin | 12 / 351 | 10 / 295 | 10 / 295 | 10 / 295 | 10 / 295 |
 | ed25519.authentication_finish | 13 / 781 | 7 / 396 | 3 / 204 | 7 / 396 | 3 / 204 |
@@ -79,6 +81,6 @@ The following values are requests and cumulative requested bytes per API call, i
 
 ## Reproduce and inspect
 
-- [Raw portable timings](evidence/continuation-20261118/native-rustcrypto.json), [AWS-LC timings](evidence/continuation-20261118/native-aws-lc.json), [WASI timings](evidence/continuation-20261118/wasi.json), and [allocation observations](evidence/continuation-20261118/allocations.json).
+- [Raw portable timings](https://github.com/nazozero/nazo-passkey/blob/4652c67b1bdea01163296cfd5735d4b0bebeac18/docs/evidence/continuation-20261118/native-rustcrypto.json), [AWS-LC timings](https://github.com/nazozero/nazo-passkey/blob/4652c67b1bdea01163296cfd5735d4b0bebeac18/docs/evidence/continuation-20261118/native-aws-lc.json), [WASI timings](https://github.com/nazozero/nazo-passkey/blob/4652c67b1bdea01163296cfd5735d4b0bebeac18/docs/evidence/continuation-20261118/wasi.json), and [allocation observations](https://github.com/nazozero/nazo-passkey/blob/4652c67b1bdea01163296cfd5735d4b0bebeac18/docs/evidence/continuation-20261118/allocations.json).
 - [Immutable measurement workflow](https://github.com/nazozero/NazoAuth/blob/dfd4c4f839aac20627f7d618a83ba2b4d1b107c5/.github/workflows/passkey-performance-continuation.yml) and [completed run](https://github.com/nazozero/NazoAuth/actions/runs/44135648844). The pinned result commit also retains raw allocation traces and build logs.
-- [Previous 8260480 report](performance-checkpoint-8260480.md) is historical and uses a different machine. Do not subtract those timings from the current machine's observations.
+- [Previous 8260480 report](https://github.com/nazozero/nazo-passkey/blob/4652c67b1bdea01163296cfd5735d4b0bebeac18/docs/performance-checkpoint-8260480.md) is historical and uses a different machine. Do not subtract those timings from the current machine's observations.

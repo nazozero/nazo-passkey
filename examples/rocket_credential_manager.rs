@@ -28,7 +28,7 @@ use rocket::serde::json::Json;
 use rocket::{Build, Rocket, State, fs::FileServer, get, launch, post, routes};
 use serde::Serialize;
 
-use passkey_auth::{
+use nazo_passkey::{
     Attachment, AuthenticationChallenge, AuthenticationResponse, AuthenticationState,
     PasskeyCredential, RegistrationChallenge, RegistrationResponse, RegistrationState, Webauthn,
 };
@@ -187,7 +187,7 @@ fn authenticate_finish(
     let sid = sid_from_cookies(cookies)?;
     let auth_state = take_auth_state(state, &sid)?;
 
-    let asserted_id = passkey_auth::CredentialId::from_b64url(&body.id)
+    let asserted_id = nazo_passkey::CredentialId::from_b64url(&body.id)
         .map_err(|_| Custom(Status::BadRequest, "bad credential id".into()))?;
     let mut user = state.user.lock().unwrap();
     let stored = user
@@ -361,7 +361,7 @@ fn delete_credential(
     id_b64: &str,
 ) -> Result<Json<DeleteReply>, Custom<String>> {
     require_signed_in(state, cookies)?;
-    let target = passkey_auth::CredentialId::from_b64url(id_b64)
+    let target = nazo_passkey::CredentialId::from_b64url(id_b64)
         .map_err(|_| Custom(Status::BadRequest, "bad credential id".into()))?;
     let mut user = state.user.lock().unwrap();
     if user.credentials.len() <= 1 {
@@ -472,9 +472,8 @@ fn take_auth_state(
 }
 
 fn rand_bytes(n: usize) -> Vec<u8> {
-    use rand::RngCore;
     let mut buf = vec![0u8; n];
-    rand::thread_rng().fill_bytes(&mut buf);
+    rand::fill(&mut buf);
     buf
 }
 

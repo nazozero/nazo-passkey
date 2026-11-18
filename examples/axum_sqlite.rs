@@ -40,7 +40,7 @@ use tokio::sync::Mutex;
 // See axum_server.rs for why we do NOT install CorsLayer::permissive().
 use tower_http::services::ServeDir;
 
-use passkey_auth::{
+use nazo_passkey::{
     Attachment, AttestationEvidence, AuthenticationResponse, AuthenticationState, CosePublicKey,
     CredentialId, PasskeyCredential, RegistrationResponse, RegistrationState, Webauthn,
 };
@@ -114,9 +114,8 @@ impl Store {
         drop(q);
         // First run: mint a fresh user_handle.
         let handle = {
-            use rand::RngCore;
             let mut buf = vec![0u8; 16];
-            rand::thread_rng().fill_bytes(&mut buf);
+            rand::fill(&mut buf);
             buf
         };
         self.conn.execute(
@@ -461,9 +460,8 @@ struct AuthFinishReply {
 
 fn get_or_create_sid(cookies: &HeaderMap) -> String {
     sid_from_cookies(cookies).unwrap_or_else(|| {
-        use rand::RngCore;
         let mut buf = [0u8; 16];
-        rand::thread_rng().fill_bytes(&mut buf);
+        rand::fill(&mut buf);
         hex::encode(buf)
     })
 }

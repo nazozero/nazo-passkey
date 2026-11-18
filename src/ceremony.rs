@@ -93,15 +93,9 @@ pub struct Webauthn {
     /// registration time. Does NOT affect authentication - by then
     /// the user already has a specific credential.
     attachment: Attachment,
-    /// When `true`, response-side wire fields (credential id,
-    /// attestationObject, clientDataJSON, authenticatorData,
-    /// signature, userHandle) MUST be encoded as strict
-    /// url-safe-no-pad base64. When `false` (default), the lenient
-    /// `b64url_decode` is used — accepting padding and the standard
-    /// alphabet for compatibility with buggy client JS that uses
-    /// `btoa(...)`. Production deployments that control the client
-    /// should set this to `true` to surface client-side encoding
-    /// bugs rather than silently working around them.
+    /// Require canonical base64url on the outer response fields. The default
+    /// accepts padding and the standard alphabet for existing JSON adapters.
+    /// The signed client-data challenge is always canonical base64url.
     strict_base64: bool,
     /// When `true`, `finish_authentication` REQUIRES the assertion
     /// response to include a `userHandle` whenever the ceremony was
@@ -233,18 +227,10 @@ impl Webauthn {
         Ok(())
     }
 
-    /// Builder: when `true`, response-side wire fields are decoded
-    /// as strict url-safe-no-pad base64 — the only encoding the
-    /// WebAuthn spec permits. When `false` (default) lenient decoding
-    /// also accepts url-safe-with-padding and the standard alphabet,
-    /// papering over buggy client JS that uses `btoa(...)` instead
-    /// of a proper base64url encoder.
-    ///
-    /// Production deployments that control their own client JS should
-    /// flip this to `true` so client-side encoding bugs surface as
-    /// `Error::Base64` instead of silently working. Skip if you are
-    /// integrating with a third-party browser SDK whose encoding you
-    /// cannot guarantee.
+    /// Require canonical unpadded base64url on the outer response fields.
+    /// The default also accepts padding and the standard alphabet for existing
+    /// JSON adapters. The signed `clientDataJSON.challenge` always requires
+    /// canonical unpadded base64url, independently of this setting.
     #[must_use]
     pub fn strict_base64(mut self, strict: bool) -> Self {
         self.strict_base64 = strict;
@@ -412,8 +398,9 @@ impl Webauthn {
         Ok((chal, state))
     }
 
-    /// Verify the registration response. On success returns the
-    /// `PasskeyCredential` the caller persists.
+    /// Verify the registration response and return the credential to persist.
+    /// The caller must consume the ceremony state once, authorize enrollment,
+    /// and enforce RP-wide credential-ID uniqueness when inserting the record.
     pub fn finish_registration(
         &self,
         state: &RegistrationState,
@@ -657,27 +644,16 @@ impl Webauthn {
         (chal, state)
     }
 
-    /// Verify the assertion. `stored` is the credential the caller
-    /// looked up by `response.id`.
+    /// Verify an assertion against the credential selected by `response.id`.
     ///
-    /// # Caller contract (security-critical)
+    /// The caller must resolve the owning account within the current RP/tenant.
+    /// Username-first flows bind its handle with an account-aware start method.
+    /// Discoverable flows resolve `response.user_handle` to the owning account;
+    /// [`Self::finish_discoverable_authentication`] supplies that binding for
+    /// records whose stored user handle is absent.
     ///
-    /// **The caller MUST ensure that `stored` belongs to the user
-    /// being authenticated** — typically by looking it up via
-    /// `response.id` scoped to a known user record, NOT by globally
-    /// searching every credential in the database.
-    ///
-    /// In a multi-tenant deployment, a naive lookup like
-    /// `credentials.find(|c| c.id == response.id)` is wrong: two users
-    /// COULD (in pathological cases) end up with the same credential
-    /// id and the wrong user would be authenticated. Real WebAuthn
-    /// credential ids are large random byte strings so this is
-    /// vanishingly unlikely in practice — but the crate cannot enforce
-    /// the right scoping for you. For discoverable-credential
-    /// (passwordless) flows, look up by `response.user_handle` first,
-    /// then verify `response.id` matches the user's stored credentials.
-    /// See [`examples/axum_passwordless.rs`](https://github.com/marirs/passkey-auth/blob/main/examples/axum_passwordless.rs)
-    /// for the recommended pattern.
+    /// Consume the ceremony state once and atomically persist the returned
+    /// counter and backup metadata before granting authentication success.
     pub fn finish_authentication(
         &self,
         state: &AuthenticationState,
@@ -726,7 +702,7 @@ impl Webauthn {
         {
             return Err(Error::UserHandleMismatch);
         }
-        let discoverable = state.allow_credentials.is_empty();
+        let discoverable = state.user_handle.is_none() && state.allow_credentials.is_empty();
         match response.user_handle.as_deref() {
             Some(encoded) => {
                 let mut handle = [0; 64];
@@ -784,8 +760,7 @@ impl Webauthn {
             "signature",
         )?;
         crypto::verify_auth_data(&key, &ad_bytes, &cdj_hash, &sig[..sig_len])?;
-        // Counter anomalies are an RP policy decision. Preserve NazoAuth's
-        // strict rejection policy, including backups; 0/0 remains supported.
+        // Reject non-increasing counters, including backups; 0/0 is supported.
         if (new_counter != 0 || stored.counter != 0) && new_counter <= stored.counter {
             return Err(Error::CounterReplay {
                 stored: stored.counter,

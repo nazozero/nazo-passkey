@@ -4,7 +4,7 @@
 
 use base64::{Engine, engine::general_purpose::URL_SAFE_NO_PAD as B64};
 use ciborium::value::Value;
-use passkey_auth::{RegistrationResponse, RegistrationState, Webauthn};
+use nazo_passkey::{RegistrationResponse, RegistrationState, Webauthn};
 use sha2::{Digest, Sha256};
 
 const CREDENTIAL_ID: &[u8] = b"binary-regression-credential";

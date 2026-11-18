@@ -22,7 +22,7 @@ use rocket::serde::json::Json;
 use rocket::{State, fs::FileServer, get, launch, post, routes};
 use serde::Serialize;
 
-use passkey_auth::{
+use nazo_passkey::{
     Attachment, AuthenticationChallenge, AuthenticationResponse, AuthenticationState,
     PasskeyCredential, RegistrationChallenge, RegistrationResponse, RegistrationState, Webauthn,
 };
@@ -203,7 +203,7 @@ fn authenticate_finish(
         .and_then(|s| s.auth_state.take())
         .ok_or_else(|| Custom(Status::BadRequest, "no authentication in flight".into()))?;
 
-    let asserted_id = passkey_auth::CredentialId::from_b64url(&body.id)
+    let asserted_id = nazo_passkey::CredentialId::from_b64url(&body.id)
         .map_err(|_| Custom(Status::BadRequest, "bad credential id".into()))?;
     let mut user_guard = state.user.lock().unwrap();
     let stored = user_guard
@@ -261,9 +261,8 @@ fn sid_or_new(cookies: &CookieJar<'_>) -> String {
 }
 
 fn rand_bytes(n: usize) -> Vec<u8> {
-    use rand::RngCore;
     let mut buf = vec![0u8; n];
-    rand::thread_rng().fill_bytes(&mut buf);
+    rand::fill(&mut buf);
     buf
 }
 

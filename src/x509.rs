@@ -41,8 +41,8 @@ impl AttestationCert {
     pub(crate) fn from_der(der: &[u8], packed: bool) -> Result<Self> {
         let certificate =
             Certificate::from_der(der).map_err(|e| Error::Cbor(format!("x509 parse: {e}")))?;
-        let tbs = &certificate.tbs_certificate;
-        let spki = &tbs.subject_public_key_info;
+        let tbs = certificate.tbs_certificate();
+        let spki = tbs.subject_public_key_info();
         if spki.algorithm.oid != ID_EC_PUBLIC_KEY {
             return Err(invalid("attestation certificate key must be EC"));
         }
@@ -69,7 +69,7 @@ impl AttestationCert {
 
         let mut aaguid = None;
         let mut basic_constraints = None;
-        if let Some(extensions) = &tbs.extensions {
+        if let Some(extensions) = tbs.extensions() {
             if extensions.len() > 64 {
                 return Err(invalid("attestation certificate extension limit exceeded"));
             }
@@ -120,7 +120,7 @@ impl AttestationCert {
             }
         }
         if packed {
-            if tbs.version != Version::V3 {
+            if tbs.version() != Version::V3 {
                 return Err(invalid("packed attestation certificate must be X.509 v3"));
             }
             let constraints = basic_constraints
@@ -130,7 +130,7 @@ impl AttestationCert {
                     "packed certificate basicConstraints must have CA=false",
                 ));
             }
-            validate_packed_subject(&tbs.subject)?;
+            validate_packed_subject(tbs.subject())?;
         }
         Ok(Self {
             verifying_key: p256::ecdsa::VerifyingKey::from_sec1_bytes(key)
@@ -142,47 +142,45 @@ impl AttestationCert {
 
 fn validate_packed_subject(subject: &x509_cert::name::Name) -> Result<()> {
     let mut present = [false; 4];
-    for rdn in &subject.0 {
-        for attribute in rdn.0.iter() {
-            let index = match attribute.oid {
-                OID_C => 0,
-                OID_O => 1,
-                OID_OU => 2,
-                OID_CN => 3,
-                _ => continue,
-            };
-            if present[index] {
-                return Err(invalid(
-                    "packed certificate duplicate required subject field",
-                ));
-            }
-            present[index] = true;
-            let text = if index == 0 {
-                PrintableStringRef::try_from(&attribute.value)
-                    .map_err(|_| invalid("packed certificate C must be PrintableString"))?
-                    .as_str()
-            } else {
-                Utf8StringRef::try_from(&attribute.value)
-                    .map_err(|_| invalid("packed certificate O, OU and CN must be UTF8String"))?
-                    .as_str()
-            };
-            if text.is_empty() {
-                return Err(invalid("packed certificate empty subject field"));
-            }
-            // The certificate's country is an unverified assertion, just
-            // like the vendor's legal name. ISO 3166 includes private-use
-            // codes (the W3C vectors use AA); a current assignment table
-            // would also incorrectly reject historical/reserved claims.
-            if index == 0 && (text.len() != 2 || !text.bytes().all(|v| v.is_ascii_uppercase())) {
-                return Err(invalid(
-                    "packed certificate country must be two uppercase ASCII letters",
-                ));
-            }
-            if index == 2 && text != "Authenticator Attestation" {
-                return Err(invalid(
-                    "packed certificate OU must be Authenticator Attestation",
-                ));
-            }
+    for attribute in subject.iter() {
+        let index = match attribute.oid {
+            OID_C => 0,
+            OID_O => 1,
+            OID_OU => 2,
+            OID_CN => 3,
+            _ => continue,
+        };
+        if present[index] {
+            return Err(invalid(
+                "packed certificate duplicate required subject field",
+            ));
+        }
+        present[index] = true;
+        let text = if index == 0 {
+            PrintableStringRef::try_from(&attribute.value)
+                .map_err(|_| invalid("packed certificate C must be PrintableString"))?
+                .as_str()
+        } else {
+            Utf8StringRef::try_from(&attribute.value)
+                .map_err(|_| invalid("packed certificate O, OU and CN must be UTF8String"))?
+                .as_str()
+        };
+        if text.is_empty() {
+            return Err(invalid("packed certificate empty subject field"));
+        }
+        // The certificate's country is an unverified assertion, just
+        // like the vendor's legal name. ISO 3166 includes private-use
+        // codes (the W3C vectors use AA); a current assignment table
+        // would also incorrectly reject historical/reserved claims.
+        if index == 0 && (text.len() != 2 || !text.bytes().all(|v| v.is_ascii_uppercase())) {
+            return Err(invalid(
+                "packed certificate country must be two uppercase ASCII letters",
+            ));
+        }
+        if index == 2 && text != "Authenticator Attestation" {
+            return Err(invalid(
+                "packed certificate OU must be Authenticator Attestation",
+            ));
         }
     }
     if present.iter().any(|v| !v) {

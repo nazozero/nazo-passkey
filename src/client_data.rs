@@ -47,8 +47,8 @@ fn present_string<'de, D: Deserializer<'de>>(
     String::deserialize(deserializer).map(Some)
 }
 
-/// Validate the exact signed bytes. A single UTF-8 BOM is removed only for
-/// JSON decoding (WebAuthn §7); it remains in the returned bytes for hashing.
+/// Validate the exact signed bytes. JSON decoding removes one leading BOM and
+/// replaces malformed UTF-8 (WebAuthn §7); hashing uses the unchanged bytes.
 /// Unknown JSON fields remain allowed for forward compatibility. This RP
 /// supports same-origin ceremonies: crossOrigin=true or topOrigin is rejected.
 pub(crate) fn validate(
@@ -60,8 +60,9 @@ pub(crate) fn validate(
 ) -> Result<Vec<u8>> {
     let raw = decode_b64_bounded(encoded, strict, 8192, "clientDataJSON")?;
     let json = raw.as_slice().trim_prefix(&[0xef, 0xbb, 0xbf]);
+    let json = String::from_utf8_lossy(json);
     let p: Parsed<'_> =
-        serde_json::from_slice(json).map_err(|e| Error::ClientData(e.to_string()))?;
+        serde_json::from_str(&json).map_err(|e| Error::ClientData(e.to_string()))?;
     if p.kind != expected_type {
         return Err(Error::ClientDataType {
             expected: expected_type,
@@ -69,7 +70,9 @@ pub(crate) fn validate(
         });
     }
     let mut challenge = [0; 64];
-    let length = decode_b64_into(&p.challenge, strict, &mut challenge, "challenge")?;
+    // The signed challenge is always canonical base64url (WebAuthn §7.1/§7.2).
+    // The compatibility setting only applies to the outer JSON adapter.
+    let length = decode_b64_into(&p.challenge, true, &mut challenge, "challenge")?;
     if &challenge[..length] != expected_challenge.as_bytes() {
         return Err(Error::ChallengeMismatch);
     }
@@ -125,6 +128,45 @@ mod tests {
     }
 
     #[test]
+    fn signed_challenge_is_canonical_even_with_a_lenient_outer_adapter() {
+        use base64::engine::general_purpose::{STANDARD_NO_PAD, URL_SAFE};
+
+        let challenge = Challenge(vec![0xfb; 32]);
+        for encoded_challenge in [
+            URL_SAFE.encode(challenge.as_bytes()),
+            STANDARD_NO_PAD.encode(challenge.as_bytes()),
+        ] {
+            let cdj = make_cdj(TYPE_AUTHENTICATE, &encoded_challenge, "https://example.com");
+            assert!(matches!(
+                validate(
+                    &cdj,
+                    TYPE_AUTHENTICATE,
+                    &challenge,
+                    "https://example.com",
+                    false
+                ),
+                Err(Error::Base64(_))
+            ));
+        }
+
+        let raw = format!(
+            r#"{{"type":"webauthn.get","challenge":"{}","origin":"https://example.com"}}"#,
+            challenge.to_b64url()
+        );
+        assert_eq!(
+            validate(
+                &URL_SAFE.encode(raw.as_bytes()),
+                TYPE_AUTHENTICATE,
+                &challenge,
+                "https://example.com",
+                false,
+            )
+            .unwrap(),
+            raw.as_bytes()
+        );
+    }
+
+    #[test]
     fn wrong_origin_rejected() {
         let chal = Challenge(vec![1, 2, 3, 4]);
         let cdj = make_cdj("webauthn.create", &chal.to_b64url(), "https://evil.com");
@@ -175,6 +217,41 @@ mod tests {
             .unwrap(),
             raw
         );
+    }
+
+    #[test]
+    fn utf8_replacement_only_affects_json_decoding() {
+        let challenge = Challenge(vec![9; 32]);
+        let mut raw = format!(
+            r#"{{"type":"webauthn.get","challenge":"{}","origin":"https://example.com","future"#,
+            challenge.to_b64url()
+        )
+        .into_bytes();
+        raw.extend_from_slice(b"\xff\":\"\xed\xa0\x80\"}");
+        assert_eq!(
+            validate(
+                &B64URL.encode(&raw),
+                TYPE_AUTHENTICATE,
+                &challenge,
+                "https://example.com",
+                true,
+            )
+            .unwrap(),
+            raw
+        );
+
+        let mut twice_bom = vec![0xef, 0xbb, 0xbf, 0xef, 0xbb, 0xbf];
+        twice_bom.extend_from_slice(&raw);
+        assert!(matches!(
+            validate(
+                &B64URL.encode(twice_bom),
+                TYPE_AUTHENTICATE,
+                &challenge,
+                "https://example.com",
+                true,
+            ),
+            Err(Error::ClientData(_))
+        ));
     }
 
     #[test]

@@ -155,7 +155,6 @@ mod tests {
     use super::*;
     use ed25519_dalek::{Signer as _, SigningKey};
     use p256::ecdsa::SigningKey as EsSigningKey;
-    use rand::RngCore;
 
     #[test]
     fn rfc8032_ed25519_vector_and_small_order_forgery() {
@@ -178,8 +177,7 @@ mod tests {
 
     #[test]
     fn ed25519_round_trip() {
-        let mut seed = [0u8; 32];
-        rand::thread_rng().fill_bytes(&mut seed);
+        let seed = rand::random::<[u8; 32]>();
         let sk = SigningKey::from_bytes(&seed);
         let vk_bytes = sk.verifying_key().to_bytes();
         let msg = b"hello passkey world";

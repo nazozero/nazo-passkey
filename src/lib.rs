@@ -1,33 +1,36 @@
 //! WebAuthn relying party verifier with a pure-Rust default and optional native
-//! AWS-LC credential ES256 verification. Ed25519 always uses dalek's strict
-//! verifier; WASM uses RustCrypto. See `README.md` for scope and migration.
+//! AWS-LC credential ES256 verification. Ed25519 uses borrowed transcript parts
+//! with a strict acceptance policy; WASM uses RustCrypto.
 //!
 //! Quickstart:
 //! ```no_run
-//! use passkey_auth::Webauthn;
+//! use nazo_passkey::Webauthn;
 //!
-//! let wa = Webauthn::new("example.com", "Example", "https://example.com");
+//! let wa = Webauthn::try_new("example.com", "Example", "https://example.com")?;
 //!
 //! // Registration ------------------------------------------------------
-//! let (challenge, state) = wa.start_registration(
+//! let (challenge, state) = wa.try_start_registration(
 //!     b"user-handle-bytes",
 //!     "alice@example.com",
 //!     "Alice",
 //!     &[], // no existing credentials yet
-//! );
+//! )?;
 //! // → send `challenge` to the browser as JSON
 //! // ← browser POSTs a `RegistrationResponse` back
-//! # let response: passkey_auth::RegistrationResponse = unimplemented!();
+//! # let response: nazo_passkey::RegistrationResponse = unimplemented!();
 //! let credential = wa.finish_registration(&state, &response).expect("ok");
 //! // → persist the complete credential, including account, UV and backup metadata
 //!
 //! // Authentication ----------------------------------------------------
-//! let (challenge, state) = wa.start_authentication(&[credential.id.clone()]);
+//! let (challenge, state) = wa.start_authentication_with_creds_for_user(
+//!     b"user-handle-bytes", std::slice::from_ref(&credential),
+//! );
 //! // → send `challenge` to the browser
-//! # let response: passkey_auth::AuthenticationResponse = unimplemented!();
+//! # let response: nazo_passkey::AuthenticationResponse = unimplemented!();
 //! let outcome = wa.finish_authentication(&state, &response, &credential).expect("ok");
 //! // → commit counter and backup metadata with account-scoped compare-and-swap
 //! // → use outcome.user_verification_eligible when applying the MFA/session policy
+//! # Ok::<(), nazo_passkey::Error>(())
 //! ```
 
 #![forbid(unsafe_code)]

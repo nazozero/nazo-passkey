@@ -1,7 +1,7 @@
 //! Unmodified byte vectors from W3C WebAuthn Level 3, REC 2026-08-25 §16.
 //! Fixture provenance and document license are in fixtures/README.md.
 use base64::{Engine, engine::general_purpose::URL_SAFE_NO_PAD};
-use passkey_auth::{AuthenticationResponse, Challenge, Error, RegistrationResponse, Webauthn};
+use nazo_passkey::{AuthenticationResponse, Challenge, Error, RegistrationResponse, Webauthn};
 use serde_json::Value;
 
 fn bytes(value: &Value, field: &str) -> Vec<u8> {

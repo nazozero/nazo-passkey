@@ -4,7 +4,7 @@ use std::sync::OnceLock;
 
 use base64::{Engine, engine::general_purpose::URL_SAFE_NO_PAD as B64};
 use libfuzzer_sys::fuzz_target;
-use passkey_auth::{
+use nazo_passkey::{
     AuthenticationResponse, AuthenticationState, Challenge, PasskeyCredential,
     RegistrationResponse, RegistrationState, Webauthn,
 };

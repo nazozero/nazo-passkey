@@ -39,7 +39,7 @@ use tokio::sync::Mutex;
 // origin check on the /whoami and /authenticate endpoints).
 use tower_http::services::ServeDir;
 
-use passkey_auth::{
+use nazo_passkey::{
     Attachment, AuthenticationResponse, AuthenticationState, PasskeyCredential,
     RegistrationResponse, RegistrationState, Webauthn,
 };
@@ -207,7 +207,7 @@ async fn authenticate_finish(
         .ok_or(AppError::BadRequest("no authentication in flight"))?;
 
     // Look up the stored credential the user is asserting with.
-    let asserted_id = passkey_auth::CredentialId::from_b64url(&body.id)
+    let asserted_id = nazo_passkey::CredentialId::from_b64url(&body.id)
         .map_err(|_| AppError::BadRequest("bad credential id"))?;
     let mut user_guard = state.user.lock().await;
     let stored = user_guard
@@ -272,9 +272,8 @@ fn json_with_sid<T: Serialize>(body: &T, sid: &str) -> Response {
 }
 
 fn rand_bytes(n: usize) -> Vec<u8> {
-    use rand::RngCore;
     let mut buf = vec![0u8; n];
-    rand::thread_rng().fill_bytes(&mut buf);
+    rand::fill(&mut buf);
     buf
 }
 

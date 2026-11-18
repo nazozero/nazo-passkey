@@ -1,20 +1,20 @@
 [package]
-name = "passkey-auth-perf"
+name = "nazo-passkey-perf"
 version = "0.0.0"
 edition = "2024"
 publish = false
 
 [features]
-aws-lc = ["passkey-auth/aws-lc"]
+aws-lc = ["nazo-passkey/aws-lc"]
 
 [dependencies]
-passkey-auth = { path = ".." }
-base64 = "0.22"
-ciborium = "0.2"
-ed25519-dalek = "3"
-p256 = { version = "0.14", features = ["ecdsa"] }
-sha2 = "0.11"
-serde_json = "1"
+nazo-passkey = { path = ".." }
+base64 = "0.23.1"
+ciborium = "0.2.2"
+ed25519-dalek = "3.0.0"
+p256 = { version = "0.14.0", features = ["ecdsa"] }
+sha2 = "0.11.1"
+serde_json = "1.0.154"
 
 [[bin]]
 name = "ceremony-bench"
