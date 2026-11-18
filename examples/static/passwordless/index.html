@@ -80,15 +80,6 @@
       if (!startResp.ok) throw new Error(await startResp.text());
       const opts = await startResp.json();
 
-      // Force the authenticator to store the credential locally so
-      // it can be discovered without an allow-list at sign-in time.
-      // The server's challenge JSON already requests preferred; we
-      // override to required for the demo.
-      if (opts.authenticatorSelection) {
-        opts.authenticatorSelection.residentKey = "required";
-        opts.authenticatorSelection.requireResidentKey = true;
-      }
-
       log("→ navigator.credentials.create(...)");
       const publicKey = PublicKeyCredential.parseCreationOptionsFromJSON(opts);
       const cred = await navigator.credentials.create({ publicKey });

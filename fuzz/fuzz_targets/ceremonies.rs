@@ -51,7 +51,13 @@ fn fixtures() -> &'static [Fixture] {
                     hex::decode(vector[part][field].as_str().unwrap()).unwrap()
                 };
                 let wa = Webauthn::new("example.org", "Fuzz", "https://example.org");
-                let (_, mut registration) = wa.start_registration(USER_HANDLE, "user", "User", &[]);
+                let (_, mut registration) = wa.start_registration(
+                    USER_HANDLE,
+                    "user",
+                    "User",
+                    &[],
+                    Default::default(),
+                );
                 registration.challenge = Challenge(bytes("registration", "challenge"));
                 let create_json = B64.encode(bytes("registration", "clientDataJSON"));
                 let attestation = B64.encode(bytes("registration", "attestationObject"));

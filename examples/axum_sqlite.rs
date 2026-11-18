@@ -42,7 +42,8 @@ use tower_http::services::ServeDir;
 
 use nazo_passkey::{
     Attachment, AttestationEvidence, AuthenticationResponse, AuthenticationState, CosePublicKey,
-    CredentialId, PasskeyCredential, RegistrationResponse, RegistrationState, Webauthn,
+    CredentialId, PasskeyCredential, RegistrationOptions, RegistrationResponse, RegistrationState,
+    ResidentKeyRequirement, Webauthn,
 };
 
 const DB_PATH: &str = "passkeys.db";
@@ -303,10 +304,16 @@ async fn register_start(
         .collect();
     drop(store);
 
-    let (challenge, reg_state) =
-        state
-            .wa
-            .start_registration(&user_handle, USERNAME, "Alice", &existing);
+    let (challenge, reg_state) = state.wa.start_registration(
+        &user_handle,
+        USERNAME,
+        "Alice",
+        &existing,
+        RegistrationOptions {
+            resident_key: ResidentKeyRequirement::Preferred,
+            ..Default::default()
+        },
+    );
 
     state
         .sessions

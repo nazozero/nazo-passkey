@@ -14,6 +14,7 @@
 //!     "alice@example.com",
 //!     "Alice",
 //!     &[], // no existing credentials yet
+//!     Default::default(), // discoverable credential, no attestation requested
 //! )?;
 //! // → send `challenge` to the browser as JSON
 //! // ← browser POSTs a `RegistrationResponse` back
@@ -50,8 +51,9 @@ mod x509;
 pub use ceremony::{Attachment, Webauthn};
 pub use error::{Error, Result};
 pub use types::{
-    AssertionResponse, AttestationEvidence, AttestationResponse, AuthSuccess,
-    AuthenticationChallenge, AuthenticationResponse, AuthenticationState, Challenge, CosePublicKey,
-    CredentialId, PasskeyCredential, PublicKeyCredential, RegistrationChallenge,
-    RegistrationResponse, RegistrationState, RpId,
+    AssertionResponse, AttestationConveyancePreference, AttestationEvidence, AttestationResponse,
+    AuthSuccess, AuthenticationChallenge, AuthenticationResponse, AuthenticationState, Challenge,
+    CosePublicKey, CredentialId, PasskeyCredential, PublicKeyCredential, RegistrationChallenge,
+    RegistrationOptions, RegistrationResponse, RegistrationState, ResidentKeyRequirement, RpId,
+    VerifiedAttestation,
 };

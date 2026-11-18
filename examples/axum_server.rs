@@ -39,8 +39,8 @@ use tokio::sync::Mutex;
 use tower_http::services::ServeDir;
 
 use nazo_passkey::{
-    Attachment, AuthenticationResponse, AuthenticationState, PasskeyCredential,
-    RegistrationResponse, RegistrationState, Webauthn,
+    Attachment, AuthenticationResponse, AuthenticationState, PasskeyCredential, RegistrationOptions,
+    RegistrationResponse, RegistrationState, ResidentKeyRequirement, Webauthn,
 };
 
 // ---------- in-memory state -----------------------------------------------
@@ -96,10 +96,16 @@ async fn register_start(
         .collect();
     drop(user_guard);
 
-    let (challenge, reg_state) =
-        state
-            .wa
-            .start_registration(&user_id, "alice@example.com", "Alice", &existing);
+    let (challenge, reg_state) = state.wa.start_registration(
+        &user_id,
+        "alice@example.com",
+        "Alice",
+        &existing,
+        RegistrationOptions {
+            resident_key: ResidentKeyRequirement::Preferred,
+            ..Default::default()
+        },
+    );
 
     state
         .sessions

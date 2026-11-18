@@ -129,11 +129,9 @@ async function register(page, uv, username) {
   });
   assert.equal(options.authenticatorSelection.userVerification, uv);
   assert.equal(options.attestation, "none");
-  if (username !== undefined) {
-    // Match the passwordless demo's resident-key requirement.
-    options.authenticatorSelection.residentKey = "required";
-    options.authenticatorSelection.requireResidentKey = true;
-  }
+  assert.equal(options.authenticatorSelection.residentKey,
+    username === undefined ? "preferred" : "required");
+  assert.equal(options.authenticatorSelection.requireResidentKey, username !== undefined);
   const body = await getCredentialJSON(page, "create", options);
   const { attestationObject } = body.response;
   const attestation = decode(Buffer.from(attestationObject, "base64url"));
@@ -262,6 +260,27 @@ test("discoverable sign-in with required UV and backup flags", { timeout: 90_000
   assert.deepEqual(await request(page, "/whoami", { method: "GET" }), { username });
   t.diagnostic(JSON.stringify({ attestation: "none", registration: registration.data, signedIn: data }));
 });
+
+for (const [protocol, format] of [["ctap2", "packed"], ["u2f", "fido-u2f"]]) {
+  test(`direct ${format} certificate attestation from Chromium`, { timeout: 90_000 }, async (t) => {
+    const { page } = await startDemo(t, "axum_server", { ...usb, protocol });
+    const options = await request(page, "/register/start");
+    assert.equal(options.attestation, "none");
+    assert.equal(options.authenticatorSelection.residentKey, "preferred");
+    assert.equal(options.authenticatorSelection.requireResidentKey, false);
+    // Request a statement for this browser fixture; the demo's default remains none.
+    options.attestation = "direct";
+    const body = await getCredentialJSON(page, "create", options);
+    const attestation = decode(Buffer.from(body.response.attestationObject, "base64url"));
+    assert.equal(attestation.fmt, format);
+    assert.equal(attestation.attStmt.x5c.length, 1);
+    assert.ok(attestation.attStmt.x5c[0].length > 0);
+    assert.ok(attestation.attStmt.sig.length > 0);
+    const result = await request(page, "/register/finish", { body });
+    assert.deepEqual(result, { ok: true, credential_id: body.id });
+    t.diagnostic(JSON.stringify({ attestation: format, certificates: attestation.attStmt.x5c.length }));
+  });
+}
 
 test("browser assertion is rejected after the server's five-minute state expiry", {
   timeout: 360_000,

@@ -30,7 +30,8 @@ use serde::Serialize;
 
 use nazo_passkey::{
     Attachment, AuthenticationChallenge, AuthenticationResponse, AuthenticationState,
-    PasskeyCredential, RegistrationChallenge, RegistrationResponse, RegistrationState, Webauthn,
+    PasskeyCredential, RegistrationChallenge, RegistrationOptions, RegistrationResponse,
+    RegistrationState, ResidentKeyRequirement, Webauthn,
 };
 
 const USERNAME: &str = "alice@example.com";
@@ -81,9 +82,16 @@ fn register_start(
 
     let sid = sid_or_new(cookies);
 
-    let (challenge, reg_state) = state
-        .wa
-        .start_registration(&user_handle, USERNAME, "Alice", &[]);
+    let (challenge, reg_state) = state.wa.start_registration(
+        &user_handle,
+        USERNAME,
+        "Alice",
+        &[],
+        RegistrationOptions {
+            resident_key: ResidentKeyRequirement::Preferred,
+            ..Default::default()
+        },
+    );
 
     state
         .sessions
@@ -254,9 +262,16 @@ fn add_credential_start(
     let handle = user.handle.clone();
     drop(user);
 
-    let (challenge, reg_state) = state
-        .wa
-        .start_registration(&handle, USERNAME, "Alice", &existing);
+    let (challenge, reg_state) = state.wa.start_registration(
+        &handle,
+        USERNAME,
+        "Alice",
+        &existing,
+        RegistrationOptions {
+            resident_key: ResidentKeyRequirement::Preferred,
+            ..Default::default()
+        },
+    );
     state
         .sessions
         .lock()

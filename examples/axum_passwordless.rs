@@ -119,7 +119,7 @@ async fn register_start(
     let (challenge, reg_state) =
         state
             .wa
-            .start_registration(&user_handle, &username, &username, &[]);
+            .start_registration(&user_handle, &username, &username, &[], Default::default());
 
     state
         .sessions
@@ -413,7 +413,13 @@ mod tests {
         handle: &[u8],
         credential_id: &[u8],
     ) -> (RegistrationState, RegistrationResponse) {
-        let (challenge, state) = wa.start_registration(handle, "alice", "Alice", &[]);
+        let (challenge, state) = wa.start_registration(
+            handle,
+            "alice",
+            "Alice",
+            &[],
+            Default::default(),
+        );
         let public_key = ed25519_dalek::SigningKey::from_bytes(&[7; 32])
             .verifying_key()
             .to_bytes();
