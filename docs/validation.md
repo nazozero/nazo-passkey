@@ -84,7 +84,6 @@ Playwright versions, authenticator options, and observed ceremony fields.
 | --- | --- |
 | `axum_server`, virtual USB without resident key or UV | Username-first allow-list login, UV preferred, `none` attestation, BE/BS clear and signature counter increases. Reject same counter, wrong account, modified RP ID hash, wrong signature and a genuine assertion made at a different origin. |
 | `axum_passwordless`, virtual internal with resident key and UV | Empty allow-list login with the registered handle, `none` attestation, BE set and BS changes from clear to set. Reject a stale challenge, repeat finish and UV-clear assertion under required UV. Confirm sign-in with `/whoami`. |
-| `axum_server`, virtual USB, expired state | Obtain a browser assertion and submit it unchanged after the actual five-minute ceremony TTL. Expect HTTP 401 for expired state. |
 
 Run from the repository root with Node.js 24, the pinned Rust toolchain, and
 port 3000 free. On Linux, add `--with-deps` to the browser install command if
@@ -97,8 +96,23 @@ npm --prefix interop exec --no -- playwright install --no-shell chromium
 npm --prefix interop test
 ```
 
-Allow about six minutes for the suite, including the expiry test. Challenges
-and credentials are generated anew by each run. The lockfiles and
+Routine CI checks expiry with the Rust test `expired_ceremony_rejected`, which
+backdates the ceremony state. To also exercise the real five-minute TTL through
+the browser, set `WEBAUTHN_TEST_EXPIRY=1` for the test run and allow about six
+minutes. The browser fixture submits the unchanged assertion after 302 seconds
+and expects HTTP 401 for expired state.
+
+```sh
+WEBAUTHN_TEST_EXPIRY=1 npm --prefix interop test
+```
+
+```powershell
+$env:WEBAUTHN_TEST_EXPIRY = '1'
+npm --prefix interop test
+Remove-Item Env:WEBAUTHN_TEST_EXPIRY
+```
+
+Challenges and credentials are generated anew by each run. The lockfiles and
 fixtures reproduce the test inputs and expected behavior. This validation has
 no FIDO-issued certification status.
 

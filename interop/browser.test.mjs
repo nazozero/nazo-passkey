@@ -263,7 +263,10 @@ test("discoverable sign-in with required UV and backup flags", { timeout: 90_000
   t.diagnostic(JSON.stringify({ attestation: "none", registration: registration.data, signedIn: data }));
 });
 
-test("browser assertion is rejected after the server's five-minute state expiry", { timeout: 360_000 }, async (t) => {
+test("browser assertion is rejected after the server's five-minute state expiry", {
+  timeout: 360_000,
+  skip: process.env.WEBAUTHN_TEST_EXPIRY !== "1" && "Set WEBAUTHN_TEST_EXPIRY=1 to wait for the real TTL",
+}, async (t) => {
   const { page } = await startDemo(t, "axum_server", usb);
   const { id } = await register(page, "preferred");
   const { body } = await assertion(page, "preferred", [id]);
