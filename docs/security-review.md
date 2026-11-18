@@ -49,6 +49,26 @@ manufacturer requires a separate root, chain, validity, revocation, and
 metadata policy. See the [protocol matrix](protocol-compliance.md) for the
 supported leaf profiles and formats.
 
+`finish_registration_with_attestation` calls the application's policy once,
+after all protocol checks, statement verification, and credential exclusions.
+The callback receives the actual evidence kind, format, AAGUID, and original
+leaf-first certificate slices. An error stops registration before credential
+construction. `Direct` requests can return `None` or `SelfAttestation`, which
+the callback evaluates under the same policy.
+
+The default `None` request and ordinary `finish_registration` path require no
+PKI configuration. Each received statement is verified under its format.
+Persisted `UntrustedCertificate` records the library's certificate and signature
+checks; the application owns any subsequent trust decision.
+
+The `packed` statement signs the AAGUID in `authData`; `none` and `fido-u2f`
+leave that field unauthenticated, even when the application trusts the U2F
+certificate.
+
+Resident-key options control browser credential creation. UP, UV, and account
+binding checks remain independent of the requested storage mode. Discoverable
+login requires a handle matching the credential's owning account.
+
 ## Ownership and allocations
 
 Decoded response buffers own Base64 output. CBOR fields and valid UTF-8 client
@@ -57,6 +77,10 @@ only on that path; signature hashing still borrows the original bytes. Fixed-siz
 cryptographic values use bounded stack storage. Ed25519 hashes transcript
 parts without concatenating them. Owned returned credentials and x509-cert's
 certificate model allocate as required by their APIs.
+
+Attestation policy callbacks borrow the bounded certificate slices already
+parsed from the decoded response. Exposing the evidence adds no DER copies or
+second attestation-object parse.
 
 ## Application obligations
 

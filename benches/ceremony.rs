@@ -152,7 +152,8 @@ fn main() {
             ]))
         };
         let id = [42; 32];
-        let (_, mut register_state) = wa.start_registration(b"benchmark-user", "user", "User", &[]);
+        let (_, mut register_state) =
+            wa.start_registration(b"benchmark-user", "user", "User", &[], Default::default());
         register_state.challenge = Challenge(vec![13; 32]);
         let cdj = serde_json::to_vec(&serde_json::json!({"type":"webauthn.create", "challenge": register_state.challenge.to_b64url(), "origin":"https://example.com", "crossOrigin":false})).unwrap();
         let mut ad = Sha256::digest(b"example.com").to_vec();
@@ -203,7 +204,7 @@ fn main() {
             },
         };
         measure(&format!("{algorithm}.registration_begin"), n, || {
-            wa.start_registration(b"benchmark-user", "user", "User", &[])
+            wa.start_registration(b"benchmark-user", "user", "User", &[], Default::default())
         });
         measure(&format!("{algorithm}.registration_finish"), n, || {
             wa.finish_registration(&register_state, &register).unwrap()

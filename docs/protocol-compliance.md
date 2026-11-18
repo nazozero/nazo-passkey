@@ -10,6 +10,8 @@ authenticator operations, and CTAP transports belong to their respective peers.
 | Requirement | Implementation and evidence |
 | --- | --- |
 | [W3] §5.4.3: stable account handle, 1–64 bytes | Registration checks the length. Applications choose opaque handles and own their account binding. `ceremony` unit and end-to-end tests cover boundaries. |
+| [W3] §5.4.4 / §5.4.6: discoverable-credential selection | Per-registration `Required`, `Preferred`, or `Discouraged`; derive `requireResidentKey` from the selected value. The library defaults to `Required` for username-less passkey enrollment. |
+| [W3] §5.4.7: attestation conveyance | Per-registration `None` (default) or `Direct`; verify the returned statement format and let application policy assess its evidence. |
 | [W3] §13.1: unpredictable challenge | 32 bytes from `getrandom`; native OS, WASI, or browser Web Crypto backend. |
 | [W3] §7.1 / §7.2: server challenge state | State binds the RP, origin, and verification policy; zero, future, expired, or mismatched state rejects. Applications consume it once. |
 | [W3] §7.1 steps 5–6, §7.2 steps 8–9: UTF-8 and JSON | Strip one leading BOM for parsing; use UTF-8 replacement decoding; reject malformed JSON and duplicate typed fields. Preserve all original bytes for hashing. |
@@ -52,6 +54,25 @@ trust, issuer signatures, lifetime, revocation, metadata status, and vendor
 legal identity are application trust decisions. The country field is checked
 as two uppercase ASCII letters; the verifier does not establish the vendor's
 incorporation jurisdiction. AAGUID and transport hints are descriptive data.
+
+`finish_registration_with_attestation` implements the handoff between
+[W3] §7.1 statement verification and RP trust assessment. Its callback receives
+`VerifiedAttestation` after protocol verification and exclusions, before
+credential construction. The view includes the evidence kind, format, AAGUID,
+and original leaf-first DER slices; `None` and self-attestation have empty
+chains. An application rejection prevents a credential from being returned.
+An accepted certificate remains `UntrustedCertificate` in the stored library
+summary; applications retain their own trust outcomes.
+
+Requesting `Direct` permits the browser to return `none` or self-attestation;
+the callback handles both according to application policy. Ordinary
+`finish_registration` accepts protocol-valid evidence without a PKI trust
+requirement, matching the default privacy-friendly `None` request.
+
+Resident-key selection affects browser creation rather than server-side proof
+of storage mode. The library's `Required` default supports discoverable login;
+WebAuthn's omitted-field default is `Discouraged`. UP, UV, and account-binding
+verification remain independent of the resident-key request.
 
 ## Compatibility and implementation policy
 

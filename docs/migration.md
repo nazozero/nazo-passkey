@@ -20,6 +20,34 @@ passkey-auth = { package = "nazo-passkey", git = "https://github.com/nazozero/na
 Pin a reviewed commit through `rev` for production deployments. Earlier Git
 revisions retain their original package metadata and remain reproducible.
 
+## Registration options
+
+`start_registration` and `try_start_registration` take `RegistrationOptions`
+as their final argument. `RegistrationOptions::default()` now requests
+`residentKey: "required"` and `attestation: "none"`, making discoverable passkey
+enrollment the default. To allow non-discoverable enrollment, pass:
+
+```rust
+use nazo_passkey::{RegistrationOptions, ResidentKeyRequirement};
+
+let options = RegistrationOptions {
+    resident_key: ResidentKeyRequirement::Preferred,
+    ..Default::default()
+};
+```
+
+`AuthenticatorSelection::resident_key` and `RegistrationChallenge::attestation`
+are typed enums. The wire `requireResidentKey` boolean is derived from the
+resident-key choice.
+
+Applications with an attestation trust policy can request
+`AttestationConveyancePreference::Direct` and use
+`finish_registration_with_attestation` to inspect `VerifiedAttestation`
+before receiving a credential to persist. Reject with
+`Error::AttestationRejected`; handle `None` and `SelfAttestation` according
+to policy even after requesting `Direct`. The ordinary finish method requires
+no trust-policy callback.
+
 ## Stored credentials
 
 Complete `PasskeyCredential` serde records preserve the existing byte-array
@@ -38,6 +66,11 @@ keys remain usable. The stored-key reader accepts historical ordering and
 integer widths while enforcing key type, curve, point validity, usage
 restrictions, and public-only key material. Invalid historical key records
 require repair or re-enrollment.
+
+The attestation callback borrows certificate DER without changing the stored
+record. `UntrustedCertificate` continues to record the library's verification
+result even when the application accepts the chain. Persist application trust
+decisions in application-owned fields.
 
 ## Pending ceremonies and application code
 

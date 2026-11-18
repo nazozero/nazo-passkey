@@ -314,6 +314,41 @@ fn deserialize_user_handle<'de, D: Deserializer<'de>>(
 
 // ---------- Challenge JSON for the START side ---------------------------
 
+/// Discoverable-credential storage requested for registration.
+///
+/// The default requires discoverability so enrolled passkeys can support
+/// username-less sign-in. UP, UV and account binding are verified separately.
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "lowercase")]
+pub enum ResidentKeyRequirement {
+    /// Require a discoverable credential; fail creation if unavailable.
+    #[default]
+    Required,
+    /// Prefer a discoverable credential, allowing a non-discoverable fallback.
+    Preferred,
+    /// Prefer a non-discoverable credential.
+    Discouraged,
+}
+
+/// Attestation conveyance requested from the browser.
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "lowercase")]
+pub enum AttestationConveyancePreference {
+    /// Preserve privacy by requesting no attestation statement.
+    #[default]
+    None,
+    /// Request the authenticator's statement for an application trust policy.
+    /// The browser may still return `none`.
+    Direct,
+}
+
+/// Per-registration choices, independent of UV and authenticator attachment.
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
+pub struct RegistrationOptions {
+    pub resident_key: ResidentKeyRequirement,
+    pub attestation: AttestationConveyancePreference,
+}
+
 /// What we send to the browser for `navigator.credentials.create()`.
 /// All byte fields are base64url-encoded; the client JS is expected
 /// to decode them before passing to the WebAuthn API.
@@ -331,7 +366,7 @@ pub struct RegistrationChallenge {
     pub timeout: u32, // milliseconds
     #[serde(rename = "authenticatorSelection")]
     pub authenticator_selection: AuthenticatorSelection,
-    pub attestation: &'static str, // "none"
+    pub attestation: AttestationConveyancePreference,
 }
 
 #[derive(Debug, Serialize)]
@@ -364,19 +399,36 @@ pub struct CredentialDescriptor {
     pub transports: Vec<String>,
 }
 
-#[derive(Debug, Serialize, Clone)]
+#[derive(Debug, Clone)]
 pub struct AuthenticatorSelection {
     /// Browser selection hint. It does not prove that a key is hardware
     /// protected, or authorize an authenticator-vendor policy.
-    #[serde(
-        rename = "authenticatorAttachment",
-        skip_serializing_if = "Option::is_none"
-    )]
     pub authenticator_attachment: Option<&'static str>,
-    #[serde(rename = "residentKey", skip_serializing_if = "Option::is_none")]
-    pub resident_key: Option<&'static str>,
-    #[serde(rename = "userVerification")]
+    pub resident_key: ResidentKeyRequirement,
     pub user_verification: &'static str, // "preferred"
+}
+
+impl Serialize for AuthenticatorSelection {
+    fn serialize<S: serde::Serializer>(
+        &self,
+        serializer: S,
+    ) -> std::result::Result<S::Ok, S::Error> {
+        use serde::ser::SerializeStruct;
+
+        let fields = 3 + usize::from(self.authenticator_attachment.is_some());
+        let mut wire = serializer.serialize_struct("AuthenticatorSelection", fields)?;
+        if let Some(attachment) = self.authenticator_attachment {
+            wire.serialize_field("authenticatorAttachment", attachment)?;
+        }
+        wire.serialize_field("residentKey", &self.resident_key)?;
+        // WebAuthn §5.4.4 derives this wire field from residentKey.
+        wire.serialize_field(
+            "requireResidentKey",
+            &(self.resident_key == ResidentKeyRequirement::Required),
+        )?;
+        wire.serialize_field("userVerification", self.user_verification)?;
+        wire.end()
+    }
 }
 
 /// What we send to the browser for `navigator.credentials.get()`.
@@ -493,6 +545,28 @@ pub enum AttestationEvidence {
     /// Certificate profile and statement signature verified; chain trust,
     /// certificate validity and manufacturer identity remain unverified.
     UntrustedCertificate,
+}
+
+/// Protocol-checked attestation supplied to the application's registration policy.
+///
+/// The certificate slices borrow the decoded response and are valid only during
+/// the callback. Their order is the original `x5c` order, with the leaf first.
+/// The applicable leaf profile and statement signature have been checked; other
+/// certificates have been checked for valid DER. The application decides chain
+/// trust, validity, revocation and metadata policy.
+#[derive(Debug, Clone, Copy)]
+pub struct VerifiedAttestation<'a> {
+    /// What the verifier established, independently of the requested conveyance.
+    pub evidence: AttestationEvidence,
+    /// The verified statement format: `none`, `packed`, or `fido-u2f`.
+    pub format: &'static str,
+    /// The credential's AAGUID. Packed statements sign this field; `none` and
+    /// `fido-u2f` leave it unauthenticated. Manufacturer provenance requires
+    /// the application's certificate and metadata trust decision.
+    pub aaguid: [u8; 16],
+    /// DER certificates in leaf-first order; empty for none or self-attestation.
+    /// This is the supplied `x5c` sequence, not a validated certificate path.
+    pub certificate_chain: &'a [&'a [u8]],
 }
 
 /// Stored after a successful registration. The caller persists this

@@ -12,8 +12,9 @@ use crate::error::{Error, Result};
 use crate::types::{
     AuthSuccess, AuthenticationChallenge, AuthenticationResponse, AuthenticationState,
     AuthenticatorSelection, Challenge, CosePublicKey, CredentialDescriptor, CredentialId,
-    PasskeyCredential, PubKeyCredParam, RegistrationChallenge, RegistrationResponse,
-    RegistrationState, RpId, RpInfo, UserInfo, decode_b64_bounded, decode_b64_into, now_secs,
+    PasskeyCredential, PubKeyCredParam, RegistrationChallenge, RegistrationOptions,
+    RegistrationResponse, RegistrationState, RpId, RpInfo, UserInfo, VerifiedAttestation,
+    decode_b64_bounded, decode_b64_into, now_secs,
 };
 
 const CEREMONY_TIMEOUT_MS: u32 = 60_000;
@@ -296,14 +297,17 @@ impl Webauthn {
     /// Returned `RegistrationState` is what the caller must hand back
     /// to `finish_registration` (typically stashed in a session-keyed
     /// map with a short TTL).
+    /// `RegistrationOptions::default()` requests a discoverable credential
+    /// with no attestation statement. UV follows this RP's verification policy.
     pub fn start_registration(
         &self,
         user_id: &[u8],
         user_name: &str,
         user_display_name: &str,
         existing: &[CredentialId],
+        options: RegistrationOptions,
     ) -> (RegistrationChallenge, RegistrationState) {
-        self.try_start_registration(user_id, user_name, user_display_name, existing)
+        self.try_start_registration(user_id, user_name, user_display_name, existing, options)
             .expect("user handle must contain 1..=64 bytes")
     }
 
@@ -315,6 +319,7 @@ impl Webauthn {
         user_name: &str,
         user_display_name: &str,
         existing: &[CredentialId],
+        options: RegistrationOptions,
     ) -> Result<(RegistrationChallenge, RegistrationState)> {
         if !(1..=64).contains(&user_id.len()) {
             return Err(Error::InvalidState("user handle must contain 1..=64 bytes"));
@@ -360,10 +365,10 @@ impl Webauthn {
             timeout: CEREMONY_TIMEOUT_MS,
             authenticator_selection: AuthenticatorSelection {
                 authenticator_attachment: self.attachment.as_token(),
-                resident_key: Some("preferred"),
+                resident_key: options.resident_key,
                 user_verification: self.uv_token(),
             },
-            attestation: "none",
+            attestation: options.attestation,
         };
         let state = RegistrationState {
             challenge,
@@ -375,13 +380,37 @@ impl Webauthn {
         Ok((chal, state))
     }
 
-    /// Verify the registration response and return the credential to persist.
+    /// Verify registration without requiring trusted authenticator provenance.
+    ///
+    /// Use [`Self::finish_registration_with_attestation`] to apply an attestation
+    /// trust policy before receiving the credential to persist.
     /// The caller must consume the ceremony state once, authorize enrollment,
     /// and enforce RP-wide credential-ID uniqueness when inserting the record.
     pub fn finish_registration(
         &self,
         state: &RegistrationState,
         response: &RegistrationResponse,
+    ) -> Result<PasskeyCredential> {
+        self.finish_registration_with_attestation(state, response, |_| Ok(()))
+    }
+
+    /// Verify registration and apply the caller's attestation trust policy.
+    ///
+    /// The callback runs once after all protocol and statement checks, before
+    /// constructing the credential. It borrows the original certificate DER
+    /// without copying or reparsing the attestation object. Return an error,
+    /// such as [`Error::AttestationRejected`], to reject enrollment.
+    ///
+    /// The callback receives the evidence actually returned by the browser,
+    /// including `none` or self-attestation after a `direct` request. Certificate
+    /// chain trust, validity, revocation and metadata policy belong to the caller.
+    /// An accepted certificate remains recorded as `UntrustedCertificate`: the
+    /// library's evidence summary records its checks, not the caller's decision.
+    pub fn finish_registration_with_attestation(
+        &self,
+        state: &RegistrationState,
+        response: &RegistrationResponse,
+        check_attestation: impl FnOnce(VerifiedAttestation<'_>) -> Result<()>,
     ) -> Result<PasskeyCredential> {
         // 0. Reject ceremonies older than the hard ceiling. Defence
         // in depth. The caller must atomically consume state as well:
@@ -456,7 +485,7 @@ impl Webauthn {
             return Err(Error::UnsupportedAlg(cose.alg()));
         }
 
-        let attestation = att.verify_statement(cose, &cdj_hash)?;
+        let attestation = att.verify_statement(attested, &cdj_hash)?;
 
         // A duplicate is a distinct application conflict only after the
         // statement is valid. Preserve invalid-attestation rejection/audit
@@ -469,7 +498,10 @@ impl Webauthn {
             return Err(Error::CredentialExcluded);
         }
 
-        // 7. Build the persisted credential.
+        let evidence = attestation.evidence;
+        check_attestation(attestation)?;
+
+        // 7. Build the persisted credential after the application's policy accepts it.
         Ok(PasskeyCredential {
             id: response.id.clone(),
             public_key_cose: CosePublicKey(attested.public_key_cose.to_vec()),
@@ -480,7 +512,7 @@ impl Webauthn {
             uv_initialized: Some(att.auth_data.user_verified()),
             backup_eligible: Some(att.auth_data.backup_eligible()),
             backup_state: Some(att.auth_data.backup_state()),
-            attestation,
+            attestation: evidence,
         })
     }
 
@@ -774,6 +806,82 @@ fn check_not_expired(created_at: u64) -> Result<()> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::types::{AttestationConveyancePreference, ResidentKeyRequirement};
+
+    #[test]
+    fn registration_defaults_request_discoverability_without_attestation() {
+        let wa = Webauthn::new("example.com", "Example", "https://example.com");
+        let (challenge, _) = wa.start_registration(b"u", "u", "U", &[], Default::default());
+        let wire = serde_json::to_value(challenge).unwrap();
+        assert_eq!(wire["authenticatorSelection"]["residentKey"], "required");
+        assert_eq!(wire["authenticatorSelection"]["requireResidentKey"], true);
+        assert_eq!(
+            wire["authenticatorSelection"]["userVerification"],
+            "preferred"
+        );
+        assert_eq!(wire["attestation"], "none");
+    }
+
+    #[test]
+    fn registration_choices_serialize_independently() {
+        for (resident_key, token, require_resident_key) in [
+            (ResidentKeyRequirement::Required, "required", true),
+            (ResidentKeyRequirement::Preferred, "preferred", false),
+            (ResidentKeyRequirement::Discouraged, "discouraged", false),
+        ] {
+            for (attestation, attestation_token) in [
+                (AttestationConveyancePreference::None, "none"),
+                (AttestationConveyancePreference::Direct, "direct"),
+            ] {
+                for require_uv in [false, true] {
+                    for (attachment, attachment_token) in [
+                        (Attachment::Platform, Some("platform")),
+                        (Attachment::CrossPlatform, Some("cross-platform")),
+                        (Attachment::Any, None),
+                    ] {
+                        let wa = Webauthn::new("example.com", "Example", "https://example.com")
+                            .require_user_verification(require_uv)
+                            .authenticator_attachment(attachment);
+                        let (challenge, _) = wa.start_registration(
+                            b"u",
+                            "u",
+                            "U",
+                            &[],
+                            RegistrationOptions {
+                                resident_key,
+                                attestation,
+                            },
+                        );
+                        let wire = serde_json::to_value(challenge).unwrap();
+                        let selection = &wire["authenticatorSelection"];
+                        assert_eq!(selection["residentKey"], token);
+                        assert_eq!(selection["requireResidentKey"], require_resident_key);
+                        assert_eq!(
+                            selection["userVerification"],
+                            if require_uv { "required" } else { "preferred" }
+                        );
+                        assert_eq!(
+                            selection
+                                .get("authenticatorAttachment")
+                                .and_then(serde_json::Value::as_str),
+                            attachment_token
+                        );
+                        assert_eq!(wire["attestation"], attestation_token);
+                    }
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn require_resident_key_is_derived_when_options_are_serialized() {
+        let wa = Webauthn::new("example.com", "Example", "https://example.com");
+        let (mut challenge, _) = wa.start_registration(b"u", "u", "U", &[], Default::default());
+        challenge.authenticator_selection.resident_key = ResidentKeyRequirement::Discouraged;
+        let wire = serde_json::to_value(challenge).unwrap();
+        assert_eq!(wire["authenticatorSelection"]["residentKey"], "discouraged");
+        assert_eq!(wire["authenticatorSelection"]["requireResidentKey"], false);
+    }
 
     #[test]
     fn configuration_requires_an_exact_secure_related_origin() {
@@ -806,14 +914,26 @@ mod tests {
         let wa = Webauthn::new("example.com", "Example", "https://example.com");
         for length in [0, 65] {
             assert!(
-                wa.try_start_registration(&vec![7; length], "user", "User", &[])
-                    .is_err()
+                wa.try_start_registration(
+                    &vec![7; length],
+                    "user",
+                    "User",
+                    &[],
+                    Default::default()
+                )
+                .is_err()
             );
         }
         for length in [1, 64] {
             assert!(
-                wa.try_start_registration(&vec![7; length], "user", "User", &[])
-                    .is_ok()
+                wa.try_start_registration(
+                    &vec![7; length],
+                    "user",
+                    "User",
+                    &[],
+                    Default::default()
+                )
+                .is_ok()
             );
         }
     }
@@ -834,7 +954,7 @@ mod tests {
         // would reject — or worse, register an alg the RP did not
         // advertise. This test pins them together.
         let wa = Webauthn::new("example.com", "Example", "https://example.com");
-        let (chal, _) = wa.start_registration(b"u", "u", "U", &[]);
+        let (chal, _) = wa.start_registration(b"u", "u", "U", &[], Default::default());
         let advertised: Vec<i64> = chal.pub_key_cred_params.iter().map(|p| p.alg).collect();
         assert_eq!(advertised, ALLOWED_REGISTRATION_ALGS);
     }
@@ -842,7 +962,7 @@ mod tests {
     #[test]
     fn challenge_reflects_attachment_builder() {
         let wa_platform = Webauthn::new("example.com", "Example", "https://example.com");
-        let (chal, _) = wa_platform.start_registration(b"u", "u", "U", &[]);
+        let (chal, _) = wa_platform.start_registration(b"u", "u", "U", &[], Default::default());
         assert_eq!(
             chal.authenticator_selection.authenticator_attachment,
             Some("platform"),
@@ -850,12 +970,12 @@ mod tests {
 
         let wa_any = Webauthn::new("example.com", "Example", "https://example.com")
             .authenticator_attachment(Attachment::Any);
-        let (chal, _) = wa_any.start_registration(b"u", "u", "U", &[]);
+        let (chal, _) = wa_any.start_registration(b"u", "u", "U", &[], Default::default());
         assert_eq!(chal.authenticator_selection.authenticator_attachment, None,);
 
         let wa_cross = Webauthn::new("example.com", "Example", "https://example.com")
             .authenticator_attachment(Attachment::CrossPlatform);
-        let (chal, _) = wa_cross.start_registration(b"u", "u", "U", &[]);
+        let (chal, _) = wa_cross.start_registration(b"u", "u", "U", &[], Default::default());
         assert_eq!(
             chal.authenticator_selection.authenticator_attachment,
             Some("cross-platform"),

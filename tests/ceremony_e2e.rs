@@ -24,7 +24,7 @@ use sha2::{Digest, Sha256};
 
 use nazo_passkey::{
     AssertionResponse, AttestationResponse, AuthenticationResponse, CredentialId, Error,
-    RegistrationResponse, Webauthn,
+    RegistrationOptions, RegistrationResponse, ResidentKeyRequirement, Webauthn,
 };
 
 const RP_ID: &str = "example.com";
@@ -168,7 +168,13 @@ fn register_then_authenticate_happy_path() {
     let mut auth = FakeAuthenticator::new();
 
     // ---- Registration ----------------------------------------------------
-    let (chal, state) = wa.start_registration(USER_HANDLE, "alice@example.com", "Alice", &[]);
+    let (chal, state) = wa.start_registration(
+        USER_HANDLE,
+        "alice@example.com",
+        "Alice",
+        &[],
+        Default::default(),
+    );
 
     let (_cdj_raw, cdj_b64) = client_data("webauthn.create", &chal.challenge, ORIGIN);
     let attestation = B64URL.encode(auth.attestation_object());
@@ -337,7 +343,8 @@ fn signed_challenges_reject_padding_in_both_ceremonies() {
     let mut auth = FakeAuthenticator::new();
     let credential = do_register(&wa, &mut auth);
 
-    let (_, registration) = wa.start_registration(USER_HANDLE, "alice", "Alice", &[]);
+    let (_, registration) =
+        wa.start_registration(USER_HANDLE, "alice", "Alice", &[], Default::default());
     let padded =
         base64::engine::general_purpose::URL_SAFE.encode(registration.challenge.as_bytes());
     assert!(padded.ends_with('='));
@@ -572,7 +579,13 @@ fn stored_user_handle_is_checked_without_username_first_state() {
 // ---------- helper ---------------------------------------------------------
 
 fn do_register(wa: &Webauthn, auth: &mut FakeAuthenticator) -> nazo_passkey::PasskeyCredential {
-    let (chal, state) = wa.start_registration(USER_HANDLE, "alice@example.com", "Alice", &[]);
+    let (chal, state) = wa.start_registration(
+        USER_HANDLE,
+        "alice@example.com",
+        "Alice",
+        &[],
+        Default::default(),
+    );
     let (_cdj_raw, cdj_b64) = client_data("webauthn.create", &chal.challenge, ORIGIN);
     let attestation = B64URL.encode(auth.attestation_object());
     let response = RegistrationResponse {
@@ -592,7 +605,8 @@ fn registration_outer_id_and_exclusion_are_enforced() {
     let wa = Webauthn::new(RP_ID, "Example", ORIGIN);
     let mut auth = FakeAuthenticator::new();
     let existing = do_register(&wa, &mut auth);
-    let (chal, state) = wa.start_registration(USER_HANDLE, "alice", "Alice", &[]);
+    let (chal, state) =
+        wa.start_registration(USER_HANDLE, "alice", "Alice", &[], Default::default());
     let (_, client_data_json) = client_data("webauthn.create", &chal.challenge, ORIGIN);
     let mut response = RegistrationResponse {
         id: CredentialId(b"other-id".to_vec()),
@@ -715,7 +729,8 @@ fn uv_preferred_false_and_required_registration_behavior() {
         .unwrap();
     assert!(!result.user_verified && !result.user_verification_eligible);
     let required = wa.require_user_verification(true);
-    let (chal, state) = required.start_registration(USER_HANDLE, "alice", "Alice", &[]);
+    let (chal, state) =
+        required.start_registration(USER_HANDLE, "alice", "Alice", &[], Default::default());
     let (_, client_data_json) = client_data("webauthn.create", &chal.challenge, ORIGIN);
     let response = RegistrationResponse {
         id: CredentialId(auth.credential_id.clone()),
@@ -795,4 +810,92 @@ fn registration_attestation_evidence_is_explicit() {
         credential.attestation,
         nazo_passkey::AttestationEvidence::None
     );
+}
+
+#[test]
+fn resident_key_requests_preserve_account_binding_and_up_uv_checks() {
+    for resident_key in [
+        ResidentKeyRequirement::Required,
+        ResidentKeyRequirement::Preferred,
+        ResidentKeyRequirement::Discouraged,
+    ] {
+        for require_uv in [false, true] {
+            let wa = Webauthn::new(RP_ID, "Example", ORIGIN).require_user_verification(require_uv);
+            let mut auth = FakeAuthenticator::new();
+            let (challenge, registration) = wa.start_registration(
+                USER_HANDLE,
+                "alice",
+                "Alice",
+                &[],
+                RegistrationOptions {
+                    resident_key,
+                    ..Default::default()
+                },
+            );
+            let (_, client_data_json) =
+                client_data("webauthn.create", &challenge.challenge, ORIGIN);
+            let mut response = RegistrationResponse {
+                id: CredentialId(auth.credential_id.clone()),
+                response: AttestationResponse {
+                    transports: vec![],
+                    attestation_object: B64URL.encode(auth.attestation_object()),
+                    client_data_json,
+                },
+            };
+            let credential = wa.finish_registration(&registration, &response).unwrap();
+            assert_eq!(credential.user_handle.as_deref(), Some(USER_HANDLE));
+
+            auth.flags = FLAG_UV;
+            response.response.attestation_object = B64URL.encode(auth.attestation_object());
+            assert!(matches!(
+                wa.finish_registration(&registration, &response),
+                Err(Error::UserNotPresent)
+            ));
+            auth.flags = FLAG_UP;
+            response.response.attestation_object = B64URL.encode(auth.attestation_object());
+            let result = wa.finish_registration(&registration, &response);
+            if require_uv {
+                assert!(matches!(result, Err(Error::UserNotVerified)));
+            } else {
+                assert_eq!(result.unwrap().uv_initialized, Some(false));
+            }
+
+            let (challenge, authentication) = wa.start_authentication(&[]);
+            auth.flags = FLAG_UP | FLAG_UV;
+            for handle in [None, Some(OTHER_USER_HANDLE)] {
+                let assertion = make_assertion(&mut auth, &challenge.challenge, handle);
+                assert!(matches!(
+                    wa.finish_authentication(&authentication, &assertion, &credential),
+                    Err(Error::UserHandleMismatch)
+                ));
+            }
+            let assertion = make_assertion(&mut auth, &challenge.challenge, Some(USER_HANDLE));
+            wa.finish_authentication(&authentication, &assertion, &credential)
+                .unwrap();
+            assert!(matches!(
+                wa.finish_discoverable_authentication(
+                    &authentication,
+                    &assertion,
+                    &credential,
+                    OTHER_USER_HANDLE,
+                ),
+                Err(Error::UserHandleMismatch)
+            ));
+
+            auth.flags = FLAG_UP;
+            let assertion = make_assertion(&mut auth, &challenge.challenge, Some(USER_HANDLE));
+            let result = wa.finish_authentication(&authentication, &assertion, &credential);
+            if require_uv {
+                assert!(matches!(result, Err(Error::UserNotVerified)));
+            } else {
+                assert!(!result.unwrap().user_verified);
+            }
+            auth.flags = FLAG_UV;
+            let assertion = make_assertion(&mut auth, &challenge.challenge, Some(USER_HANDLE));
+            assert!(matches!(
+                wa.finish_authentication(&authentication, &assertion, &credential),
+                Err(Error::UserNotPresent)
+            ));
+        }
+    }
 }

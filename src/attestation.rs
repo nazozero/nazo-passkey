@@ -1,16 +1,14 @@
 //! Borrowed attestation parsing and statement verification.
 //!
-//! A valid certificate signature proves possession of the leaf private key.
-//! It does not establish manufacturer identity, a trusted chain, certificate
-//! validity at a particular time, metadata status, or hardware key protection.
-//! The public result explicitly records that limitation.
+//! Certificate evidence borrows the original DER after statement verification.
+//! The relying party applies its own chain and authenticator trust policy.
 
-use crate::auth_data::AuthenticatorData;
+use crate::auth_data::{AttestedCredentialData, AuthenticatorData};
 use crate::cbor::{Decoder, invalid};
 use crate::cose::{ALG_ES256, CoseKey};
 use crate::crypto;
 use crate::error::{Error, Result};
-use crate::types::AttestationEvidence;
+use crate::types::{AttestationEvidence, VerifiedAttestation};
 use crate::x509::AttestationCert;
 
 #[derive(Debug)]
@@ -79,26 +77,37 @@ impl<'a> ParsedAttestation<'a> {
 
     pub(crate) fn verify_statement(
         &self,
-        credential_key: &CoseKey,
+        attested: &AttestedCredentialData<'_>,
         client_data_hash: &[u8; 32],
-    ) -> Result<AttestationEvidence> {
-        match &self.att_stmt {
-            AttestationStatement::None => Ok(AttestationEvidence::None),
-            AttestationStatement::Packed(statement) => {
-                self.verify_packed(statement, credential_key, client_data_hash)
-            }
-            AttestationStatement::FidoU2f(statement) => {
-                self.verify_fido_u2f(statement, credential_key, client_data_hash)
-            }
-        }
+    ) -> Result<VerifiedAttestation<'_>> {
+        let (evidence, format, certificate_chain): (_, _, &[&[u8]]) = match &self.att_stmt {
+            AttestationStatement::None => (AttestationEvidence::None, "none", &[]),
+            AttestationStatement::Packed(statement) => (
+                self.verify_packed(statement, attested, client_data_hash)?,
+                "packed",
+                &statement.chain[..statement.chain_len],
+            ),
+            AttestationStatement::FidoU2f(statement) => (
+                self.verify_fido_u2f(statement, attested, client_data_hash)?,
+                "fido-u2f",
+                &statement.chain[..statement.chain_len],
+            ),
+        };
+        Ok(VerifiedAttestation {
+            evidence,
+            format,
+            aaguid: attested.aaguid,
+            certificate_chain,
+        })
     }
 
     fn verify_packed(
         &self,
         statement: &Statement<'_>,
-        key: &CoseKey,
+        attested: &AttestedCredentialData<'_>,
         client_data_hash: &[u8; 32],
     ) -> Result<AttestationEvidence> {
+        let key = &attested.key;
         let alg = statement.alg.ok_or_else(|| invalid("packed missing alg"))?;
         if statement.chain_len == 0 {
             if alg != key.alg() {
@@ -111,15 +120,10 @@ impl<'a> ParsedAttestation<'a> {
             return Err(Error::UnsupportedAlg(alg));
         }
         let leaf = AttestationCert::from_der(statement.chain[0], true)?;
-        if let Some(cert_aaguid) = leaf.aaguid {
-            let attested = self
-                .auth_data
-                .attested
-                .as_ref()
-                .ok_or_else(|| invalid("packed missing attested credential data"))?;
-            if cert_aaguid != attested.aaguid {
-                return Err(invalid("packed cert AAGUID does not match authData"));
-            }
+        if let Some(cert_aaguid) = leaf.aaguid
+            && cert_aaguid != attested.aaguid
+        {
+            return Err(invalid("packed cert AAGUID does not match authData"));
         }
         for certificate in &statement.chain[1..statement.chain_len] {
             AttestationCert::validate_der(certificate)?;
@@ -135,21 +139,16 @@ impl<'a> ParsedAttestation<'a> {
     fn verify_fido_u2f(
         &self,
         statement: &Statement<'_>,
-        key: &CoseKey,
+        attested: &AttestedCredentialData<'_>,
         client_data_hash: &[u8; 32],
     ) -> Result<AttestationEvidence> {
-        let CoseKey::Es256 { x, y } = key else {
+        let CoseKey::Es256 { x, y } = &attested.key else {
             return Err(invalid("fido-u2f credential must use ES256"));
         };
         if statement.chain_len != 1 {
             return Err(invalid("fido-u2f requires exactly one certificate"));
         }
         let leaf = AttestationCert::from_der(statement.chain[0], false)?;
-        let attested = self
-            .auth_data
-            .attested
-            .as_ref()
-            .ok_or_else(|| invalid("fido-u2f missing attested credential data"))?;
         verify_es256_parts(
             &leaf.verifying_key,
             &[

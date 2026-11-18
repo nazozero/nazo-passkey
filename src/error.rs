@@ -36,6 +36,10 @@ pub enum Error {
     #[error("credential is excluded by the registration state")]
     CredentialExcluded,
 
+    /// The application's attestation policy rejected a protocol-valid response.
+    #[error("attestation rejected by the relying party's trust policy")]
+    AttestationRejected,
+
     #[error("credential backup eligibility changed")]
     BackupEligibilityChanged,
 

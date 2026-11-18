@@ -24,7 +24,8 @@ use serde::Serialize;
 
 use nazo_passkey::{
     Attachment, AuthenticationChallenge, AuthenticationResponse, AuthenticationState,
-    PasskeyCredential, RegistrationChallenge, RegistrationResponse, RegistrationState, Webauthn,
+    PasskeyCredential, RegistrationChallenge, RegistrationOptions, RegistrationResponse,
+    RegistrationState, ResidentKeyRequirement, Webauthn,
 };
 
 // ---------- in-memory state -----------------------------------------------
@@ -73,10 +74,16 @@ fn register_start(
         .collect();
     drop(user_guard);
 
-    let (challenge, reg_state) =
-        state
-            .wa
-            .start_registration(&user_id, "alice@example.com", "Alice", &existing);
+    let (challenge, reg_state) = state.wa.start_registration(
+        &user_id,
+        "alice@example.com",
+        "Alice",
+        &existing,
+        RegistrationOptions {
+            resident_key: ResidentKeyRequirement::Preferred,
+            ..Default::default()
+        },
+    );
 
     state
         .sessions

@@ -42,15 +42,15 @@ Add `features = ["aws-lc"]` to select native AWS-LC ES256 verification.
 | Persistence | Serde credential records, including UV history, backup state, and attestation evidence |
 
 Certificate attestation returns `UntrustedCertificate`: the signature and
-applicable leaf profile have been checked. An application that requires trusted
-device provenance supplies its certificate-chain, validity, revocation, and
-metadata policy. The complete feature and responsibility matrix is in
+applicable leaf profile have been checked. Applications can inspect the borrowed
+certificate evidence and apply their trust policy before receiving a credential
+to persist. The complete feature and responsibility matrix is in
 [protocol compliance](docs/protocol-compliance.md).
 
 ## Integrate a ceremony
 
 ```rust
-use nazo_passkey::Webauthn;
+use nazo_passkey::{RegistrationOptions, Webauthn};
 
 let webauthn = Webauthn::try_new("example.com", "Example", "https://example.com")?
     .require_user_verification(true);
@@ -60,6 +60,7 @@ let (options, state) = webauthn.try_start_registration(
     "alice",
     "Alice",
     &[],
+    RegistrationOptions::default(),
 )?;
 ```
 
@@ -74,6 +75,7 @@ directly. Deserialize the finish request as `RegistrationResponse` or
 | --- | --- |
 | `try_start_registration` | Authorize enrollment and supply existing credential IDs |
 | `finish_registration` | Consume ceremony state once; insert the complete record under a credential-ID uniqueness constraint within the RP |
+| `finish_registration_with_attestation` | Apply the application's attestation trust policy before inserting the returned record |
 | `start_authentication_with_creds_for_user` | Load the intended account's credentials and bind its handle |
 | `finish_authentication` | Select the stored credential within that account; commit the verified update before creating a session |
 | `finish_discoverable_authentication` | Resolve the returned handle within the RP and supply its expected account binding |
@@ -88,6 +90,20 @@ these with an account-scoped compare-and-swap before issuing a session. The
 counter policy accepts zero-only counters and rejects other non-increasing
 values; concurrent assertions can therefore require a retry.
 
+### Discoverable credentials
+
+The final registration argument is `RegistrationOptions`. Its `resident_key`
+field accepts `ResidentKeyRequirement::Required`, `Preferred`, or `Discouraged`.
+The library defaults to `Required` so newly enrolled passkeys support
+username-less login. Select `Preferred` when enrollment may fall back to a
+non-discoverable credential, or `Discouraged` to prefer that storage mode.
+`requireResidentKey` is derived from `resident_key` when serializing options.
+
+Resident-key selection controls credential creation in the browser. The
+registration response carries no signed discoverability flag. Server-side
+verification separately enforces UP, configured UV, and account binding;
+discoverable assertions require the credential's owning account handle.
+
 ### User verification
 
 `AuthSuccess::user_verified` reports the signed UV flag.
@@ -100,6 +116,31 @@ authorized flow.
 Username-first authentication accepts an absent `userHandle` for older
 non-discoverable credentials. A supplied handle must match the expected account.
 Discoverable authentication requires a handle and account binding.
+
+### Attestation policy
+
+`RegistrationOptions::default()` requests `AttestationConveyancePreference::None`.
+Ordinary registration uses `finish_registration` and requires no PKI setup.
+Select `Direct` only when applying a real attestation trust policy. A browser
+may still return `none` or self-attestation; the application decides whether
+to accept that evidence.
+
+Use `finish_registration_with_attestation(&state, &response, check_attestation)`
+to supply a callback accepting `VerifiedAttestation<'_>` and returning
+`nazo_passkey::Result<()>`. It runs after all protocol and statement checks,
+before the credential is constructed. Return `Error::AttestationRejected` to
+reject enrollment.
+
+The view contains the evidence kind, format, AAGUID, and original leaf-first
+DER certificate slices, borrowed for the callback's duration. None and
+self-attestation have an empty chain. The application verifies trust anchors,
+chain signatures, certificate validity, revocation, and metadata as required
+by its policy. The persisted `UntrustedCertificate` value records the library's
+checks; store any application trust decision separately.
+
+The `packed` statement signs the AAGUID in `authData`; `none` and `fido-u2f`
+leave that field unauthenticated, even when the application trusts the U2F
+certificate.
 
 ### Parsing and borrowing
 

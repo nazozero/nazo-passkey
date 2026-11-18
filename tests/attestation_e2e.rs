@@ -304,7 +304,7 @@ fn packed_x5c_happy_path() {
     let auth_data = auth_data_register(RP_ID, aaguid, cred_id, &cose_pk);
 
     let wa = Webauthn::new(RP_ID, "Example", ORIGIN);
-    let (chal, state) = wa.start_registration(b"u", "alice", "Alice", &[]);
+    let (chal, state) = wa.start_registration(b"u", "alice", "Alice", &[], Default::default());
     let (cdj_raw, cdj_b64) = client_data("webauthn.create", &chal.challenge, ORIGIN);
 
     // Build the packed attestation statement signed by the CERT key
@@ -368,7 +368,7 @@ fn packed_x5c_aaguid_mismatch_rejected() {
     let auth_data = auth_data_register(RP_ID, auth_aaguid, cred_id, &cose_pk);
 
     let wa = Webauthn::new(RP_ID, "Example", ORIGIN);
-    let (chal, state) = wa.start_registration(b"u", "alice", "Alice", &[]);
+    let (chal, state) = wa.start_registration(b"u", "alice", "Alice", &[], Default::default());
     let (cdj_raw, cdj_b64) = client_data("webauthn.create", &chal.challenge, ORIGIN);
 
     let mut signed = Vec::with_capacity(auth_data.len() + 32);
@@ -431,7 +431,7 @@ fn packed_x5c_bad_signature_rejected() {
     let auth_data = auth_data_register(RP_ID, aaguid, cred_id, &cose_pk);
 
     let wa = Webauthn::new(RP_ID, "Example", ORIGIN);
-    let (chal, state) = wa.start_registration(b"u", "alice", "Alice", &[]);
+    let (chal, state) = wa.start_registration(b"u", "alice", "Alice", &[], Default::default());
     let (cdj_raw, cdj_b64) = client_data("webauthn.create", &chal.challenge, ORIGIN);
 
     let mut signed = Vec::with_capacity(auth_data.len() + 32);
@@ -496,7 +496,7 @@ fn fido_u2f_happy_path() {
     let auth_data = auth_data_register(RP_ID, aaguid, cred_id, &cose_pk);
 
     let wa = Webauthn::new(RP_ID, "Example", ORIGIN);
-    let (chal, state) = wa.start_registration(b"u", "alice", "Alice", &[]);
+    let (chal, state) = wa.start_registration(b"u", "alice", "Alice", &[], Default::default());
     let (cdj_raw, cdj_b64) = client_data("webauthn.create", &chal.challenge, ORIGIN);
 
     // U2F pre-image: 0x00 || rpIdHash || cdjHash || credId || pubKey-SEC1
@@ -561,7 +561,7 @@ fn fido_u2f_wrong_credential_pubkey_rejected() {
     let auth_data = auth_data_register(RP_ID, [0u8; 16], cred_id, &cose_pk);
 
     let wa = Webauthn::new(RP_ID, "Example", ORIGIN);
-    let (chal, state) = wa.start_registration(b"u", "alice", "Alice", &[]);
+    let (chal, state) = wa.start_registration(b"u", "alice", "Alice", &[], Default::default());
     let (cdj_raw, cdj_b64) = client_data("webauthn.create", &chal.challenge, ORIGIN);
 
     // ...but we sign over the WRONG pubkey, simulating tampering.
@@ -636,7 +636,7 @@ fn packed_x5c_malformed_aaguid_rejected() {
     let auth_data = auth_data_register(RP_ID, *b"any-authd-aaguid", cred_id, &cose_pk);
 
     let wa = Webauthn::new(RP_ID, "Example", ORIGIN);
-    let (chal, state) = wa.start_registration(b"u", "alice", "Alice", &[]);
+    let (chal, state) = wa.start_registration(b"u", "alice", "Alice", &[], Default::default());
     let (cdj_raw, cdj_b64) = client_data("webauthn.create", &chal.challenge, ORIGIN);
 
     let mut signed = Vec::with_capacity(auth_data.len() + 32);
@@ -766,7 +766,8 @@ fn registration_with_chain(
         &credential.cose_pubkey(),
     );
     let wa = Webauthn::new(RP_ID, "Test", ORIGIN);
-    let (challenge, state) = wa.start_registration(b"user", "alice", "Alice", &[]);
+    let (challenge, state) =
+        wa.start_registration(b"user", "alice", "Alice", &[], Default::default());
     let (cdj_raw, cdj_b64) = client_data("webauthn.create", &challenge.challenge, ORIGIN);
     let mut message = Vec::new();
     if format == "fido-u2f" {
@@ -1233,6 +1234,121 @@ fn checked_attestation_signature_does_not_claim_certificate_trust() {
     );
 }
 
+#[test]
+fn application_policy_inspects_original_certificate_evidence_before_accepting() {
+    use nazo_passkey::{AttestationEvidence, Error};
+
+    let aaguid = [0x42; 16];
+    let leaf = CertBundle::new(AaguidExt::Valid(aaguid));
+    let intermediate = CertBundle::new(AaguidExt::None);
+    for format in ["packed", "fido-u2f"] {
+        let mut chain = vec![leaf.cert_der.clone()];
+        if format == "packed" {
+            // An unrelated but well-formed certificate is not a trusted path.
+            // Statement verification must leave that decision to the caller.
+            chain.push(intermediate.cert_der.clone());
+        }
+        let (wa, state, response) = registration_with_chain(format, &leaf, chain.clone(), aaguid);
+        let expected: Vec<&[u8]> = chain.iter().map(Vec::as_slice).collect();
+        let mut calls = 0;
+        let credential = wa
+            .finish_registration_with_attestation(&state, &response, |attestation| {
+                calls += 1;
+                assert_eq!(
+                    attestation.evidence,
+                    AttestationEvidence::UntrustedCertificate
+                );
+                assert_eq!(attestation.format, format);
+                assert_eq!(attestation.aaguid, aaguid);
+                assert_eq!(attestation.certificate_chain, expected.as_slice());
+                Ok(())
+            })
+            .unwrap();
+        assert_eq!(calls, 1);
+        assert_eq!(
+            credential.attestation,
+            AttestationEvidence::UntrustedCertificate
+        );
+
+        // A valid statement can still be rejected by the application's policy.
+        let rejected = wa.finish_registration_with_attestation(&state, &response, |attestation| {
+            assert_eq!(attestation.certificate_chain, expected.as_slice());
+            Err(Error::AttestationRejected)
+        });
+        assert!(matches!(rejected, Err(Error::AttestationRejected)));
+    }
+}
+
+#[test]
+fn invalid_certificate_evidence_never_reaches_application_policy() {
+    let cert = CertBundle::new(AaguidExt::None);
+    for format in ["packed", "fido-u2f"] {
+        for chain in [
+            Vec::new(),
+            vec![Vec::new()],
+            vec![vec![1, 2, 3]],
+            vec![cert.cert_der.clone(), vec![1, 2, 3]],
+            vec![cert.cert_der.clone(); 9],
+        ] {
+            let (wa, state, response) = registration_with_chain(format, &cert, chain, [0; 16]);
+            assert!(
+                wa.finish_registration_with_attestation(&state, &response, |_| {
+                    panic!("malformed {format} evidence reached application policy")
+                })
+                .is_err()
+            );
+        }
+
+        let (wa, mut state, mut response) =
+            registration_with_chain(format, &cert, vec![cert.cert_der.clone()], [0; 16]);
+        let bytes = B64URL
+            .decode(&response.response.attestation_object)
+            .unwrap();
+        let original: CborValue = ciborium::de::from_reader(bytes.as_slice()).unwrap();
+        let wrong_signature: EsSig = cert.signing_key.sign(b"another registration transcript");
+        for missing_chain in [false, true] {
+            let mut envelope = original.clone();
+            let CborValue::Map(fields) = &mut envelope else {
+                unreachable!()
+            };
+            let (_, CborValue::Map(statement)) = &mut fields[1] else {
+                unreachable!()
+            };
+            if missing_chain {
+                // Packed without x5c is self-attestation: the credential key
+                // must verify it. This statement was signed by a separate key.
+                statement.retain(|(key, _)| key.as_text() != Some("x5c"));
+            } else {
+                let (_, signature) = statement
+                    .iter_mut()
+                    .find(|(key, _)| key.as_text() == Some("sig"))
+                    .unwrap();
+                *signature = CborValue::Bytes(wrong_signature.to_der().as_bytes().to_vec());
+            }
+            let mut changed = Vec::new();
+            ciborium::ser::into_writer(&envelope, &mut changed).unwrap();
+            response.response.attestation_object = B64URL.encode(changed);
+            let result = wa.finish_registration_with_attestation(&state, &response, |_| {
+                panic!("invalid {format} statement reached application policy")
+            });
+            if missing_chain && format == "fido-u2f" {
+                assert!(result.is_err());
+            } else {
+                assert!(matches!(result, Err(nazo_passkey::Error::BadSignature)));
+            }
+        }
+
+        response.response.attestation_object = B64URL.encode(bytes);
+        state.exclude_credentials.push(response.id.clone());
+        assert!(matches!(
+            wa.finish_registration_with_attestation(&state, &response, |_| {
+                panic!("excluded credential reached application policy")
+            }),
+            Err(nazo_passkey::Error::CredentialExcluded)
+        ));
+    }
+}
+
 fn self_attestation_response(
     ed25519: bool,
     mutation: u8,
@@ -1262,7 +1378,8 @@ fn self_attestation_response(
     };
     let auth_data = auth_data_register(RP_ID, [0; 16], b"self-attestation", &cose);
     let wa = Webauthn::new(RP_ID, "Test", ORIGIN);
-    let (challenge, state) = wa.start_registration(b"user", "alice", "Alice", &[]);
+    let (challenge, state) =
+        wa.start_registration(b"user", "alice", "Alice", &[], Default::default());
     let (cdj, cdj_encoded) = client_data("webauthn.create", &challenge.challenge, ORIGIN);
     let mut message = auth_data.clone();
     message.extend_from_slice(&Sha256::digest(&cdj));
@@ -1372,4 +1489,54 @@ fn duplicate_attestation_statement_members_are_rejected() {
         response.response.attestation_object = B64URL.encode(bytes);
         assert!(wa.finish_registration(&state, &response).is_err());
     }
+}
+
+#[test]
+fn u2f_aaguid_remains_informational_after_statement_verification() {
+    let cert = CertBundle::new(AaguidExt::None);
+    let (wa, state, mut response) =
+        registration_with_chain("fido-u2f", &cert, vec![cert.cert_der.clone()], [0; 16]);
+    assert_eq!(
+        wa.finish_registration(&state, &response).unwrap().aaguid,
+        [0; 16]
+    );
+
+    let bytes = B64URL
+        .decode(&response.response.attestation_object)
+        .unwrap();
+    let mut envelope: CborValue = ciborium::de::from_reader(bytes.as_slice()).unwrap();
+    let CborValue::Map(fields) = &mut envelope else {
+        unreachable!()
+    };
+    let (_, CborValue::Bytes(auth_data)) = fields
+        .iter_mut()
+        .find(|(key, _)| key.as_text() == Some("authData"))
+        .unwrap()
+    else {
+        unreachable!()
+    };
+    let changed_aaguid = [0xa5; 16];
+    // U2F signs the RP hash, client-data hash, credential ID and key;
+    // this field is outside its signature transcript.
+    auth_data[37..53].copy_from_slice(&changed_aaguid);
+    let mut changed = Vec::new();
+    ciborium::ser::into_writer(&envelope, &mut changed).unwrap();
+    response.response.attestation_object = B64URL.encode(changed);
+
+    let mut calls = 0;
+    let credential = wa
+        .finish_registration_with_attestation(&state, &response, |attestation| {
+            calls += 1;
+            assert_eq!(attestation.format, "fido-u2f");
+            assert_eq!(
+                attestation.evidence,
+                nazo_passkey::AttestationEvidence::UntrustedCertificate
+            );
+            assert_eq!(attestation.aaguid, changed_aaguid);
+            assert_eq!(attestation.certificate_chain, &[cert.cert_der.as_slice()]);
+            Ok(())
+        })
+        .unwrap();
+    assert_eq!(calls, 1);
+    assert_eq!(credential.aaguid, changed_aaguid);
 }
