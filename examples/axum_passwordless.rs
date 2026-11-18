@@ -21,11 +21,9 @@
 //!
 //! For this flow to work, the registration challenge sets
 //! `residentKey: "required"` — instructs the authenticator to store
-//! the credential locally as a discoverable credential. The crate
-//! already defaults to "preferred" which is enough for built-in
-//! passkey authenticators (Touch ID, Windows Hello, iCloud Keychain);
-//! we override to "required" here to make the demo robust on hardware
-//! keys too.
+//! the credential locally as a discoverable credential. This is the
+//! library's registration default; the browser no longer overrides the
+//! server's selection policy.
 //!
 //! NOT FOR PRODUCTION: in-memory state, no rate limiting, sessions
 //! are unsigned cookies. See axum_server.rs for the broader warnings.
