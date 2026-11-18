@@ -69,18 +69,20 @@ def main():
         key, key_end = decode(auth_data, key_start)
         assert key[3] in (-7, -8)
         credential_id = b64(registration["credential_id"])
-        registration_json = {
-            "id": credential_id, "transports": [],
+        envelope = {
+            "id": credential_id, "rawId": credential_id, "type": "public-key",
+            "clientExtensionResults": {},
+        }
+        registration_json = {**envelope, "response": {
+            "transports": [],
             "attestationObject": b64(registration["attestationObject"]),
             "clientDataJSON": b64(registration["clientDataJSON"]),
-        }
-        authentication_json = {
-            "id": credential_id,
+        }}
+        authentication_json = {**envelope, "response": {
             "authenticatorData": b64(authentication["authenticatorData"]),
             "clientDataJSON": b64(authentication["clientDataJSON"]),
             "signature": b64(authentication["signature"]),
-            "userHandle": None,
-        }
+        }}
         seeds = [
             (0, "attestation", registration["attestationObject"]),
             (1, "registration-client-data", registration["clientDataJSON"]),

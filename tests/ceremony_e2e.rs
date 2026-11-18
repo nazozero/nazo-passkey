@@ -22,7 +22,10 @@ use ciborium::value::Value as CborValue;
 use ed25519_dalek::{Signer, SigningKey};
 use sha2::{Digest, Sha256};
 
-use nazo_passkey::{AuthenticationResponse, Error, RegistrationResponse, Webauthn};
+use nazo_passkey::{
+    AssertionResponse, AttestationResponse, AuthenticationResponse, CredentialId, Error,
+    RegistrationResponse, Webauthn,
+};
 
 const RP_ID: &str = "example.com";
 const ORIGIN: &str = "https://example.com";
@@ -171,10 +174,12 @@ fn register_then_authenticate_happy_path() {
     let attestation = B64URL.encode(auth.attestation_object());
 
     let response = RegistrationResponse {
-        id: B64URL.encode(&auth.credential_id),
-        transports: vec!["internal".into()],
-        attestation_object: attestation,
-        client_data_json: cdj_b64,
+        id: CredentialId(auth.credential_id.clone()),
+        response: AttestationResponse {
+            transports: vec!["internal".into()],
+            attestation_object: attestation,
+            client_data_json: cdj_b64,
+        },
     };
 
     let credential = wa
@@ -192,11 +197,13 @@ fn register_then_authenticate_happy_path() {
     let sig = auth.sign_assertion(&auth_data, &cdj_raw);
 
     let response = AuthenticationResponse {
-        id: B64URL.encode(&auth.credential_id),
-        authenticator_data: B64URL.encode(&auth_data),
-        signature: B64URL.encode(&sig),
-        client_data_json: cdj_b64,
-        user_handle: None,
+        id: CredentialId(auth.credential_id.clone()),
+        response: AssertionResponse {
+            authenticator_data: B64URL.encode(&auth_data),
+            signature: B64URL.encode(&sig),
+            client_data_json: cdj_b64,
+            user_handle: None,
+        },
     };
 
     let outcome = wa
@@ -223,11 +230,13 @@ fn counter_replay_rejected() {
     let sig = auth.sign_assertion(&auth_data, &cdj_raw);
 
     let response = AuthenticationResponse {
-        id: B64URL.encode(&auth.credential_id),
-        authenticator_data: B64URL.encode(&auth_data),
-        signature: B64URL.encode(&sig),
-        client_data_json: cdj_b64,
-        user_handle: None,
+        id: CredentialId(auth.credential_id.clone()),
+        response: AssertionResponse {
+            authenticator_data: B64URL.encode(&auth_data),
+            signature: B64URL.encode(&sig),
+            client_data_json: cdj_b64,
+            user_handle: None,
+        },
     };
 
     let err = wa
@@ -251,11 +260,13 @@ fn require_uv_rejects_uv_less_assertion() {
     let sig = auth.sign_assertion(&auth_data, &cdj_raw);
 
     let response = AuthenticationResponse {
-        id: B64URL.encode(&auth.credential_id),
-        authenticator_data: B64URL.encode(&auth_data),
-        signature: B64URL.encode(&sig),
-        client_data_json: cdj_b64,
-        user_handle: None,
+        id: CredentialId(auth.credential_id.clone()),
+        response: AssertionResponse {
+            authenticator_data: B64URL.encode(&auth_data),
+            signature: B64URL.encode(&sig),
+            client_data_json: cdj_b64,
+            user_handle: None,
+        },
     };
 
     let err = wa
@@ -277,11 +288,13 @@ fn wrong_origin_rejected() {
     let sig = auth.sign_assertion(&auth_data, &cdj_raw);
 
     let response = AuthenticationResponse {
-        id: B64URL.encode(&auth.credential_id),
-        authenticator_data: B64URL.encode(&auth_data),
-        signature: B64URL.encode(&sig),
-        client_data_json: cdj_b64,
-        user_handle: None,
+        id: CredentialId(auth.credential_id.clone()),
+        response: AssertionResponse {
+            authenticator_data: B64URL.encode(&auth_data),
+            signature: B64URL.encode(&sig),
+            client_data_json: cdj_b64,
+            user_handle: None,
+        },
     };
 
     let err = wa
@@ -303,11 +316,13 @@ fn wrong_challenge_rejected() {
     let sig = auth.sign_assertion(&auth_data, &cdj_raw);
 
     let response = AuthenticationResponse {
-        id: B64URL.encode(&auth.credential_id),
-        authenticator_data: B64URL.encode(&auth_data),
-        signature: B64URL.encode(&sig),
-        client_data_json: cdj_b64,
-        user_handle: None,
+        id: CredentialId(auth.credential_id.clone()),
+        response: AssertionResponse {
+            authenticator_data: B64URL.encode(&auth_data),
+            signature: B64URL.encode(&sig),
+            client_data_json: cdj_b64,
+            user_handle: None,
+        },
     };
 
     let err = wa
@@ -328,10 +343,12 @@ fn signed_challenges_reject_padding_in_both_ceremonies() {
     assert!(padded.ends_with('='));
     let (_, client_data_json) = client_data("webauthn.create", &padded, ORIGIN);
     let response = RegistrationResponse {
-        id: credential.id.to_b64url(),
-        transports: vec![],
-        attestation_object: B64URL.encode(auth.attestation_object()),
-        client_data_json,
+        id: credential.id.clone(),
+        response: AttestationResponse {
+            transports: vec![],
+            attestation_object: B64URL.encode(auth.attestation_object()),
+            client_data_json,
+        },
     };
     assert!(matches!(
         wa.finish_registration(&registration, &response),
@@ -361,17 +378,20 @@ fn client_data_utf8_decoding_preserves_the_signed_transcript() {
     raw.extend_from_slice(&json);
     let auth_data = auth.auth_data_authenticate(None);
     let mut response = AuthenticationResponse {
-        id: credential.id.to_b64url(),
-        authenticator_data: B64URL.encode(&auth_data),
-        signature: B64URL.encode(auth.sign_assertion(&auth_data, &raw)),
-        client_data_json: B64URL.encode(&raw),
-        user_handle: None,
+        id: credential.id.clone(),
+        response: AssertionResponse {
+            authenticator_data: B64URL.encode(&auth_data),
+            signature: B64URL.encode(auth.sign_assertion(&auth_data, &raw)),
+            client_data_json: B64URL.encode(&raw),
+            user_handle: None,
+        },
     };
     wa.finish_authentication(&state, &response, &credential)
         .unwrap();
 
     let decoded = String::from_utf8_lossy(&json);
-    response.signature = B64URL.encode(auth.sign_assertion(&auth_data, decoded.as_bytes()));
+    response.response.signature =
+        B64URL.encode(auth.sign_assertion(&auth_data, decoded.as_bytes()));
     assert!(matches!(
         wa.finish_authentication(&state, &response, &credential),
         Err(Error::BadSignature)
@@ -394,11 +414,13 @@ fn expired_ceremony_rejected() {
     let (cdj_raw, cdj_b64) = client_data("webauthn.get", &chal.challenge, ORIGIN);
     let sig = auth.sign_assertion(&auth_data, &cdj_raw);
     let response = AuthenticationResponse {
-        id: B64URL.encode(&auth.credential_id),
-        authenticator_data: B64URL.encode(&auth_data),
-        signature: B64URL.encode(&sig),
-        client_data_json: cdj_b64,
-        user_handle: None,
+        id: CredentialId(auth.credential_id.clone()),
+        response: AssertionResponse {
+            authenticator_data: B64URL.encode(&auth_data),
+            signature: B64URL.encode(&sig),
+            client_data_json: cdj_b64,
+            user_handle: None,
+        },
     };
 
     let err = wa
@@ -407,80 +429,10 @@ fn expired_ceremony_rejected() {
     assert!(matches!(err, Error::CeremonyExpired { .. }), "got {err:?}");
 }
 
-#[test]
-fn strict_base64_rejects_standard_alphabet() {
-    // M2: in strict mode, a credential id encoded with the standard
-    // base64 alphabet (containing `+` or `/`) MUST be rejected even
-    // though the lenient default would accept it.
-    let wa = Webauthn::new(RP_ID, "Example", ORIGIN).strict_base64(true);
-    let mut auth = FakeAuthenticator::new();
-    // Pick a credential id whose base64 encoding contains a char that
-    // differs between the standard and url-safe alphabets. 0xFB → "+"
-    // in standard, "-" in url-safe; 0xFF → "/" vs "_". The first byte
-    // is enough.
-    auth.credential_id = vec![0xFB, 0x01, 0x02, 0x03];
-    let credential = do_register(&wa, &mut auth);
-
-    let (chal, state) = wa.start_authentication(std::slice::from_ref(&credential.id));
-    let auth_data = auth.auth_data_authenticate(None);
-    let (cdj_raw, cdj_b64) = client_data("webauthn.get", &chal.challenge, ORIGIN);
-    let sig = auth.sign_assertion(&auth_data, &cdj_raw);
-
-    // Encode credential id with the STANDARD alphabet (this is what
-    // a buggy `btoa(...)` client would emit). The string contains `+`
-    // which is invalid base64url.
-    let std_alphabet = base64::engine::general_purpose::STANDARD_NO_PAD.encode(&auth.credential_id);
-    assert!(std_alphabet.contains('+'), "test setup: need a '+'");
-
-    let response = AuthenticationResponse {
-        id: std_alphabet,
-        authenticator_data: B64URL.encode(&auth_data),
-        signature: B64URL.encode(&sig),
-        client_data_json: cdj_b64,
-        user_handle: None,
-    };
-
-    let err = wa
-        .finish_authentication(&state, &response, &credential)
-        .unwrap_err();
-    assert!(matches!(err, Error::Base64(_)), "got {err:?}");
-}
-
-#[test]
-fn lenient_base64_accepts_standard_alphabet() {
-    // M2 baseline: the default lenient mode keeps accepting the
-    // standard alphabet so existing buggy clients are not broken
-    // by upgrading the crate without opting into strict mode.
-    let wa = Webauthn::new(RP_ID, "Example", ORIGIN); // strict OFF
-    let mut auth = FakeAuthenticator::new();
-    auth.credential_id = vec![0xFB, 0x01, 0x02, 0x03];
-    let credential = do_register(&wa, &mut auth);
-
-    let (chal, state) = wa.start_authentication(std::slice::from_ref(&credential.id));
-    let auth_data = auth.auth_data_authenticate(None);
-    let (cdj_raw, cdj_b64) = client_data("webauthn.get", &chal.challenge, ORIGIN);
-    let sig = auth.sign_assertion(&auth_data, &cdj_raw);
-
-    let std_alphabet = base64::engine::general_purpose::STANDARD_NO_PAD.encode(&auth.credential_id);
-
-    let response = AuthenticationResponse {
-        id: std_alphabet,
-        authenticator_data: B64URL.encode(&auth_data),
-        signature: B64URL.encode(&sig),
-        client_data_json: cdj_b64,
-        user_handle: None,
-    };
-
-    let outcome = wa
-        .finish_authentication(&state, &response, &credential)
-        .expect("lenient mode must accept standard alphabet");
-    assert_eq!(outcome.new_counter, 1);
-}
-
 // ---------- user_handle (I2) ----------------------------------------------
 
 /// Helper: build an AuthenticationResponse for a credential, optionally
-/// stamping a user_handle (b64url-encoded). Used by the four
+/// stamping a user handle. Used by the four
 /// user_handle tests below.
 fn make_assertion(
     auth: &mut FakeAuthenticator,
@@ -491,11 +443,13 @@ fn make_assertion(
     let (cdj_raw, cdj_b64) = client_data("webauthn.get", chal_b64, ORIGIN);
     let sig = auth.sign_assertion(&auth_data, &cdj_raw);
     AuthenticationResponse {
-        id: B64URL.encode(&auth.credential_id),
-        authenticator_data: B64URL.encode(&auth_data),
-        signature: B64URL.encode(&sig),
-        client_data_json: cdj_b64,
-        user_handle: user_handle.map(|h| B64URL.encode(h)),
+        id: CredentialId(auth.credential_id.clone()),
+        response: AssertionResponse {
+            authenticator_data: B64URL.encode(&auth_data),
+            signature: B64URL.encode(&sig),
+            client_data_json: cdj_b64,
+            user_handle: user_handle.map(<[u8]>::to_vec),
+        },
     }
 }
 
@@ -622,10 +576,12 @@ fn do_register(wa: &Webauthn, auth: &mut FakeAuthenticator) -> nazo_passkey::Pas
     let (_cdj_raw, cdj_b64) = client_data("webauthn.create", &chal.challenge, ORIGIN);
     let attestation = B64URL.encode(auth.attestation_object());
     let response = RegistrationResponse {
-        id: B64URL.encode(&auth.credential_id),
-        transports: vec!["internal".into()],
-        attestation_object: attestation,
-        client_data_json: cdj_b64,
+        id: CredentialId(auth.credential_id.clone()),
+        response: AttestationResponse {
+            transports: vec!["internal".into()],
+            attestation_object: attestation,
+            client_data_json: cdj_b64,
+        },
     };
     wa.finish_registration(&state, &response)
         .expect("registration must succeed")
@@ -633,22 +589,24 @@ fn do_register(wa: &Webauthn, auth: &mut FakeAuthenticator) -> nazo_passkey::Pas
 
 #[test]
 fn registration_outer_id_and_exclusion_are_enforced() {
-    let wa = Webauthn::new(RP_ID, "Example", ORIGIN).strict_base64(true);
+    let wa = Webauthn::new(RP_ID, "Example", ORIGIN);
     let mut auth = FakeAuthenticator::new();
     let existing = do_register(&wa, &mut auth);
     let (chal, state) = wa.start_registration(USER_HANDLE, "alice", "Alice", &[]);
     let (_, client_data_json) = client_data("webauthn.create", &chal.challenge, ORIGIN);
     let mut response = RegistrationResponse {
-        id: B64URL.encode(b"other-id"),
-        transports: vec![],
-        attestation_object: B64URL.encode(auth.attestation_object()),
-        client_data_json,
+        id: CredentialId(b"other-id".to_vec()),
+        response: AttestationResponse {
+            transports: vec![],
+            attestation_object: B64URL.encode(auth.attestation_object()),
+            client_data_json,
+        },
     };
     assert!(matches!(
         wa.finish_registration(&state, &response),
         Err(Error::CredentialIdMismatch)
     ));
-    response.id = existing.id.to_b64url();
+    response.id = existing.id.clone();
     let mut excluded = state;
     excluded.exclude_credentials.push(existing.id);
     assert!(matches!(
@@ -657,7 +615,7 @@ fn registration_outer_id_and_exclusion_are_enforced() {
     ));
     // An excluded outer ID must still match the ID actually attested. Do not
     // let callers mistake a malformed response for a duplicate enrollment.
-    response.id = B64URL.encode(b"other-id");
+    response.id = CredentialId(b"other-id".to_vec());
     excluded
         .exclude_credentials
         .push(nazo_passkey::CredentialId(b"other-id".to_vec()));
@@ -760,10 +718,12 @@ fn uv_preferred_false_and_required_registration_behavior() {
     let (chal, state) = required.start_registration(USER_HANDLE, "alice", "Alice", &[]);
     let (_, client_data_json) = client_data("webauthn.create", &chal.challenge, ORIGIN);
     let response = RegistrationResponse {
-        id: B64URL.encode(&auth.credential_id),
-        transports: vec![],
-        attestation_object: B64URL.encode(auth.attestation_object()),
-        client_data_json,
+        id: CredentialId(auth.credential_id.clone()),
+        response: AttestationResponse {
+            transports: vec![],
+            attestation_object: B64URL.encode(auth.attestation_object()),
+            client_data_json,
+        },
     };
     assert!(matches!(
         required.finish_registration(&state, &response),

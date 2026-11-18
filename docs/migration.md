@@ -57,11 +57,13 @@ evaluate the assertion performing that update against the previous history.
 
 ## Wire encoding
 
-Responses use the existing flat adapter structs. Browser integrations extract
-the nested `credential.response` fields and encode binary values as unpadded
-base64url. `strict_base64(true)` enforces this on the outer adapter.
+Post the result of `PublicKeyCredential.toJSON()` directly to the finish route.
+Deserialize it as `RegistrationResponse` or `AuthenticationResponse`. Read
+the decoded credential ID from `id` and the decoded optional assertion handle
+from `response.user_handle`. Remove any client-side response repacking and
+`strict_base64` configuration. Wire values and the signed
+`clientDataJSON.challenge` require canonical unpadded base64url.
 
-The signed `clientDataJSON.challenge` now always requires canonical base64url,
-including when the outer adapter allows legacy encodings. Client data uses
-WebAuthn's UTF-8 replacement decoding for parsing, while hashing the original
-response bytes for signature verification.
+Restart pending ceremonies when switching wire formats. Existing stored
+credentials can still be used. Client data follows WebAuthn's UTF-8 replacement
+rules for parsing and uses the original bytes for signature verification.

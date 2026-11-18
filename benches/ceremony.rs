@@ -7,7 +7,10 @@ use std::time::Instant;
 use base64::{Engine, engine::general_purpose::URL_SAFE_NO_PAD as B64};
 use ciborium::value::Value;
 use ed25519_dalek::{Signer as _, SigningKey as EdSigningKey};
-use nazo_passkey::{AuthenticationResponse, Challenge, RegistrationResponse, Webauthn};
+use nazo_passkey::{
+    AssertionResponse, AttestationResponse, AuthenticationResponse, Challenge, CredentialId,
+    RegistrationResponse, Webauthn,
+};
 use p256::ecdsa::{Signature as EsSignature, SigningKey as EsSigningKey, signature::Verifier as _};
 use sha2::{Digest, Sha256};
 
@@ -124,7 +127,7 @@ fn main() {
             .unwrap_or(5000)
     }
     .max(10);
-    let wa = Webauthn::new("example.com", "Benchmark", "https://example.com").strict_base64(true);
+    let wa = Webauthn::new("example.com", "Benchmark", "https://example.com");
     let es = EsSigningKey::from_slice(&[7; 32]).unwrap();
     let ed = EdSigningKey::from_bytes(&[7; 32]);
     for algorithm in ["es256", "ed25519"] {
@@ -165,10 +168,12 @@ fn main() {
             (Value::Text("authData".into()), Value::Bytes(ad)),
         ]));
         let register = RegistrationResponse {
-            id: B64.encode(id),
-            transports: vec!["internal".into()],
-            attestation_object: B64.encode(attestation),
-            client_data_json: B64.encode(cdj),
+            id: CredentialId(id.to_vec()),
+            response: AttestationResponse {
+                transports: vec!["internal".into()],
+                attestation_object: B64.encode(attestation),
+                client_data_json: B64.encode(cdj),
+            },
         };
         let credential = wa.finish_registration(&register_state, &register).unwrap();
         let (_, mut state) = wa.start_authentication_with_creds_for_user(
@@ -189,11 +194,13 @@ fn main() {
             ed.sign(&message).to_bytes().to_vec()
         };
         let assertion = AuthenticationResponse {
-            id: B64.encode(id),
-            authenticator_data: B64.encode(ad),
-            signature: B64.encode(signature),
-            client_data_json: B64.encode(cdj),
-            user_handle: Some(B64.encode(b"benchmark-user")),
+            id: CredentialId(id.to_vec()),
+            response: AssertionResponse {
+                authenticator_data: B64.encode(ad),
+                signature: B64.encode(signature),
+                client_data_json: B64.encode(cdj),
+                user_handle: Some(b"benchmark-user".to_vec()),
+            },
         };
         measure(&format!("{algorithm}.registration_begin"), n, || {
             wa.start_registration(b"benchmark-user", "user", "User", &[])

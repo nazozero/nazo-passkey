@@ -50,7 +50,8 @@ mod x509;
 pub use ceremony::{Attachment, Webauthn};
 pub use error::{Error, Result};
 pub use types::{
-    AttestationEvidence, AuthSuccess, AuthenticationChallenge, AuthenticationResponse,
-    AuthenticationState, Challenge, CosePublicKey, CredentialId, PasskeyCredential,
-    RegistrationChallenge, RegistrationResponse, RegistrationState, RpId,
+    AssertionResponse, AttestationEvidence, AttestationResponse, AuthSuccess,
+    AuthenticationChallenge, AuthenticationResponse, AuthenticationState, Challenge, CosePublicKey,
+    CredentialId, PasskeyCredential, PublicKeyCredential, RegistrationChallenge,
+    RegistrationResponse, RegistrationState, RpId,
 };

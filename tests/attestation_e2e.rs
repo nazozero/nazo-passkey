@@ -88,7 +88,7 @@ impl Criticality for MalformedAaguid {
     }
 }
 
-use nazo_passkey::{RegistrationResponse, Webauthn};
+use nazo_passkey::{AttestationResponse, CredentialId, RegistrationResponse, Webauthn};
 
 const RP_ID: &str = "example.com";
 const ORIGIN: &str = "https://example.com";
@@ -343,10 +343,12 @@ fn packed_x5c_happy_path() {
     ciborium::ser::into_writer(&att_obj, &mut att_bytes).unwrap();
 
     let response = RegistrationResponse {
-        id: B64URL.encode(cred_id),
-        transports: vec!["usb".into()],
-        attestation_object: B64URL.encode(&att_bytes),
-        client_data_json: cdj_b64,
+        id: CredentialId(cred_id.to_vec()),
+        response: AttestationResponse {
+            transports: vec!["usb".into()],
+            attestation_object: B64URL.encode(&att_bytes),
+            client_data_json: cdj_b64,
+        },
     };
 
     let credential = wa
@@ -403,10 +405,12 @@ fn packed_x5c_aaguid_mismatch_rejected() {
     ciborium::ser::into_writer(&att_obj, &mut att_bytes).unwrap();
 
     let response = RegistrationResponse {
-        id: B64URL.encode(cred_id),
-        transports: vec![],
-        attestation_object: B64URL.encode(&att_bytes),
-        client_data_json: cdj_b64,
+        id: CredentialId(cred_id.to_vec()),
+        response: AttestationResponse {
+            transports: vec![],
+            attestation_object: B64URL.encode(&att_bytes),
+            client_data_json: cdj_b64,
+        },
     };
 
     let err = wa
@@ -466,10 +470,12 @@ fn packed_x5c_bad_signature_rejected() {
     ciborium::ser::into_writer(&att_obj, &mut att_bytes).unwrap();
 
     let response = RegistrationResponse {
-        id: B64URL.encode(cred_id),
-        transports: vec![],
-        attestation_object: B64URL.encode(&att_bytes),
-        client_data_json: cdj_b64,
+        id: CredentialId(cred_id.to_vec()),
+        response: AttestationResponse {
+            transports: vec![],
+            attestation_object: B64URL.encode(&att_bytes),
+            client_data_json: cdj_b64,
+        },
     };
 
     let err = wa
@@ -530,10 +536,12 @@ fn fido_u2f_happy_path() {
     ciborium::ser::into_writer(&att_obj, &mut att_bytes).unwrap();
 
     let response = RegistrationResponse {
-        id: B64URL.encode(cred_id),
-        transports: vec!["usb".into()],
-        attestation_object: B64URL.encode(&att_bytes),
-        client_data_json: cdj_b64,
+        id: CredentialId(cred_id.to_vec()),
+        response: AttestationResponse {
+            transports: vec!["usb".into()],
+            attestation_object: B64URL.encode(&att_bytes),
+            client_data_json: cdj_b64,
+        },
     };
 
     let credential = wa
@@ -592,10 +600,12 @@ fn fido_u2f_wrong_credential_pubkey_rejected() {
     ciborium::ser::into_writer(&att_obj, &mut att_bytes).unwrap();
 
     let response = RegistrationResponse {
-        id: B64URL.encode(cred_id),
-        transports: vec![],
-        attestation_object: B64URL.encode(&att_bytes),
-        client_data_json: cdj_b64,
+        id: CredentialId(cred_id.to_vec()),
+        response: AttestationResponse {
+            transports: vec![],
+            attestation_object: B64URL.encode(&att_bytes),
+            client_data_json: cdj_b64,
+        },
     };
 
     assert!(wa.finish_registration(&state, &response).is_err());
@@ -663,10 +673,12 @@ fn packed_x5c_malformed_aaguid_rejected() {
     ciborium::ser::into_writer(&att_obj, &mut att_bytes).unwrap();
 
     let response = RegistrationResponse {
-        id: B64URL.encode(cred_id),
-        transports: vec![],
-        attestation_object: B64URL.encode(&att_bytes),
-        client_data_json: cdj_b64,
+        id: CredentialId(cred_id.to_vec()),
+        response: AttestationResponse {
+            transports: vec![],
+            attestation_object: B64URL.encode(&att_bytes),
+            client_data_json: cdj_b64,
+        },
     };
 
     let err = wa
@@ -753,7 +765,7 @@ fn registration_with_chain(
         b"profile-regression",
         &credential.cose_pubkey(),
     );
-    let wa = Webauthn::new(RP_ID, "Test", ORIGIN).strict_base64(true);
+    let wa = Webauthn::new(RP_ID, "Test", ORIGIN);
     let (challenge, state) = wa.start_registration(b"user", "alice", "Alice", &[]);
     let (cdj_raw, cdj_b64) = client_data("webauthn.create", &challenge.challenge, ORIGIN);
     let mut message = Vec::new();
@@ -790,10 +802,12 @@ fn registration_with_chain(
     let mut bytes = Vec::new();
     ciborium::ser::into_writer(&envelope, &mut bytes).unwrap();
     let response = RegistrationResponse {
-        id: B64URL.encode(b"profile-regression"),
-        transports: vec![],
-        attestation_object: B64URL.encode(bytes),
-        client_data_json: cdj_b64,
+        id: CredentialId(b"profile-regression".to_vec()),
+        response: AttestationResponse {
+            transports: vec![],
+            attestation_object: B64URL.encode(bytes),
+            client_data_json: cdj_b64,
+        },
     };
     (wa, state, response)
 }
@@ -1028,15 +1042,15 @@ fn excluded_registration_still_verifies_packed_signature_and_certificate() {
     let mut cert = CertBundle::new(AaguidExt::None);
     let (wa, mut state, mut response) =
         registration_with_chain("packed", &cert, vec![cert.cert_der.clone()], [0; 16]);
-    state.exclude_credentials.push(nazo_passkey::CredentialId(
-        B64URL.decode(&response.id).unwrap(),
-    ));
+    state.exclude_credentials.push(response.id.clone());
     assert!(matches!(
         wa.finish_registration(&state, &response),
         Err(nazo_passkey::Error::CredentialExcluded)
     ));
 
-    let bytes = B64URL.decode(&response.attestation_object).unwrap();
+    let bytes = B64URL
+        .decode(&response.response.attestation_object)
+        .unwrap();
     let original: CborValue = ciborium::de::from_reader(bytes.as_slice()).unwrap();
     // A real, correctly encoded ECDSA signature over the wrong transcript
     // must remain a verification failure, not become a duplicate conflict.
@@ -1051,7 +1065,7 @@ fn excluded_registration_still_verifies_packed_signature_and_certificate() {
     statement[1].1 = CborValue::Bytes(wrong_signature.to_der().as_bytes().to_vec());
     let mut bytes = Vec::new();
     ciborium::ser::into_writer(&envelope, &mut bytes).unwrap();
-    response.attestation_object = B64URL.encode(bytes);
+    response.response.attestation_object = B64URL.encode(bytes);
     assert!(matches!(
         wa.finish_registration(&state, &response),
         Err(nazo_passkey::Error::BadSignature)
@@ -1070,7 +1084,7 @@ fn excluded_registration_still_verifies_packed_signature_and_certificate() {
     statement[2].1 = CborValue::Array(vec![CborValue::Bytes(cert.cert_der)]);
     let mut bytes = Vec::new();
     ciborium::ser::into_writer(&envelope, &mut bytes).unwrap();
-    response.attestation_object = B64URL.encode(bytes);
+    response.response.attestation_object = B64URL.encode(bytes);
     assert!(matches!(
         wa.finish_registration(&state, &response),
         Err(nazo_passkey::Error::Cbor(message))
@@ -1247,7 +1261,7 @@ fn self_attestation_response(
         ec.cose_pubkey()
     };
     let auth_data = auth_data_register(RP_ID, [0; 16], b"self-attestation", &cose);
-    let wa = Webauthn::new(RP_ID, "Test", ORIGIN).strict_base64(true);
+    let wa = Webauthn::new(RP_ID, "Test", ORIGIN);
     let (challenge, state) = wa.start_registration(b"user", "alice", "Alice", &[]);
     let (cdj, cdj_encoded) = client_data("webauthn.create", &challenge.challenge, ORIGIN);
     let mut message = auth_data.clone();
@@ -1295,10 +1309,12 @@ fn self_attestation_response(
         wa,
         state,
         RegistrationResponse {
-            id: B64URL.encode(b"self-attestation"),
-            transports: vec![],
-            attestation_object: B64URL.encode(bytes),
-            client_data_json: cdj_encoded,
+            id: CredentialId(b"self-attestation".to_vec()),
+            response: AttestationResponse {
+                transports: vec![],
+                attestation_object: B64URL.encode(bytes),
+                client_data_json: cdj_encoded,
+            },
         },
     )
 }
@@ -1338,7 +1354,9 @@ fn ed25519_self_attestation_uses_the_registered_algorithm_and_real_signature() {
 #[test]
 fn duplicate_attestation_statement_members_are_rejected() {
     let (wa, state, mut response) = self_attestation_response(false, 0);
-    let bytes = B64URL.decode(&response.attestation_object).unwrap();
+    let bytes = B64URL
+        .decode(&response.response.attestation_object)
+        .unwrap();
     let envelope: CborValue = ciborium::de::from_reader(bytes.as_slice()).unwrap();
     for position in 0..2 {
         let mut duplicated = envelope.clone();
@@ -1351,7 +1369,7 @@ fn duplicate_attestation_statement_members_are_rejected() {
         statement.insert(position, statement[position].clone());
         let mut bytes = Vec::new();
         ciborium::ser::into_writer(&duplicated, &mut bytes).unwrap();
-        response.attestation_object = B64URL.encode(bytes);
+        response.response.attestation_object = B64URL.encode(bytes);
         assert!(wa.finish_registration(&state, &response).is_err());
     }
 }

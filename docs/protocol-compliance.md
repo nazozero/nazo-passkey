@@ -13,7 +13,7 @@ authenticator operations, and CTAP transports belong to their respective peers.
 | [W3] §13.1: unpredictable challenge | 32 bytes from `getrandom`; native OS, WASI, or browser Web Crypto backend. |
 | [W3] §7.1 / §7.2: server challenge state | State binds the RP, origin, and verification policy; zero, future, expired, or mismatched state rejects. Applications consume it once. |
 | [W3] §7.1 steps 5–6, §7.2 steps 8–9: UTF-8 and JSON | Strip one leading BOM for parsing; use UTF-8 replacement decoding; reject malformed JSON and duplicate typed fields. Preserve all original bytes for hashing. |
-| [W3] §7.1 steps 7–8, §7.2 steps 10–11: type and challenge | Exact ceremony type and canonical unpadded base64url challenge. Outer adapter compatibility does not relax the signed challenge. |
+| [W3] §7.1 steps 7–8, §7.2 steps 10–11: type and challenge | Exact ceremony type and canonical unpadded base64url challenge. |
 | [W3] §7.1 steps 9–11, §7.2 steps 12–14: origin | Exact configured origin; same-origin policy rejects `crossOrigin=true` and any `topOrigin`. |
 | [W3] §7.1 step 13, §7.2 step 21: client-data hash | SHA-256 over the original decoded bytes. Signature tests distinguish original bytes from BOM-stripped or replacement-decoded text. |
 | [W3] §7.1 step 14, §7.2 step 15: RP ID | Compare the signed `rpIdHash` with the configured RP hash. |
@@ -59,7 +59,7 @@ incorporation jurisdiction. AAGUID and transport hints are descriptive data.
 | --- | --- |
 | Level 1 / Level 2 | Supported credential algorithms and same-origin client behavior remain usable. Existing records can omit the newly added security metadata. |
 | Historical COSE keys | Accept historical map ordering and integer widths; enforce required fields, known metadata types, `key_ops` verification permission, and public-only material. |
-| Outer response encoding | Flat adapter structs; strict base64url is configurable for legacy callers. The signed challenge always uses canonical base64url. |
+| Outer response encoding | [W3] §5.1 `PublicKeyCredential.toJSON()` envelope. Check `type` and matching `id` / `rawId` and require canonical unpadded base64url for verifier inputs. Client extension hints do not participate in verification. |
 | Reserved flags | Ignore unknown reserved bits while enforcing known AT/ED/UP/UV/BE/BS rules. |
 | Extensions | Parse bounded signed output structures; ignore their values for authentication and factor policy. |
 | Resource bounds | Client data 8 KiB, attestation 64 KiB, authenticator data 16 KiB, CBOR depth 12 / container 64 / total items 2,048; see README for all bounds. |

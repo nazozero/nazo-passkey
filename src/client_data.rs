@@ -56,9 +56,8 @@ pub(crate) fn validate(
     expected_type: &'static str,
     expected_challenge: &Challenge,
     expected_origin: &str,
-    strict: bool,
 ) -> Result<Vec<u8>> {
-    let raw = decode_b64_bounded(encoded, strict, 8192, "clientDataJSON")?;
+    let raw = decode_b64_bounded(encoded, 8192, "clientDataJSON")?;
     let json = raw.as_slice().trim_prefix(&[0xef, 0xbb, 0xbf]);
     let json = String::from_utf8_lossy(json);
     let p: Parsed<'_> =
@@ -70,9 +69,7 @@ pub(crate) fn validate(
         });
     }
     let mut challenge = [0; 64];
-    // The signed challenge is always canonical base64url (WebAuthn §7.1/§7.2).
-    // The compatibility setting only applies to the outer JSON adapter.
-    let length = decode_b64_into(&p.challenge, true, &mut challenge, "challenge")?;
+    let length = decode_b64_into(&p.challenge, &mut challenge, "challenge")?;
     if &challenge[..length] != expected_challenge.as_bytes() {
         return Err(Error::ChallengeMismatch);
     }
@@ -105,7 +102,7 @@ mod tests {
     fn happy_path_register() {
         let chal = Challenge(vec![1, 2, 3, 4]);
         let cdj = make_cdj("webauthn.create", &chal.to_b64url(), "https://example.com");
-        let raw = validate(&cdj, TYPE_REGISTER, &chal, "https://example.com", false).unwrap();
+        let raw = validate(&cdj, TYPE_REGISTER, &chal, "https://example.com").unwrap();
         // Returned raw is the decoded JSON, suitable for hashing.
         assert!(raw.starts_with(b"{\"type\":\"webauthn.create\""));
     }
@@ -114,7 +111,7 @@ mod tests {
     fn wrong_type_rejected() {
         let chal = Challenge(vec![1, 2, 3, 4]);
         let cdj = make_cdj("webauthn.get", &chal.to_b64url(), "https://example.com");
-        let err = validate(&cdj, TYPE_REGISTER, &chal, "https://example.com", false).unwrap_err();
+        let err = validate(&cdj, TYPE_REGISTER, &chal, "https://example.com").unwrap_err();
         assert!(matches!(err, Error::ClientDataType { .. }));
     }
 
@@ -123,12 +120,12 @@ mod tests {
         let chal = Challenge(vec![1, 2, 3, 4]);
         let bad = Challenge(vec![9, 9, 9]);
         let cdj = make_cdj("webauthn.create", &bad.to_b64url(), "https://example.com");
-        let err = validate(&cdj, TYPE_REGISTER, &chal, "https://example.com", false).unwrap_err();
+        let err = validate(&cdj, TYPE_REGISTER, &chal, "https://example.com").unwrap_err();
         assert!(matches!(err, Error::ChallengeMismatch));
     }
 
     #[test]
-    fn signed_challenge_is_canonical_even_with_a_lenient_outer_adapter() {
+    fn signed_challenge_requires_canonical_base64url() {
         use base64::engine::general_purpose::{STANDARD_NO_PAD, URL_SAFE};
 
         let challenge = Challenge(vec![0xfb; 32]);
@@ -138,13 +135,7 @@ mod tests {
         ] {
             let cdj = make_cdj(TYPE_AUTHENTICATE, &encoded_challenge, "https://example.com");
             assert!(matches!(
-                validate(
-                    &cdj,
-                    TYPE_AUTHENTICATE,
-                    &challenge,
-                    "https://example.com",
-                    false
-                ),
+                validate(&cdj, TYPE_AUTHENTICATE, &challenge, "https://example.com",),
                 Err(Error::Base64(_))
             ));
         }
@@ -155,11 +146,10 @@ mod tests {
         );
         assert_eq!(
             validate(
-                &URL_SAFE.encode(raw.as_bytes()),
+                &B64URL.encode(raw.as_bytes()),
                 TYPE_AUTHENTICATE,
                 &challenge,
                 "https://example.com",
-                false,
             )
             .unwrap(),
             raw.as_bytes()
@@ -170,7 +160,7 @@ mod tests {
     fn wrong_origin_rejected() {
         let chal = Challenge(vec![1, 2, 3, 4]);
         let cdj = make_cdj("webauthn.create", &chal.to_b64url(), "https://evil.com");
-        let err = validate(&cdj, TYPE_REGISTER, &chal, "https://example.com", false).unwrap_err();
+        let err = validate(&cdj, TYPE_REGISTER, &chal, "https://example.com").unwrap_err();
         assert!(matches!(err, Error::OriginMismatch { .. }));
     }
     #[test]
@@ -190,7 +180,6 @@ mod tests {
                     TYPE_AUTHENTICATE,
                     &challenge,
                     "https://example.com",
-                    true
                 ),
                 Err(Error::CrossOriginUnsupported)
             ));
@@ -212,7 +201,6 @@ mod tests {
                 TYPE_AUTHENTICATE,
                 &challenge,
                 "https://example.com",
-                true
             )
             .unwrap(),
             raw
@@ -234,7 +222,6 @@ mod tests {
                 TYPE_AUTHENTICATE,
                 &challenge,
                 "https://example.com",
-                true,
             )
             .unwrap(),
             raw
@@ -248,7 +235,6 @@ mod tests {
                 TYPE_AUTHENTICATE,
                 &challenge,
                 "https://example.com",
-                true,
             ),
             Err(Error::ClientData(_))
         ));
@@ -272,7 +258,6 @@ mod tests {
                     TYPE_AUTHENTICATE,
                     &challenge,
                     "https://example.com",
-                    true
                 )
                 .is_err()
             );
@@ -283,7 +268,6 @@ mod tests {
                 TYPE_AUTHENTICATE,
                 &challenge,
                 "https://example.com",
-                true
             ),
             Err(Error::InputTooLarge { .. })
         ));

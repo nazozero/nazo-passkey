@@ -3,9 +3,8 @@
 //! Run with:
 //!     cargo run --example axum_server
 //!
-//! Then open http://localhost:3000 in a passkey-capable browser
-//! (Chrome 108+, Safari 16+, Firefox 122+, Edge 108+). The page
-//! lets you register a passkey for "alice@example.com" and then
+//! Then open http://localhost:3000 in a browser with the WebAuthn JSON APIs.
+//! The page lets you register a passkey for "alice@example.com" and then
 //! authenticate with it.
 //!
 //! NOT FOR PRODUCTION:
@@ -207,13 +206,11 @@ async fn authenticate_finish(
         .ok_or(AppError::BadRequest("no authentication in flight"))?;
 
     // Look up the stored credential the user is asserting with.
-    let asserted_id = nazo_passkey::CredentialId::from_b64url(&body.id)
-        .map_err(|_| AppError::BadRequest("bad credential id"))?;
     let mut user_guard = state.user.lock().await;
     let stored = user_guard
         .credentials
         .iter_mut()
-        .find(|c| c.id == asserted_id)
+        .find(|c| c.id == body.id)
         .ok_or(AppError::Unauthorized("unknown credential".into()))?;
 
     let outcome = state
@@ -309,8 +306,7 @@ async fn main() {
         .authenticator_attachment(Attachment::Any)
         // UV preferred (not required) so even a hardware-key tap counts.
         // For a real production passkey deployment, flip this to true.
-        .require_user_verification(false)
-        .strict_base64(true);
+        .require_user_verification(false);
 
     let state = Arc::new(AppState {
         user: Mutex::new(User::default()),
@@ -329,7 +325,7 @@ async fn main() {
         .with_state(state);
 
     let addr = SocketAddr::from(([127, 0, 0, 1], 3000));
-    println!("passkey demo listening on http://localhost:3000");
     let listener = tokio::net::TcpListener::bind(addr).await.unwrap();
+    println!("passkey demo listening on http://localhost:3000");
     axum::serve(listener, app).await.unwrap();
 }

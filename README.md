@@ -53,7 +53,6 @@ metadata policy. The complete feature and responsibility matrix is in
 use nazo_passkey::Webauthn;
 
 let webauthn = Webauthn::try_new("example.com", "Example", "https://example.com")?
-    .strict_base64(true)
     .require_user_verification(true);
 
 let (options, state) = webauthn.try_start_registration(
@@ -65,9 +64,11 @@ let (options, state) = webauthn.try_start_registration(
 ```
 
 Use a stable, opaque account handle of 1–64 bytes. Send `options` to the browser
-and retain `state` on the server with the account and session. The examples
-show conversion between the browser's nested `PublicKeyCredential` and the
-library's flat response structs.
+and retain `state` on the server with the account and session. The examples use
+the browser's `PublicKeyCredential.parseCreationOptionsFromJSON()` or
+`parseRequestOptionsFromJSON()` and POST the result of `credential.toJSON()`
+directly. Deserialize the finish request as `RegistrationResponse` or
+`AuthenticationResponse`.
 
 | Operation | Application responsibility |
 | --- | --- |
@@ -109,8 +110,10 @@ Base64 decoding, owned credential records, and ceremony state allocate storage.
 The [performance record](docs/performance.md) retains measurements for its
 recorded revisions.
 
-`strict_base64(true)` requires canonical base64url in the outer response adapter.
-The signed client-data challenge always requires canonical, unpadded base64url.
+The credential envelope and signed client-data challenge require canonical,
+unpadded base64url. The finish request parser verifies `type`, `id`, and
+`rawId`, then shares the decoded ID and optional user handle with account
+lookup and verification.
 Client-data decoding follows WebAuthn's UTF-8 rules; signature verification
 hashes the original bytes, including a leading BOM when present.
 

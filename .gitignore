@@ -7,6 +7,7 @@ fuzz/artifacts/
 fuzz/coverage/
 fuzz/target/
 perf/target/
+interop/node_modules/
 
 .DS_Store
 
