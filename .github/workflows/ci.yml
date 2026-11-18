@@ -45,12 +45,7 @@ jobs:
       - name: Install NASM for native AWS-LC
         if: runner.os == 'Windows' && matrix.backend == 'aws-lc'
         shell: pwsh
-        run: |
-          choco install nasm --version=3.2.0 --yes --no-progress
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          $nasmDir = Join-Path $env:ProgramFiles 'NASM'
-          $nasmDir | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
-          & (Join-Path $nasmDir 'nasm.exe') -v
+        run: ./.github/scripts/install-nasm.ps1
       - run: cargo test --locked --all-targets ${{ matrix.cargo_args }}
       - run: cargo test --locked --doc ${{ matrix.cargo_args }}
 
