@@ -187,13 +187,11 @@ fn authenticate_finish(
     let sid = sid_from_cookies(cookies)?;
     let auth_state = take_auth_state(state, &sid)?;
 
-    let asserted_id = nazo_passkey::CredentialId::from_b64url(&body.id)
-        .map_err(|_| Custom(Status::BadRequest, "bad credential id".into()))?;
     let mut user = state.user.lock().unwrap();
     let stored = user
         .credentials
         .iter_mut()
-        .find(|c| c.id == asserted_id)
+        .find(|c| c.id == body.id)
         .ok_or_else(|| Custom(Status::Unauthorized, "unknown credential".into()))?;
     let outcome = state
         .wa
@@ -491,8 +489,7 @@ fn rocket() -> Rocket<Build> {
         "http://localhost:3000",
     )
     .authenticator_attachment(Attachment::Any)
-    .require_user_verification(false)
-    .strict_base64(true);
+    .require_user_verification(false);
 
     let state = AppState {
         user: Mutex::new(User::default()),

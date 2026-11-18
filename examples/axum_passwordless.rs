@@ -47,7 +47,7 @@ use tokio::sync::Mutex;
 use tower_http::services::ServeDir;
 
 use nazo_passkey::{
-    Attachment, AuthenticationResponse, AuthenticationState, CredentialId, PasskeyCredential,
+    Attachment, AuthenticationResponse, AuthenticationState, PasskeyCredential,
     RegistrationResponse, RegistrationState, Webauthn,
 };
 
@@ -229,17 +229,14 @@ async fn authenticate_finish(
     // The browser sends userHandle (the opaque user_id we minted at
     // registration). Discoverable-credential flow REQUIRES it; without
     // it we cannot identify the user.
-    let user_handle_b64 = body
+    let user_handle = body
+        .response
         .user_handle
         .as_deref()
         .ok_or(AppError::BadRequest("response missing userHandle"))?;
-    let user_handle = base64_decode_strict(user_handle_b64)
-        .ok_or(AppError::BadRequest("userHandle not valid base64"))?;
 
     // Look up the user by handle, then find the asserted credential
     // within that user's credentials.
-    let asserted_id = CredentialId::from_b64url(&body.id)
-        .map_err(|_| AppError::BadRequest("bad credential id"))?;
 
     let mut users = state.users.lock().await;
     let (username, user) = users
@@ -250,12 +247,12 @@ async fn authenticate_finish(
     let stored = user
         .credentials
         .iter_mut()
-        .find(|c| c.id == asserted_id)
+        .find(|c| c.id == body.id)
         .ok_or(AppError::Unauthorized("unknown credential for user".into()))?;
 
     let outcome = state
         .wa
-        .finish_discoverable_authentication(&auth_state, &body, stored, &user_handle)
+        .finish_discoverable_authentication(&auth_state, &body, stored, user_handle)
         .map_err(|e| AppError::Unauthorized(format!("auth verify failed: {e}")))?;
 
     stored.counter = outcome.new_counter;
@@ -319,14 +316,6 @@ struct WhoamiReply {
 
 // ---------- helpers -------------------------------------------------------
 
-/// Match the strict wire policy used by the ceremony verifier.
-fn base64_decode_strict(s: &str) -> Option<Vec<u8>> {
-    use base64::Engine;
-    base64::engine::general_purpose::URL_SAFE_NO_PAD
-        .decode(s)
-        .ok()
-}
-
 fn get_or_create_sid(cookies: &HeaderMap) -> String {
     sid_from_cookies(cookies).unwrap_or_else(|| hex_random(16))
 }
@@ -388,8 +377,7 @@ async fn main() {
     .authenticator_attachment(Attachment::Any)
     // For passwordless flow we want UV - the authenticator MUST
     // confirm the user identity (Touch ID / PIN), not just presence.
-    .require_user_verification(true)
-    .strict_base64(true);
+    .require_user_verification(true);
 
     let state = Arc::new(AppState {
         users: Mutex::new(HashMap::new()),
@@ -407,8 +395,8 @@ async fn main() {
         .with_state(state);
 
     let addr = SocketAddr::from(([127, 0, 0, 1], 3000));
-    println!("passwordless demo listening on http://localhost:3000");
     let listener = tokio::net::TcpListener::bind(addr).await.unwrap();
+    println!("passwordless demo listening on http://localhost:3000");
     axum::serve(listener, app).await.unwrap();
 }
 
@@ -417,6 +405,7 @@ mod tests {
     use super::*;
     use base64::{Engine as _, engine::general_purpose::URL_SAFE_NO_PAD};
     use ciborium::value::Value;
+    use nazo_passkey::{AttestationResponse, CredentialId};
     use sha2::{Digest as _, Sha256};
 
     fn pending_registration(
@@ -460,10 +449,13 @@ mod tests {
         (
             state,
             RegistrationResponse {
-                id: URL_SAFE_NO_PAD.encode(credential_id),
-                transports: vec![],
-                attestation_object: URL_SAFE_NO_PAD.encode(attestation_bytes),
-                client_data_json: URL_SAFE_NO_PAD.encode(serde_json::to_vec(&client_data).unwrap()),
+                id: CredentialId(credential_id.to_vec()),
+                response: AttestationResponse {
+                    transports: vec![],
+                    attestation_object: URL_SAFE_NO_PAD.encode(attestation_bytes),
+                    client_data_json: URL_SAFE_NO_PAD
+                        .encode(serde_json::to_vec(&client_data).unwrap()),
+                },
             },
         )
     }
@@ -474,8 +466,7 @@ mod tests {
             users: Mutex::new(HashMap::new()),
             sessions: Mutex::new(HashMap::new()),
             wa: Webauthn::new("localhost", "Test", "http://localhost:3000")
-                .require_user_verification(true)
-                .strict_base64(true),
+                .require_user_verification(true),
         });
         let (first_state, first_response) = pending_registration(&state.wa, &[1; 32], &[1; 16]);
         let (second_state, second_response) = pending_registration(&state.wa, &[2; 32], &[2; 16]);

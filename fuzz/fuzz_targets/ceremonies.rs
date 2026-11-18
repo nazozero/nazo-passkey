@@ -5,8 +5,8 @@ use std::sync::OnceLock;
 use base64::{Engine, engine::general_purpose::URL_SAFE_NO_PAD as B64};
 use libfuzzer_sys::fuzz_target;
 use nazo_passkey::{
-    AuthenticationResponse, AuthenticationState, Challenge, PasskeyCredential,
-    RegistrationResponse, RegistrationState, Webauthn,
+    AssertionResponse, AttestationResponse, AuthenticationResponse, AuthenticationState, Challenge,
+    CredentialId, PasskeyCredential, RegistrationResponse, RegistrationState, Webauthn,
 };
 use serde_json::Value;
 
@@ -50,8 +50,7 @@ fn fixtures() -> &'static [Fixture] {
                 let bytes = |part: &str, field: &str| {
                     hex::decode(vector[part][field].as_str().unwrap()).unwrap()
                 };
-                let wa =
-                    Webauthn::new("example.org", "Fuzz", "https://example.org").strict_base64(true);
+                let wa = Webauthn::new("example.org", "Fuzz", "https://example.org");
                 let (_, mut registration) = wa.start_registration(USER_HANDLE, "user", "User", &[]);
                 registration.challenge = Challenge(bytes("registration", "challenge"));
                 let create_json = B64.encode(bytes("registration", "clientDataJSON"));
@@ -60,10 +59,12 @@ fn fixtures() -> &'static [Fixture] {
                     .finish_registration(
                         &registration,
                         &RegistrationResponse {
-                            id: B64.encode(bytes("registration", "credential_id")),
-                            transports: vec![],
-                            attestation_object: attestation.clone(),
-                            client_data_json: create_json.clone(),
+                            id: CredentialId(bytes("registration", "credential_id")),
+                            response: AttestationResponse {
+                                transports: vec![],
+                                attestation_object: attestation.clone(),
+                                client_data_json: create_json.clone(),
+                            },
                         },
                     )
                     .unwrap_or_else(|error| panic!("{name} registration fixture: {error}"));
@@ -78,17 +79,19 @@ fn fixtures() -> &'static [Fixture] {
                 let signature = B64.encode(bytes("authentication", "signature"));
                 let authenticator_data = B64.encode(bytes("authentication", "authenticatorData"));
                 let mut assertion = AuthenticationResponse {
-                    id: credential.id.to_b64url(),
-                    authenticator_data: authenticator_data.clone(),
-                    signature: signature.clone(),
-                    client_data_json: get_json.clone(),
-                    user_handle: None,
+                    id: credential.id.clone(),
+                    response: AssertionResponse {
+                        authenticator_data: authenticator_data.clone(),
+                        signature: signature.clone(),
+                        client_data_json: get_json.clone(),
+                        user_handle: None,
+                    },
                 };
                 // Fail loudly if a fixture stops reaching real signature verification;
                 // never weaken validation merely to increase fuzz coverage.
                 wa.finish_authentication(&authentication, &assertion, &credential)
                     .unwrap_or_else(|error| panic!("{name} assertion fixture: {error}"));
-                assertion.user_handle = Some(B64.encode(USER_HANDLE));
+                assertion.response.user_handle = Some(USER_HANDLE.to_vec());
                 wa.finish_discoverable_authentication(
                     &discoverable,
                     &assertion,
@@ -136,17 +139,19 @@ fuzz_target!(|input: &[u8]| {
     match mode {
         0 | 1 => {
             let response = RegistrationResponse {
-                id: f.credential.id.to_b64url(),
-                transports: vec![],
-                attestation_object: if mode == 0 {
-                    B64.encode(data)
-                } else {
-                    f.attestation.clone()
-                },
-                client_data_json: if mode == 1 {
-                    B64.encode(data)
-                } else {
-                    f.create_json.clone()
+                id: f.credential.id.clone(),
+                response: AttestationResponse {
+                    transports: vec![],
+                    attestation_object: if mode == 0 {
+                        B64.encode(data)
+                    } else {
+                        f.attestation.clone()
+                    },
+                    client_data_json: if mode == 1 {
+                        B64.encode(data)
+                    } else {
+                        f.create_json.clone()
+                    },
                 },
             };
             let _ = f.wa.finish_registration(&registration, &response);
@@ -157,23 +162,25 @@ fuzz_target!(|input: &[u8]| {
                 credential.public_key_cose.0 = data.to_vec();
             }
             let response = AuthenticationResponse {
-                id: credential.id.to_b64url(),
-                authenticator_data: if mode == 2 {
-                    B64.encode(data)
-                } else {
-                    f.authenticator_data.clone()
+                id: credential.id.clone(),
+                response: AssertionResponse {
+                    authenticator_data: if mode == 2 {
+                        B64.encode(data)
+                    } else {
+                        f.authenticator_data.clone()
+                    },
+                    signature: if mode == 4 {
+                        B64.encode(data)
+                    } else {
+                        f.signature.clone()
+                    },
+                    client_data_json: if mode == 6 {
+                        B64.encode(data)
+                    } else {
+                        f.get_json.clone()
+                    },
+                    user_handle: (mode == 7).then(|| data.to_vec()),
                 },
-                signature: if mode == 4 {
-                    B64.encode(data)
-                } else {
-                    f.signature.clone()
-                },
-                client_data_json: if mode == 6 {
-                    B64.encode(data)
-                } else {
-                    f.get_json.clone()
-                },
-                user_handle: (mode == 7).then(|| B64.encode(data)),
             };
             if mode == 7 {
                 let _ = f.wa.finish_discoverable_authentication(

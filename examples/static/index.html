@@ -31,21 +31,6 @@
   <pre id="log"></pre>
 
   <script>
-  // ---------- base64 helpers (browser ArrayBuffer <-> base64url) ----------
-  function b64urlEncode(buf) {
-    let s = btoa(String.fromCharCode(...new Uint8Array(buf)));
-    return s.replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
-  }
-  function b64urlDecode(str) {
-    // pad and swap alphabet
-    str = str.replace(/-/g, "+").replace(/_/g, "/");
-    while (str.length % 4) str += "=";
-    const bin = atob(str);
-    const out = new Uint8Array(bin.length);
-    for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
-    return out.buffer;
-  }
-
   const logEl = document.getElementById("log");
   function log(msg, cls) {
     const line = document.createElement("div");
@@ -62,33 +47,15 @@
       if (!startResp.ok) throw new Error(await startResp.text());
       const opts = await startResp.json();
 
-      // The server gave us base64url-encoded byte fields; the WebAuthn
-      // API wants ArrayBuffers, so decode them.
-      opts.challenge = b64urlDecode(opts.challenge);
-      opts.user.id = b64urlDecode(opts.user.id);
-      if (opts.excludeCredentials) {
-        opts.excludeCredentials = opts.excludeCredentials.map(c => ({
-          ...c, id: b64urlDecode(c.id),
-        }));
-      }
-
       log("→ navigator.credentials.create(...)");
-      const cred = await navigator.credentials.create({ publicKey: opts });
-
-      // Re-encode binary fields as strict base64url without padding,
-      // matching the server verifier policy.
-      const body = {
-        id: cred.id,
-        attestationObject: b64urlEncode(cred.response.attestationObject),
-        clientDataJSON: b64urlEncode(cred.response.clientDataJSON),
-        transports: cred.response.getTransports ? cred.response.getTransports() : [],
-      };
+      const publicKey = PublicKeyCredential.parseCreationOptionsFromJSON(opts);
+      const cred = await navigator.credentials.create({ publicKey });
 
       log("→ POST /register/finish");
       const finishResp = await fetch("/register/finish", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
+        body: JSON.stringify(cred.toJSON()),
       });
       if (!finishResp.ok) throw new Error(await finishResp.text());
       const result = await finishResp.json();
@@ -106,31 +73,15 @@
       if (!startResp.ok) throw new Error(await startResp.text());
       const opts = await startResp.json();
 
-      opts.challenge = b64urlDecode(opts.challenge);
-      if (opts.allowCredentials) {
-        opts.allowCredentials = opts.allowCredentials.map(c => ({
-          ...c, id: b64urlDecode(c.id),
-        }));
-      }
-
       log("→ navigator.credentials.get(...)");
-      const assertion = await navigator.credentials.get({ publicKey: opts });
-
-      const body = {
-        id: assertion.id,
-        authenticatorData: b64urlEncode(assertion.response.authenticatorData),
-        signature: b64urlEncode(assertion.response.signature),
-        clientDataJSON: b64urlEncode(assertion.response.clientDataJSON),
-        userHandle: assertion.response.userHandle
-          ? b64urlEncode(assertion.response.userHandle)
-          : null,
-      };
+      const publicKey = PublicKeyCredential.parseRequestOptionsFromJSON(opts);
+      const assertion = await navigator.credentials.get({ publicKey });
 
       log("→ POST /authenticate/finish");
       const finishResp = await fetch("/authenticate/finish", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
+        body: JSON.stringify(assertion.toJSON()),
       });
       if (!finishResp.ok) throw new Error(await finishResp.text());
       const result = await finishResp.json();

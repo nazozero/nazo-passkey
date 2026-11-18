@@ -62,9 +62,87 @@ WASI execution, all four dependency audits, and both bounded fuzz campaigns.
 The final PR head must pass these jobs before merge. Run results identify the
 tested commit; workflow configuration describes the required coverage.
 
-macOS ARM64 and physical-authenticator / browser interoperability require
-separate validation. The [protocol matrix](protocol-compliance.md) defines the
-supported algorithms, formats, and application responsibilities.
+Native macOS ARM64 and physical-authenticator interoperability require separate
+validation. The [protocol matrix](protocol-compliance.md) defines the supported
+algorithms, formats, and application responsibilities.
+
+## Browser and authenticator interoperability
+
+The `browser-interop` CI job builds the two Axum demos on Ubuntu 24.04 and runs
+`interop/browser.test.mjs` against Playwright's pinned Chromium build. Each
+fixture starts a fresh demo and browser context with a CDP virtual CTAP2.1
+authenticator. The tests give server options to
+`PublicKeyCredential.parseCreationOptionsFromJSON()` and
+`parseRequestOptionsFromJSON()`, call the browser's credential APIs, and POST
+`credential.toJSON()` directly to the finish routes.
+The test output records the browser product, version and revision, OS, Node and
+Playwright versions, authenticator options, and observed ceremony fields.
+[WebAuthn JSON APIs](https://www.w3.org/TR/webauthn-3/#dom-publickeycredential-parsecreationoptionsfromjson),
+[Chromium virtual authenticator protocol](https://github.com/ChromeDevTools/devtools-protocol/blob/master/pdl/domains/WebAuthn.pdl)
+
+| Fixture | Verified by the suite |
+| --- | --- |
+| `axum_server`, virtual USB without resident key or UV | Username-first allow-list login, UV preferred, `none` attestation, BE/BS clear and signature counter increases. Reject same counter, wrong account, modified RP ID hash, wrong signature and a genuine assertion made at a different origin. |
+| `axum_passwordless`, virtual internal with resident key and UV | Empty allow-list login with the registered handle, `none` attestation, BE set and BS changes from clear to set. Reject a stale challenge, repeat finish and UV-clear assertion under required UV. Confirm sign-in with `/whoami`. |
+| `axum_server`, virtual USB, expired state | Obtain a browser assertion and submit it unchanged after the actual five-minute ceremony TTL. Expect HTTP 401 for expired state. |
+
+Run from the repository root with Node.js 24, the pinned Rust toolchain, and
+port 3000 free. On Linux, add `--with-deps` to the browser install command if
+the Chromium system dependencies are missing.
+
+```sh
+cargo build --locked --example axum_server --example axum_passwordless
+npm --prefix interop ci
+npm --prefix interop exec --no -- playwright install --no-shell chromium
+npm --prefix interop test
+```
+
+Allow about six minutes for the suite, including the expiry test. Challenges
+and credentials are generated anew by each run. The lockfiles and
+fixtures reproduce the test inputs and expected behavior. This validation has
+no FIDO-issued certification status.
+
+### Executed browser run
+
+On 2026-11-18, all three browser fixtures passed locally on Windows 11 Pro x64
+(build 10.0.26200) with Chrome for Testing 159.0.8154.6
+(revision `98a2592026af8d673b9fa83b626ac68bdf4ae78a`, CDP 1.3),
+Playwright 1.65.1, Node.js 24.16.0, and Rust 1.100.0.
+
+| Virtual CTAP2.1 authenticator | Observed result |
+| --- | --- |
+| USB without resident-key or UV support | `none` attestation, UV/BE/BS clear, counter 1 at registration and 2 then 3 at sign-in. Same counter, wrong account, modified RP ID hash, wrong signature and alternate origin each returned HTTP 401. |
+| Internal with resident-key support and UV | `none` attestation, UV/BE set, BS clear at registration and set at sign-in. The stale challenge and missing UV returned HTTP 401. Resubmission returned HTTP 400. The fresh assertion signed in as the registered account, confirmed by `/whoami`. |
+| USB with expired state | The unchanged browser assertion returned HTTP 401 after the state had aged for 302 seconds. |
+
+### Manual browser and device matrix
+
+Start one example at a time from the repo root with
+`cargo run --locked --example axum_server` or
+`cargo run --locked --example axum_passwordless`. Open
+`http://localhost:3000` in a browser window with the WebAuthn JSON APIs. Use a
+disposable browser profile or test account where supported, choose the
+authenticator named in the row, and remove the test credentials afterward.
+The demos store registrations in memory. Keep the same demo running from
+registration through sign-in.
+
+| Target | Procedure and expected result | Physical result |
+| --- | --- | --- |
+| Safari on macOS | In the passwordless demo, register with Safari's platform passkey provider, then sign in by selecting the registered account. Expect the correct account and `UV=true`. Dismiss a subsequent browser prompt and confirm the demo reports a credential error. | Pending |
+| Firefox desktop | In the username-first demo, register and authenticate twice with a supported authenticator. In the passwordless demo, register a discoverable credential and select it at sign-in. Record the OS authenticator or external key used and any unavailable operation. | Pending |
+| Platform passkey | In the passwordless demo, use an enrolled platform authenticator, such as Windows Hello or Touch ID. Complete local verification at registration and at sign-in. Expect the correct account and `UV=true`. Record the provider and verification method. | Pending |
+| Synced passkey | Use two desktops signed in to the same sync provider. Run the passwordless demo on the first desktop. On the second, use `ssh -NT -L 127.0.0.1:3000:127.0.0.1:3000 user@first-desktop` to reach that same process at `http://localhost:3000`. Register on the first desktop, wait for the provider to sync, then choose the synced credential on the second. Expect the registered account and `UV=true`. Record the provider and both environments. | Pending |
+| Roaming security key | In the username-first demo, select the physical key and register and authenticate twice. Record observed counters, including zero if the key does not implement a counter. For a CTAP2 key supporting resident credentials and a PIN or biometric UV, repeat in the passwordless demo and expect account selection and `UV=true`. Record model, firmware and transport. | Pending |
+
+For each execution, record date, source revision, browser full version, OS
+version/build, device and authenticator model/provider, available firmware or
+provider version, transport, ceremony, and pass/fail with any browser or HTTP
+error. Record UV and counters from the demo output where available. To inspect
+assertion BE/BS in browser developer tools, base64url-decode
+`authenticatorData` from the `/authenticate/finish` request and apply masks
+`0x08` and `0x10` to its flags byte at offset 32. Mark unavailable observations
+as such and retain only the observations, without credential payloads.
+[Authenticator data flags](https://www.w3.org/TR/webauthn-3/#sctn-authenticator-data)
 
 ## Performance evidence
 

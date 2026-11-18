@@ -408,15 +408,13 @@ async fn authenticate_finish(
         .and_then(|s| s.auth_state.take())
         .ok_or(AppError::BadRequest("no authentication in flight"))?;
 
-    let asserted_id = CredentialId::from_b64url(&body.id)
-        .map_err(|_| AppError::BadRequest("bad credential id"))?;
     let store = state.store.lock().await;
     let user_handle = auth_state
         .user_handle
         .as_deref()
         .ok_or(AppError::BadRequest("missing account binding"))?;
     let stored = store
-        .find_credential(user_handle, asserted_id.as_bytes())
+        .find_credential(user_handle, body.id.as_bytes())
         .map_err(db_err)?
         .ok_or(AppError::Unauthorized("unknown credential".into()))?;
 
@@ -517,8 +515,7 @@ async fn main() {
     println!("opened SQLite at {DB_PATH}");
     let wa = Webauthn::new("localhost", "Passkey sqlite demo", "http://localhost:3000")
         .authenticator_attachment(Attachment::Any)
-        .require_user_verification(false)
-        .strict_base64(true);
+        .require_user_verification(false);
 
     let state = Arc::new(AppState {
         store: Mutex::new(store),

@@ -4,7 +4,9 @@
 
 use base64::{Engine, engine::general_purpose::URL_SAFE_NO_PAD as B64};
 use ciborium::value::Value;
-use nazo_passkey::{RegistrationResponse, RegistrationState, Webauthn};
+use nazo_passkey::{
+    AttestationResponse, CredentialId, RegistrationResponse, RegistrationState, Webauthn,
+};
 use sha2::{Digest, Sha256};
 
 const CREDENTIAL_ID: &[u8] = b"binary-regression-credential";
@@ -48,7 +50,7 @@ fn envelope(ad: &[u8], statement: Value) -> Value {
 }
 
 fn fixture() -> (Webauthn, RegistrationState, RegistrationResponse, Vec<u8>) {
-    let wa = Webauthn::new("example.com", "Test", "https://example.com").strict_base64(true);
+    let wa = Webauthn::new("example.com", "Test", "https://example.com");
     let (challenge, state) = wa.start_registration(b"user", "alice", "Alice", &[]);
     let client_data = serde_json::json!({
         "type": "webauthn.create", "challenge": challenge.challenge,
@@ -56,10 +58,12 @@ fn fixture() -> (Webauthn, RegistrationState, RegistrationResponse, Vec<u8>) {
     });
     let ad = auth_data(&encode(&key()), 0x45, &[]);
     let response = RegistrationResponse {
-        id: B64.encode(CREDENTIAL_ID),
-        transports: vec![],
-        client_data_json: B64.encode(serde_json::to_vec(&client_data).unwrap()),
-        attestation_object: B64.encode(encode(&envelope(&ad, Value::Map(vec![])))),
+        id: CredentialId(CREDENTIAL_ID.to_vec()),
+        response: AttestationResponse {
+            transports: vec![],
+            client_data_json: B64.encode(serde_json::to_vec(&client_data).unwrap()),
+            attestation_object: B64.encode(encode(&envelope(&ad, Value::Map(vec![])))),
+        },
     };
     (wa, state, response, ad)
 }
@@ -80,14 +84,14 @@ fn none_requires_present_empty_map() {
         Value::Array(vec![]),
         Value::Null,
     ] {
-        response.attestation_object = B64.encode(encode(&envelope(&ad, statement)));
+        response.response.attestation_object = B64.encode(encode(&envelope(&ad, statement)));
         assert!(wa.finish_registration(&state, &response).is_err());
     }
     let Value::Map(mut fields) = envelope(&ad, Value::Map(vec![])) else {
         unreachable!()
     };
     fields.remove(1);
-    response.attestation_object = B64.encode(encode(&Value::Map(fields)));
+    response.response.attestation_object = B64.encode(encode(&Value::Map(fields)));
     assert!(wa.finish_registration(&state, &response).is_err());
 }
 
@@ -100,12 +104,12 @@ fn duplicate_envelope_keys_and_trailing_items_are_rejected() {
     for position in 0..3 {
         let mut duplicate = fields.clone();
         duplicate.insert(position, fields[position].clone());
-        response.attestation_object = B64.encode(encode(&Value::Map(duplicate)));
+        response.response.attestation_object = B64.encode(encode(&Value::Map(duplicate)));
         assert!(wa.finish_registration(&state, &response).is_err());
     }
     let mut trailing = encode(&Value::Map(fields));
     trailing.push(0);
-    response.attestation_object = B64.encode(trailing);
+    response.response.attestation_object = B64.encode(trailing);
     assert!(wa.finish_registration(&state, &response).is_err());
 }
 
@@ -122,7 +126,8 @@ fn algorithm_and_label_integer_overflow_cannot_alias_negative_values() {
             fields[index].0 = Value::Integer(u64::MAX.into());
         }
         let ad = auth_data(&encode(&Value::Map(fields)), 0x45, &[]);
-        response.attestation_object = B64.encode(encode(&envelope(&ad, Value::Map(vec![]))));
+        response.response.attestation_object =
+            B64.encode(encode(&envelope(&ad, Value::Map(vec![]))));
         assert!(wa.finish_registration(&state, &response).is_err());
     }
 }
@@ -159,7 +164,8 @@ fn invalid_points_and_private_or_optional_parameters_do_not_register() {
     }
     for candidate in candidates {
         let ad = auth_data(&encode(&candidate), 0x45, &[]);
-        response.attestation_object = B64.encode(encode(&envelope(&ad, Value::Map(vec![]))));
+        response.response.attestation_object =
+            B64.encode(encode(&envelope(&ad, Value::Map(vec![]))));
         assert!(wa.finish_registration(&state, &response).is_err());
     }
 }
@@ -175,20 +181,21 @@ fn extension_and_backup_flags_have_complete_framing() {
         (0x55, &[][..]),
     ] {
         let ad = auth_data(&encode(&key()), flags, extension);
-        response.attestation_object = B64.encode(encode(&envelope(&ad, Value::Map(vec![]))));
+        response.response.attestation_object =
+            B64.encode(encode(&envelope(&ad, Value::Map(vec![]))));
         assert!(wa.finish_registration(&state, &response).is_err());
     }
     let ad = auth_data(&encode(&key()), 0xdd, &[0xa0]);
-    response.attestation_object = B64.encode(encode(&envelope(&ad, Value::Map(vec![]))));
+    response.response.attestation_object = B64.encode(encode(&envelope(&ad, Value::Map(vec![]))));
     assert!(wa.finish_registration(&state, &response).is_ok());
 }
 
 #[test]
 fn every_truncated_envelope_is_rejected_without_panic() {
     let (wa, state, mut response, _) = fixture();
-    let complete = B64.decode(&response.attestation_object).unwrap();
+    let complete = B64.decode(&response.response.attestation_object).unwrap();
     for length in 0..complete.len() {
-        response.attestation_object = B64.encode(&complete[..length]);
+        response.response.attestation_object = B64.encode(&complete[..length]);
         assert!(
             wa.finish_registration(&state, &response).is_err(),
             "prefix length {length}"
@@ -203,11 +210,11 @@ fn excessive_nesting_and_noncanonical_encodings_are_rejected() {
     deeply_nested.extend_from_slice(&[0x81; 20]);
     deeply_nested.push(0);
     let ad = auth_data(&encode(&key()), 0xc5, &deeply_nested);
-    response.attestation_object = B64.encode(encode(&envelope(&ad, Value::Map(vec![]))));
+    response.response.attestation_object = B64.encode(encode(&envelope(&ad, Value::Map(vec![]))));
     assert!(wa.finish_registration(&state, &response).is_err());
     let mut cose = encode(&key());
     cose.splice(1..2, [0x18, 0x01]);
     let ad = auth_data(&cose, 0x45, &[]);
-    response.attestation_object = B64.encode(encode(&envelope(&ad, Value::Map(vec![]))));
+    response.response.attestation_object = B64.encode(encode(&envelope(&ad, Value::Map(vec![]))));
     assert!(wa.finish_registration(&state, &response).is_err());
 }

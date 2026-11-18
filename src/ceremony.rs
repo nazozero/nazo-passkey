@@ -93,10 +93,6 @@ pub struct Webauthn {
     /// registration time. Does NOT affect authentication - by then
     /// the user already has a specific credential.
     attachment: Attachment,
-    /// Require canonical base64url on the outer response fields. The default
-    /// accepts padding and the standard alphabet for existing JSON adapters.
-    /// The signed client-data challenge is always canonical base64url.
-    strict_base64: bool,
     /// When `true`, `finish_authentication` REQUIRES the assertion
     /// response to include a `userHandle` whenever the ceremony was
     /// started via `start_authentication_for_user`. WebAuthn-3 §7.2
@@ -185,7 +181,6 @@ impl Webauthn {
             origin: origin.to_owned(),
             require_uv: false,
             attachment: Attachment::Platform,
-            strict_base64: false,
             require_user_handle: false,
             rp_id_hash,
             context_binding: [0; 32],
@@ -197,9 +192,8 @@ impl Webauthn {
     fn bind_context(&mut self) {
         let mut digest = Sha256::new();
         digest.update([
-            1,
+            2,
             u8::from(self.require_uv),
-            u8::from(self.strict_base64),
             u8::from(self.require_user_handle),
         ]);
         digest.update(self.rp_id_hash);
@@ -227,17 +221,6 @@ impl Webauthn {
         Ok(())
     }
 
-    /// Require canonical unpadded base64url on the outer response fields.
-    /// The default also accepts padding and the standard alphabet for existing
-    /// JSON adapters. The signed `clientDataJSON.challenge` always requires
-    /// canonical unpadded base64url, independently of this setting.
-    #[must_use]
-    pub fn strict_base64(mut self, strict: bool) -> Self {
-        self.strict_base64 = strict;
-        self.bind_context();
-        self
-    }
-
     /// Builder: when `true`, an authentication ceremony started via
     /// [`Self::start_authentication_for_user`] REQUIRES the assertion
     /// response to carry a matching `userHandle`. A missing
@@ -259,12 +242,6 @@ impl Webauthn {
         self.require_user_handle = require;
         self.bind_context();
         self
-    }
-
-    /// Internal: pick the right base64 decoder for response-side
-    /// wire fields based on the `strict_base64` toggle.
-    fn decode_b64(&self, s: &str, limit: usize, field: &'static str) -> Result<Vec<u8>> {
-        decode_b64_bounded(s, self.strict_base64, limit, field)
     }
 
     /// Builder method: when set to `true`, the server REJECTS any
@@ -410,14 +387,14 @@ impl Webauthn {
         // in depth. The caller must atomically consume state as well:
         // a TTL does not prevent reuse within that time window.
         self.check_state(state.created_at, state.context_binding, &state.challenge)?;
+        let body = &response.response;
 
         // 1. Validate clientDataJSON.
         let cdj_raw = client_data::validate(
-            &response.client_data_json,
+            &body.client_data_json,
             TYPE_REGISTER,
             &state.challenge,
             &self.origin,
-            self.strict_base64,
         )?;
         let cdj_hash = sha256_32(&cdj_raw);
 
@@ -425,14 +402,13 @@ impl Webauthn {
         if !(1..=64).contains(&state.user_id.len()) {
             return Err(Error::InvalidState("user handle must contain 1..=64 bytes"));
         }
-        if response.transports.len() > 16 || response.transports.iter().any(|s| s.len() > 32) {
+        if body.transports.len() > 16 || body.transports.iter().any(|s| s.len() > 32) {
             return Err(Error::InputTooLarge {
                 field: "transports",
                 limit: 512,
             });
         }
-        let att_bytes =
-            self.decode_b64(&response.attestation_object, 65536, "attestationObject")?;
+        let att_bytes = decode_b64_bounded(&body.attestation_object, 65536, "attestationObject")?;
         let att = ParsedAttestation::parse(&att_bytes)?;
 
         // 3. rpIdHash check. Note: non-constant-time `!=` is fine here
@@ -463,7 +439,7 @@ impl Webauthn {
 
         // 6. Parse the COSE public key and verify any attestation
         // statement signed by it.
-        let asserted_id = self.decode_b64(&response.id, 1023, "credential ID")?;
+        let asserted_id = response.id.as_bytes();
         if asserted_id != attested.credential_id {
             return Err(Error::CredentialIdMismatch);
         }
@@ -495,10 +471,10 @@ impl Webauthn {
 
         // 7. Build the persisted credential.
         Ok(PasskeyCredential {
-            id: CredentialId(asserted_id),
+            id: response.id.clone(),
             public_key_cose: CosePublicKey(attested.public_key_cose.to_vec()),
             counter: att.auth_data.sign_count,
-            transports: response.transports.clone(),
+            transports: body.transports.clone(),
             aaguid: attested.aaguid,
             user_handle: Some(state.user_id.clone()),
             uv_initialized: Some(att.auth_data.user_verified()),
@@ -597,9 +573,9 @@ impl Webauthn {
     /// knows which user is trying to sign in. For discoverable /
     /// passwordless flows (the user is unknown until the response
     /// arrives), use [`Self::start_authentication`] and look the
-    /// user up by `response.user_handle` yourself.
+    /// user up by the assertion's decoded user handle yourself.
     ///
-    /// By default the check is skipped when `response.user_handle`
+    /// By default the check is skipped when the assertion's user handle
     /// is absent (per spec). Tighten that with
     /// [`Self::require_user_handle`] for platform-authenticator-only
     /// deployments where the user_handle is always emitted.
@@ -648,7 +624,7 @@ impl Webauthn {
     ///
     /// The caller must resolve the owning account within the current RP/tenant.
     /// Username-first flows bind its handle with an account-aware start method.
-    /// Discoverable flows resolve `response.user_handle` to the owning account;
+    /// Discoverable flows resolve the assertion's user handle to the owning account;
     /// [`Self::finish_discoverable_authentication`] supplies that binding for
     /// records whose stored user handle is absent.
     ///
@@ -684,11 +660,12 @@ impl Webauthn {
         account_handle: Option<&[u8]>,
     ) -> Result<AuthSuccess> {
         self.check_state(state.created_at, state.context_binding, &state.challenge)?;
-        let asserted_id = CredentialId(self.decode_b64(&response.id, 1023, "credential ID")?);
-        if asserted_id.as_bytes().is_empty()
-            || asserted_id != stored.id
+        let asserted_id = &response.id;
+        let body = &response.response;
+        if !(1..=1023).contains(&asserted_id.as_bytes().len())
+            || asserted_id != &stored.id
             || (!state.allow_credentials.is_empty()
-                && !state.allow_credentials.contains(&asserted_id))
+                && !state.allow_credentials.contains(asserted_id))
         {
             return Err(Error::BadSignature);
         }
@@ -703,29 +680,23 @@ impl Webauthn {
             return Err(Error::UserHandleMismatch);
         }
         let discoverable = state.user_handle.is_none() && state.allow_credentials.is_empty();
-        match response.user_handle.as_deref() {
-            Some(encoded) => {
-                let mut handle = [0; 64];
-                let length =
-                    decode_b64_into(encoded, self.strict_base64, &mut handle, "userHandle")?;
-                if expected != Some(&handle[..length]) || length == 0 {
-                    return Err(Error::UserHandleMismatch);
-                }
+        match body.user_handle.as_deref() {
+            Some(handle) if handle.is_empty() || expected != Some(handle) => {
+                return Err(Error::UserHandleMismatch);
             }
             None if discoverable || self.require_user_handle => {
                 return Err(Error::UserHandleMismatch);
             }
-            None => {}
+            _ => {}
         }
         let cdj_raw = client_data::validate(
-            &response.client_data_json,
+            &body.client_data_json,
             TYPE_AUTHENTICATE,
             &state.challenge,
             &self.origin,
-            self.strict_base64,
         )?;
         let cdj_hash = sha256_32(&cdj_raw);
-        let ad_bytes = self.decode_b64(&response.authenticator_data, 16384, "authenticatorData")?;
+        let ad_bytes = decode_b64_bounded(&body.authenticator_data, 16384, "authenticatorData")?;
         let ad = AuthenticatorData::parse(&ad_bytes)?;
         if ad.rp_id_hash != self.rp_id_hash {
             return Err(Error::RpIdHashMismatch);
@@ -753,12 +724,7 @@ impl Webauthn {
         let new_counter = ad.sign_count;
         let key = CoseKey::parse(stored.public_key_cose.as_bytes())?;
         let mut sig = [0; 80];
-        let sig_len = decode_b64_into(
-            &response.signature,
-            self.strict_base64,
-            &mut sig,
-            "signature",
-        )?;
+        let sig_len = decode_b64_into(&body.signature, &mut sig, "signature")?;
         crypto::verify_auth_data(&key, &ad_bytes, &cdj_hash, &sig[..sig_len])?;
         // Reject non-increasing counters, including backups; 0/0 is supported.
         if (new_counter != 0 || stored.counter != 0) && new_counter <= stored.counter {
@@ -768,7 +734,7 @@ impl Webauthn {
             });
         }
         Ok(AuthSuccess {
-            credential_id: asserted_id,
+            credential_id: asserted_id.clone(),
             new_counter,
             user_verified,
             user_verification_eligible: user_verified && stored.uv_initialized == Some(true),
@@ -871,15 +837,6 @@ mod tests {
         let (chal, _) = wa.start_registration(b"u", "u", "U", &[]);
         let advertised: Vec<i64> = chal.pub_key_cred_params.iter().map(|p| p.alg).collect();
         assert_eq!(advertised, ALLOWED_REGISTRATION_ALGS);
-    }
-
-    #[test]
-    fn strict_base64_default_is_lenient() {
-        // M2: builder defaults to lenient (backwards compatible).
-        let wa = Webauthn::new("example.com", "Example", "https://example.com");
-        assert!(!wa.strict_base64);
-        let wa = wa.strict_base64(true);
-        assert!(wa.strict_base64);
     }
 
     #[test]

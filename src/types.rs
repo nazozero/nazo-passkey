@@ -1,17 +1,11 @@
 //! Wire types shared by registration + authentication ceremonies.
 //!
-//! Wire byte arrays use unpadded base64url. [`RegistrationResponse`] and
-//! [`AuthenticationResponse`] preserve this library's flat JSON adapter:
-//! callers extract fields from the browser's nested `PublicKeyCredential`.
-//! They are not the browser's native `toJSON()` response shape. Stored
-//! credential byte arrays retain their historical Serde array representation.
+//! Finish requests use the browser's `PublicKeyCredential.toJSON()` format.
+//! Stored credential byte arrays retain their Serde array representation.
 
 use base64::Engine;
-use base64::engine::general_purpose::{
-    STANDARD as B64STD, STANDARD_NO_PAD as B64STD_NO_PAD, URL_SAFE as B64URL_PAD,
-    URL_SAFE_NO_PAD as B64URL,
-};
-use serde::{Deserialize, Serialize};
+use base64::engine::general_purpose::URL_SAFE_NO_PAD as B64URL;
+use serde::{Deserialize, Deserializer, Serialize, de};
 
 use crate::error::{Error, Result};
 
@@ -66,7 +60,7 @@ impl CredentialId {
         B64URL.encode(&self.0)
     }
     pub fn from_b64url(s: &str) -> Result<Self> {
-        decode_b64_bounded(s, false, 1023, "credential ID").map(Self)
+        decode_b64_bounded(s, 1023, "credential ID").map(Self)
     }
 }
 
@@ -157,63 +151,18 @@ impl RpId {
 
 // ---------- Helpers ------------------------------------------------------
 
-/// Decode a base64url-no-pad string the way the WebAuthn spec demands,
-/// with permissive fallbacks for client serializers that emit:
-///   - base64url WITH padding (some JSON helpers add `=`)
-///   - standard base64 (`+`/`/` alphabet) with or without padding -
-///     common when client JS uses `btoa(String.fromCharCode(...))`
-///
-/// We try strict url-safe-no-pad first (spec), then progressively
-/// looser variants. All four alphabets are checked before giving up.
-///
-/// For strict spec-conformant decoding (rejects everything except
-/// url-safe-no-pad), see [`b64url_decode_strict`]. Production
-/// deployments that control the client JS should prefer the strict
-/// form via [`Webauthn::strict_base64`].
-pub(crate) fn b64url_decode(s: &str) -> Result<Vec<u8>> {
-    // 1. spec-compliant: url-safe, no padding
-    if let Ok(v) = B64URL.decode(s) {
-        return Ok(v);
-    }
-    // 2. url-safe WITH padding
-    if let Ok(v) = B64URL_PAD.decode(s) {
-        return Ok(v);
-    }
-    // 3. standard alphabet, no padding
-    if let Ok(v) = B64STD_NO_PAD.decode(s) {
-        return Ok(v);
-    }
-    // 4. standard alphabet, with padding (last-ditch; report this error)
-    B64STD.decode(s).map_err(|e| Error::Base64(e.to_string()))
-}
-
-/// Strict spec-conformant base64url decode: ONLY accepts the
-/// url-safe alphabet with no padding. Any other variant is rejected.
-///
-/// WebAuthn §6.1 requires this exact encoding. Lenient decoding
-/// ([`b64url_decode`]) silently accepts non-conformant client JS,
-/// which is convenient during development but hides client-side bugs
-/// and broadens the input surface. Strict mode forces the client to
-/// emit the right thing.
-pub(crate) fn b64url_decode_strict(s: &str) -> Result<Vec<u8>> {
-    B64URL.decode(s).map_err(|e| Error::Base64(e.to_string()))
-}
-
-/// Bound attacker-controlled input before allocating the decoded buffer.
+/// Bound canonical base64url input before allocating the decoded buffer.
 pub(crate) fn decode_b64_bounded(
     input: &str,
-    strict: bool,
     limit: usize,
     field: &'static str,
 ) -> Result<Vec<u8>> {
     if input.len() > limit.div_ceil(3) * 4 {
         return Err(Error::InputTooLarge { field, limit });
     }
-    let bytes = if strict {
-        b64url_decode_strict(input)
-    } else {
-        b64url_decode(input)
-    }?;
+    let bytes = B64URL
+        .decode(input)
+        .map_err(|error| Error::Base64(error.to_string()))?;
     if bytes.len() > limit {
         return Err(Error::InputTooLarge { field, limit });
     }
@@ -225,7 +174,6 @@ pub(crate) fn decode_b64_bounded(
 /// performs no allocation and never exposes bytes beyond the returned length.
 pub(crate) fn decode_b64_into(
     input: &str,
-    strict: bool,
     output: &mut [u8],
     field: &'static str,
 ) -> Result<usize> {
@@ -233,31 +181,95 @@ pub(crate) fn decode_b64_into(
     if input.len() > limit.div_ceil(3) * 4 {
         return Err(Error::InputTooLarge { field, limit });
     }
-    let mut result = B64URL.decode_slice(input, &mut *output);
-    if !strict && result.is_err() {
-        for engine in [&B64URL_PAD, &B64STD_NO_PAD, &B64STD] {
-            result = engine.decode_slice(input, &mut *output);
-            if result.is_ok() {
-                break;
-            }
-        }
-    }
-    result.map_err(|error| match error {
-        base64::DecodeSliceError::OutputSliceTooSmall => Error::InputTooLarge { field, limit },
-        base64::DecodeSliceError::DecodeError(error) => Error::Base64(error.to_string()),
-    })
+    B64URL
+        .decode_slice(input, output)
+        .map_err(|error| match error {
+            base64::DecodeSliceError::OutputSliceTooSmall => Error::InputTooLarge { field, limit },
+            base64::DecodeSliceError::DecodeError(error) => Error::Base64(error.to_string()),
+        })
 }
 
 // ---------- Wire structs (request bodies) -------------------------------
 
-/// JSON body posted by the client to finish a registration ceremony.
-/// Flat adapter for a browser registration response. Callers copy `id` and
-/// extract the attestation and client-data bytes from `credential.response`,
-/// encoding the bytes as unpadded base64url before posting.
+/// A browser `PublicKeyCredential.toJSON()` response.
+///
+/// Deserialization checks `type`, `id` and `rawId` and decodes the credential
+/// ID once for account lookup and verification. Client extension results and
+/// other unused browser hints are ignored.
+#[derive(Debug)]
+pub struct PublicKeyCredential<R> {
+    pub id: CredentialId,
+    pub response: R,
+}
+
+impl<'de, R: Deserialize<'de>> Deserialize<'de> for PublicKeyCredential<R> {
+    fn deserialize<D: Deserializer<'de>>(deserializer: D) -> std::result::Result<Self, D::Error> {
+        use std::borrow::Cow;
+
+        #[derive(Deserialize)]
+        struct Wire<'a, R> {
+            #[serde(borrow)]
+            id: Cow<'a, str>,
+            #[serde(rename = "rawId", borrow)]
+            raw_id: Cow<'a, str>,
+            #[serde(rename = "type", borrow)]
+            kind: Cow<'a, str>,
+            #[serde(
+                deserialize_with = "deserialize_object",
+                bound(deserialize = "R: Deserialize<'de>")
+            )]
+            response: R,
+        }
+
+        let wire: Wire<'_, R> = deserialize_object(deserializer)?;
+        if wire.kind != "public-key" {
+            return Err(de::Error::custom("credential type must be public-key"));
+        }
+        // In canonical base64url equal byte strings have equal encodings.
+        if wire.id.is_empty() || wire.id != wire.raw_id {
+            return Err(de::Error::custom(
+                "credential id and rawId must match and be nonempty",
+            ));
+        }
+        let id = CredentialId::from_b64url(&wire.id).map_err(de::Error::custom)?;
+        Ok(Self {
+            id,
+            response: wire.response,
+        })
+    }
+}
+
+// WebAuthn JSON dictionaries are objects. Serde's derived structs also accept
+// positional sequences unless the deserializer is asked for a map.
+fn deserialize_object<'de, D: Deserializer<'de>, T: Deserialize<'de>>(
+    deserializer: D,
+) -> std::result::Result<T, D::Error> {
+    struct Object<T>(std::marker::PhantomData<T>);
+
+    impl<'de, T: Deserialize<'de>> de::Visitor<'de> for Object<T> {
+        type Value = T;
+
+        fn expecting(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+            formatter.write_str("a WebAuthn JSON object")
+        }
+
+        fn visit_map<M: de::MapAccess<'de>>(self, map: M) -> std::result::Result<T, M::Error> {
+            T::deserialize(de::value::MapAccessDeserializer::new(map))
+        }
+    }
+
+    deserializer.deserialize_map(Object(std::marker::PhantomData))
+}
+
+/// Standard JSON body for finishing registration.
+pub type RegistrationResponse = PublicKeyCredential<AttestationResponse>;
+
+/// Standard JSON body for finishing authentication.
+pub type AuthenticationResponse = PublicKeyCredential<AssertionResponse>;
+
+/// Registration response fields used by the verifier.
 #[derive(Debug, Deserialize)]
-pub struct RegistrationResponse {
-    /// The base64url-encoded raw credential ID.
-    pub id: String,
+pub struct AttestationResponse {
     /// Authenticator-attached transports (USB / NFC / BLE / internal).
     /// Optional; some browsers omit it.
     #[serde(default)]
@@ -270,10 +282,9 @@ pub struct RegistrationResponse {
     pub client_data_json: String,
 }
 
-/// JSON body posted by the client to finish an authentication ceremony.
+/// Authentication response fields used by the verifier.
 #[derive(Debug, Deserialize)]
-pub struct AuthenticationResponse {
-    pub id: String,
+pub struct AssertionResponse {
     /// Raw authenticator data, base64url-encoded.
     #[serde(rename = "authenticatorData")]
     pub authenticator_data: String,
@@ -284,8 +295,21 @@ pub struct AuthenticationResponse {
     pub client_data_json: String,
     /// User handle (the opaque user id we registered with). Optional;
     /// Required for discoverable credentials; checked against the account binding.
-    #[serde(rename = "userHandle", default)]
-    pub user_handle: Option<String>,
+    #[serde(
+        rename = "userHandle",
+        default,
+        deserialize_with = "deserialize_user_handle"
+    )]
+    pub user_handle: Option<Vec<u8>>,
+}
+
+fn deserialize_user_handle<'de, D: Deserializer<'de>>(
+    deserializer: D,
+) -> std::result::Result<Option<Vec<u8>>, D::Error> {
+    Option::<String>::deserialize(deserializer)?
+        .map(|handle| decode_b64_bounded(&handle, 64, "userHandle"))
+        .transpose()
+        .map_err(de::Error::custom)
 }
 
 // ---------- Challenge JSON for the START side ---------------------------
@@ -537,75 +561,134 @@ pub struct AuthSuccess {
 mod tests {
     use super::*;
 
-    /// 5 bytes → 7 base64 chars + 1 pad char. Length is chosen so the
-    /// padded variants actually carry a trailing `=`. The byte values
-    /// include 0xFB which encodes to `+`/`-` (last alphabet slot) and
-    /// 0xFF which encodes to `/`/`_`, so any alphabet confusion in the
-    /// decoder surfaces here.
-    const SAMPLE: &[u8] = &[0xFB, 0xEF, 0xBE, 0xFF, 0xCC];
-
     #[test]
-    fn decodes_url_safe_no_pad() {
-        // base64url-no-pad of SAMPLE
-        let encoded = B64URL.encode(SAMPLE);
-        assert_eq!(b64url_decode(&encoded).unwrap(), SAMPLE);
-    }
-
-    #[test]
-    fn decodes_url_safe_with_pad() {
-        let encoded = B64URL_PAD.encode(SAMPLE);
-        assert!(encoded.ends_with('=')); // sanity
-        assert_eq!(b64url_decode(&encoded).unwrap(), SAMPLE);
-    }
-
-    #[test]
-    fn decodes_standard_no_pad() {
-        let encoded = B64STD_NO_PAD.encode(SAMPLE);
-        assert_eq!(b64url_decode(&encoded).unwrap(), SAMPLE);
-    }
-
-    #[test]
-    fn decodes_standard_with_pad() {
-        // The killer case: standard alphabet with padding, exactly
-        // what `btoa(String.fromCharCode(...new Uint8Array(buf)))`
-        // produces in browser JS.
-        let encoded = B64STD.encode(SAMPLE);
-        assert_eq!(b64url_decode(&encoded).unwrap(), SAMPLE);
-    }
-
-    #[test]
-    fn rejects_garbage() {
-        assert!(b64url_decode("!!!not-base64!!!").is_err());
-    }
-
-    #[test]
-    fn stack_base64_decoding_preserves_all_wire_encodings_and_bounds() {
+    fn stack_base64_decoding_enforces_canonical_encoding_and_bounds() {
         for limit in [0, 1, 2, 3, 32, 64, 80] {
             for length in 0..=limit + 3 {
                 let bytes: Vec<_> = (0..length).map(|i| (i as u8).wrapping_mul(127)).collect();
-                for engine in [&B64URL, &B64URL_PAD, &B64STD_NO_PAD, &B64STD] {
-                    let encoded = engine.encode(&bytes);
-                    for strict in [false, true] {
-                        let expected = decode_b64_bounded(&encoded, strict, limit, "test");
-                        let mut output = vec![0xa5; limit];
-                        let actual = decode_b64_into(&encoded, strict, &mut output, "test");
-                        assert_eq!(actual.is_ok(), expected.is_ok());
-                        if let (Ok(written), Ok(expected)) = (actual, expected) {
-                            assert_eq!(&output[..written], expected);
-                        }
-                    }
+                let encoded = B64URL.encode(&bytes);
+                let bounded = decode_b64_bounded(&encoded, limit, "test");
+                let mut output = vec![0xa5; limit];
+                let actual = decode_b64_into(&encoded, &mut output, "test");
+                assert_eq!(actual.is_ok(), length <= limit);
+                assert_eq!(bounded.is_ok(), actual.is_ok());
+                if let (Ok(written), Ok(expected)) = (actual, bounded) {
+                    assert_eq!(&output[..written], expected);
                 }
             }
         }
-        for invalid in ["!", "A", "Zh", "Zg=", "Zg===", "Zg==\n", "++++____"] {
-            let mut output = [0; 80];
-            for strict in [false, true] {
-                assert_eq!(
-                    decode_b64_into(invalid, strict, &mut output, "test").is_ok(),
-                    decode_b64_bounded(invalid, strict, 80, "test").is_ok()
-                );
-            }
+        for invalid in ["!", "A", "Zh", "Zg=", "Zg==", "Zg==\\n", "+/8"] {
+            assert!(decode_b64_into(invalid, &mut [0; 80], "test").is_err());
+            assert!(decode_b64_bounded(invalid, 80, "test").is_err());
         }
+    }
+
+    #[test]
+    fn standard_registration_response_uses_only_verifier_fields() {
+        let wire = r#"{
+            "type":"public-key","id":"-_8","rawId":"-_8",
+            "response":{
+                "attestationObject":"AA","clientDataJSON":"AQ","transports":["usb"],
+                "authenticatorData":"Ag","publicKeyAlgorithm":-7
+            },
+            "clientExtensionResults":{"credProps":{"rk":true}},
+            "authenticatorAttachment":"cross-platform"
+        }"#;
+        let parsed: RegistrationResponse = serde_json::from_str(wire).unwrap();
+        assert_eq!(parsed.id.as_bytes(), [0xfb, 0xff]);
+        assert_eq!(parsed.response.attestation_object, "AA");
+        assert_eq!(parsed.response.client_data_json, "AQ");
+        assert_eq!(parsed.response.transports, ["usb"]);
+    }
+
+    #[test]
+    fn standard_assertion_response_checks_required_fields_and_id_consistency() {
+        let wire = serde_json::json!({
+            "type":"public-key", "id":"-_8", "rawId":"-_8",
+            "response": {
+                "authenticatorData":"AA", "clientDataJSON":"AQ", "signature":"Ag", "userHandle":"Aw"
+            },
+            "clientExtensionResults": {}
+        });
+        let parsed: AuthenticationResponse = serde_json::from_value(wire.clone()).unwrap();
+        assert_eq!(parsed.id.as_bytes(), [0xfb, 0xff]);
+        assert_eq!(parsed.response.signature, "Ag");
+        assert_eq!(parsed.response.user_handle.as_deref(), Some(&[3][..]));
+
+        for key in ["type", "id", "rawId", "response"] {
+            let mut missing = wire.clone();
+            missing.as_object_mut().unwrap().remove(key);
+            assert!(
+                serde_json::from_value::<AuthenticationResponse>(missing).is_err(),
+                "{key}"
+            );
+        }
+        for key in ["authenticatorData", "clientDataJSON", "signature"] {
+            let mut missing = wire.clone();
+            missing["response"].as_object_mut().unwrap().remove(key);
+            assert!(
+                serde_json::from_value::<AuthenticationResponse>(missing).is_err(),
+                "{key}"
+            );
+        }
+
+        for (key, invalid) in [("rawId", "AA"), ("type", "password")] {
+            let mut mismatched = wire.clone();
+            mismatched[key] = invalid.into();
+            assert!(serde_json::from_value::<AuthenticationResponse>(mismatched).is_err());
+        }
+        for id in ["", "+/8", "-_8=", "-_9", &B64URL.encode(vec![5; 1024])] {
+            let mut invalid = wire.clone();
+            invalid["id"] = id.into();
+            invalid["rawId"] = id.into();
+            assert!(
+                serde_json::from_value::<AuthenticationResponse>(invalid).is_err(),
+                "{id}"
+            );
+        }
+
+        let mut invalid_handle = wire.clone();
+        invalid_handle["response"]["userHandle"] = B64URL.encode(vec![5; 65]).into();
+        assert!(serde_json::from_value::<AuthenticationResponse>(invalid_handle).is_err());
+
+        let mut omitted_handle = wire;
+        omitted_handle["response"]
+            .as_object_mut()
+            .unwrap()
+            .remove("userHandle");
+        let parsed = serde_json::from_value::<AuthenticationResponse>(omitted_handle).unwrap();
+        assert_eq!(parsed.response.user_handle, None);
+    }
+
+    #[test]
+    fn rejects_flat_bodies_and_duplicate_security_fields() {
+        let flat = r#"{"id":"AA","attestationObject":"AA","clientDataJSON":"AA"}"#;
+        assert!(serde_json::from_str::<RegistrationResponse>(flat).is_err());
+        let response = r#"{"attestationObject":"AA","clientDataJSON":"AA"}"#;
+        for duplicate in [
+            r#""type":"public-key""#,
+            r#""id":"AA""#,
+            r#""rawId":"AA""#,
+            r#""response":{}"#,
+        ] {
+            let wire = format!(
+                r#"{{"type":"public-key","id":"AA","rawId":"AA","response":{response},{duplicate}}}"#
+            );
+            assert!(serde_json::from_str::<RegistrationResponse>(&wire).is_err());
+        }
+        let duplicate = r#"{"type":"public-key","id":"AA","rawId":"AA",
+            "response":{"attestationObject":"AA","clientDataJSON":"AA","clientDataJSON":"AA"}}"#;
+        assert!(serde_json::from_str::<RegistrationResponse>(duplicate).is_err());
+    }
+
+    #[test]
+    fn credential_envelope_and_nested_response_must_be_objects() {
+        let positional =
+            r#"["AA","AA","public-key",{"attestationObject":"AA","clientDataJSON":"AA"}]"#;
+        assert!(serde_json::from_str::<RegistrationResponse>(positional).is_err());
+        let positional =
+            r#"{"type":"public-key","id":"AA","rawId":"AA","response":[[],"AA","AA"]}"#;
+        assert!(serde_json::from_str::<RegistrationResponse>(positional).is_err());
     }
 
     // ---- RpId ----------------------------------------------------------

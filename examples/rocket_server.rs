@@ -4,7 +4,7 @@
 //!     cargo run --example rocket_server
 //!
 //! Then open http://localhost:3000 in a passkey-capable browser
-//! (Chrome 108+, Safari 16+, Firefox 122+, Edge 108+). Mirrors the
+//! with the WebAuthn JSON APIs. Mirrors the
 //! axum_server example exactly - same HTML page, same endpoints,
 //! same in-memory state model. Different framework.
 //!
@@ -203,13 +203,11 @@ fn authenticate_finish(
         .and_then(|s| s.auth_state.take())
         .ok_or_else(|| Custom(Status::BadRequest, "no authentication in flight".into()))?;
 
-    let asserted_id = nazo_passkey::CredentialId::from_b64url(&body.id)
-        .map_err(|_| Custom(Status::BadRequest, "bad credential id".into()))?;
     let mut user_guard = state.user.lock().unwrap();
     let stored = user_guard
         .credentials
         .iter_mut()
-        .find(|c| c.id == asserted_id)
+        .find(|c| c.id == body.id)
         .ok_or_else(|| Custom(Status::Unauthorized, "unknown credential".into()))?;
 
     let outcome = state
@@ -280,8 +278,7 @@ fn rocket() -> _ {
         .authenticator_attachment(Attachment::Any)
         // UV preferred (not required) so even a hardware-key tap counts.
         // For a real production passkey deployment, flip this to true.
-        .require_user_verification(false)
-        .strict_base64(true);
+        .require_user_verification(false);
 
     let state = AppState {
         user: Mutex::new(User::default()),
