@@ -1,0 +1,3242 @@
+[
+  {
+    "name": "identity-unit",
+    "command": [
+      "cargo",
+      "test",
+      "-p",
+      "nazo-identity",
+      "--lib"
+    ],
+    "exit_code": 0,
+    "seconds": 527.775,
+    "log": "/workspace/scratch/f7903e352d2d/nazo-identity-unit-01.log",
+    "raw_log_name": "nazo-identity-unit-01.log",
+    "raw_log_bytes": 10989,
+    "raw_log_sha256": "69f0a15d9fe1df8d4013b08ffaf792522cfec5a2886200666734674512413ec7",
+    "summary_counts": {
+      "passed": 63,
+      "failed": 0,
+      "ignored": 0
+    },
+    "individual_tests": [
+      {
+        "name": "avatar::tests::avatar_reference_rejects_extra_query_or_path_components",
+        "outcome": "ok"
+      },
+      {
+        "name": "avatar::tests::content_detection_uses_file_signatures",
+        "outcome": "ok"
+      },
+      {
+        "name": "avatar::tests::direct_avatar_read_and_delete_preserve_repository_and_storage_boundaries",
+        "outcome": "ok"
+      },
+      {
+        "name": "avatar::tests::direct_candidates_are_deleted_only_after_revision_fenced_miss",
+        "outcome": "ok"
+      },
+      {
+        "name": "avatar::tests::direct_replacement_retires_previous_final_before_completing_upload",
+        "outcome": "ok"
+      },
+      {
+        "name": "avatar::tests::direct_upload_begin_rejects_invalid_references_and_provider_failures",
+        "outcome": "ok"
+      },
+      {
+        "name": "avatar::tests::direct_upload_claim_states_fail_closed_and_release_invalid_pending_claims",
+        "outcome": "ok"
+      },
+      {
+        "name": "avatar::tests::direct_upload_fixes_validated_snapshot_before_database_cas",
+        "outcome": "ok"
+      },
+      {
+        "name": "avatar::tests::direct_upload_handles_retries_repository_failures_and_overview_failures",
+        "outcome": "ok"
+      },
+      {
+        "name": "avatar::tests::direct_upload_recognizes_completed_and_already_recorded_candidates",
+        "outcome": "ok"
+      },
+      {
+        "name": "avatar::tests::direct_upload_rejects_empty_declared_length_before_storage_authorization",
+        "outcome": "ok"
+      },
+      {
+        "name": "avatar::tests::direct_upload_rejects_oversized_declared_length_before_storage_authorization",
+        "outcome": "ok"
+      },
+      {
+        "name": "avatar::tests::direct_upload_releases_pending_claim_after_invalid_staged_bytes",
+        "outcome": "ok"
+      },
+      {
+        "name": "avatar::tests::direct_upload_retry_from_another_service_returns_the_selected_candidate",
+        "outcome": "ok"
+      },
+      {
+        "name": "avatar::tests::direct_upload_validates_staged_snapshots_and_storage_transitions",
+        "outcome": "ok"
+      },
+      {
+        "name": "avatar::tests::final_object_identifier_binds_upload_and_exact_bytes",
+        "outcome": "ok"
+      },
+      {
+        "name": "avatar::tests::pending_reads_once_and_keeps_validated_mime_while_candidate_failures_never_publish",
+        "outcome": "ok"
+      },
+      {
+        "name": "avatar::tests::pending_validates_and_hashes_once_and_drops_bytes_before_recording",
+        "outcome": "ok"
+      },
+      {
+        "name": "federation::tests::browser_binding_digest_is_tenant_scoped_and_canonical_hex",
+        "outcome": "ok"
+      },
+      {
+        "name": "federation::tests::every_account_result_passes_active_gate_before_link_audit_or_session_creation",
+        "outcome": "ok"
+      },
+      {
+        "name": "federation::tests::legacy_state_deserializes_without_inventing_a_browser_binding",
+        "outcome": "ok"
+      },
+      {
+        "name": "mfa_service::tests::backup_code_hash_order_keeps_candidate_identity_and_single_consumption",
+        "outcome": "ok"
+      },
+      {
+        "name": "mfa_service::tests::begin_enrollment_uses_the_atomic_write_without_reading_the_old_secret",
+        "outcome": "ok"
+      },
+      {
+        "name": "mfa_service::tests::disable_reuses_verified_generation_without_consuming_another_factor",
+        "outcome": "ok"
+      },
+      {
+        "name": "mfa_service::tests::failed_or_replayed_confirmation_cannot_return_backup_code_secrets",
+        "outcome": "ok"
+      },
+      {
+        "name": "mfa_service::tests::required_confirmation_has_no_bare_repository_fallback_or_backup_code_disclosure",
+        "outcome": "ok"
+      },
+      {
+        "name": "model::tests::authentication_identity_debug_never_exposes_password_hash",
+        "outcome": "ok"
+      },
+      {
+        "name": "model::tests::password_hash_accepts_argon2_0_5_phc_vector",
+        "outcome": "ok"
+      },
+      {
+        "name": "model::tests::password_hash_verifies_candidates_without_exposing_the_verifier",
+        "outcome": "ok"
+      },
+      {
+        "name": "passkey::tests::credential_id_is_bounded_before_decode_and_keeps_strict_base64",
+        "outcome": "ok"
+      },
+      {
+        "name": "passkey::tests::uv_initialization_requires_fresh_independent_mfa_bound_to_the_account",
+        "outcome": "ok"
+      },
+      {
+        "name": "profile::tests::applications_are_loaded_from_the_accounts_tenant",
+        "outcome": "ok"
+      },
+      {
+        "name": "profile::tests::oidc_profile_fields_validate_their_declared_syntax",
+        "outcome": "ok"
+      },
+      {
+        "name": "profile::tests::overview_failure_precedes_profile_write_and_retry_commits_once",
+        "outcome": "ok"
+      },
+      {
+        "name": "profile::tests::profile_normalization_reuses_owned_text_and_scope_strings",
+        "outcome": "ok"
+      },
+      {
+        "name": "profile::tests::profile_text_trims_blanks_and_enforces_byte_limit",
+        "outcome": "ok"
+      },
+      {
+        "name": "profile::tests::profile_update_normalizes_only_writable_profile_fields",
+        "outcome": "ok"
+      },
+      {
+        "name": "profile::tests::profile_url_accepts_only_absolute_http_urls",
+        "outcome": "ok"
+      },
+      {
+        "name": "registration::tests::denied_email_reservation_releases_peer_and_skips_code_delivery",
+        "outcome": "ok"
+      },
+      {
+        "name": "registration::tests::failed_delivery_deletes_code_and_releases_tenant_scoped_reservations",
+        "outcome": "ok"
+      },
+      {
+        "name": "registration::tests::failed_email_reservation_releases_peer_and_skips_code_delivery",
+        "outcome": "ok"
+      },
+      {
+        "name": "registration::tests::failed_hash_and_uncertain_code_store_release_only_this_attempt",
+        "outcome": "ok"
+      },
+      {
+        "name": "registration::tests::registration_scopes_code_load_and_consumption_to_service_tenant",
+        "outcome": "ok"
+      },
+      {
+        "name": "registration::tests::successful_send_scopes_code_and_cooldowns_to_service_tenant",
+        "outcome": "ok"
+      },
+      {
+        "name": "registration::tests::verification_codes_are_fixed_width_decimal_values",
+        "outcome": "ok"
+      },
+      {
+        "name": "session::tests::add_amr_deduplicates_methods_and_preserves_claim_order",
+        "outcome": "ok"
+      },
+      {
+        "name": "session::tests::authentication_metadata_requires_time_methods_and_session_id",
+        "outcome": "ok"
+      },
+      {
+        "name": "session::tests::authentication_precision_is_owned_by_the_record_and_legacy_updates_clear_it",
+        "outcome": "ok"
+      },
+      {
+        "name": "session::tests::binding_client_fails_closed_for_invalid_or_missing_sessions",
+        "outcome": "ok"
+      },
+      {
+        "name": "session::tests::binding_client_rejects_repeated_compare_and_set_conflicts",
+        "outcome": "ok"
+      },
+      {
+        "name": "session::tests::binding_clients_is_session_scoped_and_idempotent",
+        "outcome": "ok"
+      },
+      {
+        "name": "session::tests::corrupt_session_is_deleted_and_resolves_as_missing",
+        "outcome": "ok"
+      },
+      {
+        "name": "session::tests::current_session_exposes_exact_logged_in_clients",
+        "outcome": "ok"
+      },
+      {
+        "name": "session::tests::invalid_authentication_metadata_is_deleted_fail_closed",
+        "outcome": "ok"
+      },
+      {
+        "name": "session::tests::mfa_resolution_invalidates_inactive_or_corrupt_sessions_but_keeps_dependency_failures",
+        "outcome": "ok"
+      },
+      {
+        "name": "session::tests::mfa_resolution_reads_one_snapshot_and_one_account_for_either_session_state",
+        "outcome": "ok"
+      },
+      {
+        "name": "session::tests::principal_guard_uses_one_narrow_lookup_and_preserves_session_gates",
+        "outcome": "ok"
+      },
+      {
+        "name": "session::tests::recent_interactive_mfa_has_one_strict_time_and_factor_policy",
+        "outcome": "ok"
+      },
+      {
+        "name": "session::tests::step_up_builds_a_fresh_session_and_csrf_pair_for_atomic_rotation",
+        "outcome": "ok"
+      },
+      {
+        "name": "session::tests::unavailable_session_store_is_not_downgraded_to_anonymous",
+        "outcome": "ok"
+      },
+      {
+        "name": "tenancy::tests::tenant_host_has_one_canonical_form",
+        "outcome": "ok"
+      },
+      {
+        "name": "tenancy::tests::tenant_host_matches_the_validated_issuer_host_for_dns_and_ip_addresses",
+        "outcome": "ok"
+      },
+      {
+        "name": "tenancy::tests::tenant_host_rejects_url_components_and_empty_domains",
+        "outcome": "ok"
+      }
+    ]
+  },
+  {
+    "name": "postgres-passkey-jsonb",
+    "command": [
+      "cargo",
+      "test",
+      "-p",
+      "nazo-postgres",
+      "--lib",
+      "passkey"
+    ],
+    "exit_code": 0,
+    "seconds": 640.35,
+    "log": "/workspace/scratch/f7903e352d2d/nazo-postgres-passkey-jsonb-02.log",
+    "raw_log_name": "nazo-postgres-passkey-jsonb-02.log",
+    "raw_log_bytes": 7617,
+    "raw_log_sha256": "edadbc8d5b2e0284e81cd90e72d30d58ce7c4aa00b09301c9326cdf7712d809b",
+    "summary_counts": {
+      "passed": 5,
+      "failed": 0,
+      "ignored": 0
+    },
+    "individual_tests": [
+      {
+        "name": "convert::identity::passkey_tests::legacy_jsonb_es256_and_ed25519_credentials_authenticate_without_registration",
+        "outcome": "ok"
+      },
+      {
+        "name": "convert::identity::passkey_tests::malformed_owned_credential_keeps_the_existing_consistency_failure",
+        "outcome": "ok"
+      },
+      {
+        "name": "convert::identity::passkey_tests::owned_credential_value_keeps_existing_webauthn_key_material_and_wire",
+        "outcome": "ok"
+      },
+      {
+        "name": "convert::identity::tests::compact_passkey_material_has_one_id_and_counter_authority",
+        "outcome": "ok"
+      },
+      {
+        "name": "convert::identity::tests::passkey_adapter_rejects_conflicting_credential_authorities",
+        "outcome": "ok"
+      }
+    ]
+  },
+  {
+    "name": "postgres-migrations",
+    "command": [
+      "cargo",
+      "test",
+      "-p",
+      "nazo-postgres",
+      "--test",
+      "migrations",
+      "pending_migrations_create_all_runtime_module_state_tables"
+    ],
+    "exit_code": 0,
+    "seconds": 157.928,
+    "log": "/workspace/scratch/f7903e352d2d/nazo-postgres-migrations-03.log",
+    "raw_log_name": "nazo-postgres-migrations-03.log",
+    "raw_log_bytes": 952,
+    "raw_log_sha256": "d83686e854906bd7226c1489ce7c82fab3cbf52ca8f8a7c860b4c31e908db43a",
+    "summary_counts": {
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0
+    },
+    "individual_tests": [
+      {
+        "name": "pending_migrations_create_all_runtime_module_state_tables",
+        "outcome": "ok"
+      }
+    ]
+  },
+  {
+    "name": "identity-authentication-contracts",
+    "command": [
+      "cargo",
+      "test",
+      "-p",
+      "nazo-identity",
+      "--test",
+      "policy",
+      "--test",
+      "authentication_method_authority",
+      "--test",
+      "password_authentication",
+      "--test",
+      "federation_authentication"
+    ],
+    "exit_code": 0,
+    "passed": 23,
+    "failed": 0,
+    "ignored": 0,
+    "seconds": 16.464,
+    "log": "/workspace/scratch/f7903e352d2d/nazo-identity-authentication-contracts-04.log",
+    "raw_log_name": "nazo-identity-authentication-contracts-04.log",
+    "raw_log_bytes": 3076,
+    "raw_log_sha256": "768accab5bb8c1517d149a096082e91effc91d54097c163e2ed39ca91d51010c",
+    "summary_counts": {
+      "passed": 23,
+      "failed": 0,
+      "ignored": 0
+    },
+    "individual_tests": [
+      {
+        "name": "credential_management_reuses_only_fresh_sufficient_authentication",
+        "outcome": "ok"
+      },
+      {
+        "name": "real_session_metadata_rejects_empty_evidence_and_invalid_time_or_sid",
+        "outcome": "ok"
+      },
+      {
+        "name": "session_amr_preserves_unknown_evidence_without_inventing_federation",
+        "outcome": "ok"
+      },
+      {
+        "name": "totp_credentials_do_not_expose_seeds_in_debug_output",
+        "outcome": "ok"
+      },
+      {
+        "name": "linked_federation_obeys_local_mfa_and_uses_pending_session_lifetime",
+        "outcome": "ok"
+      },
+      {
+        "name": "login_uses_current_account_state_after_password_verification",
+        "outcome": "ok"
+      },
+      {
+        "name": "missing_and_inactive_accounts_share_dummy_verification_and_failure_behavior",
+        "outcome": "ok"
+      },
+      {
+        "name": "password_login_can_manage_credentials_with_recent_authentication",
+        "outcome": "ok"
+      },
+      {
+        "name": "backup_code_normalization_preserves_strict_display_contract",
+        "outcome": "ok"
+      },
+      {
+        "name": "base32_decode_accepts_transport_whitespace_case_and_padding_only",
+        "outcome": "ok"
+      },
+      {
+        "name": "email_policy_normalizes_addresses_and_renders_existing_template",
+        "outcome": "ok"
+      },
+      {
+        "name": "email_policy_preserves_lettre_address_syntax_contract",
+        "outcome": "ok"
+      },
+      {
+        "name": "federation_callback_token_policy_is_exact",
+        "outcome": "ok"
+      },
+      {
+        "name": "generated_backup_code_uses_two_fixed_width_numeric_chunks",
+        "outcome": "ok"
+      },
+      {
+        "name": "generated_totp_secret_is_base32_without_padding",
+        "outcome": "ok"
+      },
+      {
+        "name": "mfa_policy_preserves_totp_and_backup_code_contracts",
+        "outcome": "ok"
+      },
+      {
+        "name": "otpauth_uri_keeps_existing_encoding_contract",
+        "outcome": "ok"
+      },
+      {
+        "name": "passkey_policy_binds_tenant_user_and_validates_user_input",
+        "outcome": "ok"
+      },
+      {
+        "name": "scim_policy_normalizes_identity_filter_payload_and_patch",
+        "outcome": "ok"
+      },
+      {
+        "name": "scim_policy_rejects_invalid_email_dot_placement",
+        "outcome": "ok"
+      },
+      {
+        "name": "session_policy_validates_metadata_and_preserves_amr_order",
+        "outcome": "ok"
+      },
+      {
+        "name": "totp_verification_rejects_replay_and_keeps_one_step_skew",
+        "outcome": "ok"
+      },
+      {
+        "name": "totp_verifier_rejects_malformed_code_or_secret_without_fallback",
+        "outcome": "ok"
+      }
+    ]
+  },
+  {
+    "name": "postgres-passkey-cas",
+    "command": [
+      "cargo",
+      "test",
+      "-p",
+      "nazo-postgres",
+      "--test",
+      "identity_repositories",
+      "passkey"
+    ],
+    "exit_code": 0,
+    "passed": 2,
+    "failed": 0,
+    "ignored": 0,
+    "seconds": 164.954,
+    "log": "/workspace/scratch/f7903e352d2d/nazo-postgres-passkey-cas-05.log",
+    "raw_log_name": "nazo-postgres-passkey-cas-05.log",
+    "raw_log_bytes": 1036,
+    "raw_log_sha256": "61863dbae4f479dfe1a2f53a7493cd3fade81a1e5544304b32efcf91fc0e815a",
+    "summary_counts": {
+      "passed": 2,
+      "failed": 0,
+      "ignored": 0
+    },
+    "individual_tests": [
+      {
+        "name": "passkey_and_federation_uniqueness_are_typed_conflicts",
+        "outcome": "ok"
+      },
+      {
+        "name": "passkey_counter_update_is_monotonic_compare_and_set",
+        "outcome": "ok"
+      }
+    ]
+  },
+  {
+    "name": "postgres-mfa",
+    "command": [
+      "cargo",
+      "test",
+      "-p",
+      "nazo-postgres",
+      "--test",
+      "identity_repositories",
+      "mfa"
+    ],
+    "exit_code": 0,
+    "passed": 14,
+    "failed": 0,
+    "ignored": 0,
+    "seconds": 195.779,
+    "log": "/workspace/scratch/f7903e352d2d/nazo-postgres-mfa-06.log",
+    "raw_log_name": "nazo-postgres-mfa-06.log",
+    "raw_log_bytes": 2207,
+    "raw_log_sha256": "aa3764470ba02288462f7c803db6f9420be515990e2d7476ec2764015d2a3f23",
+    "summary_counts": {
+      "passed": 14,
+      "failed": 0,
+      "ignored": 0
+    },
+    "individual_tests": [
+      {
+        "name": "mfa_backup_code_bounds_and_enrollment_conflict_are_explicit",
+        "outcome": "ok"
+      },
+      {
+        "name": "mfa_clear_waits_for_actual_remember_key_share_then_removes_committed_device",
+        "outcome": "ok"
+      },
+      {
+        "name": "mfa_encrypted_lifecycle_and_trait_boundary_are_tenant_safe",
+        "outcome": "ok"
+      },
+      {
+        "name": "mfa_generation::mfa_clear_committed_unknown_retry_cannot_clear_formal_g2",
+        "outcome": "ok"
+      },
+      {
+        "name": "mfa_generation::mfa_clear_failure_after_dependent_deletes_rolls_back_every_generation_field",
+        "outcome": "ok"
+      },
+      {
+        "name": "mfa_generation::mfa_clear_generation_lock_orders_formal_g2_install_after_commit",
+        "outcome": "ok"
+      },
+      {
+        "name": "mfa_generation::mfa_confirm_and_regenerate_hidden_committed_ack_return_no_backup_codes",
+        "outcome": "ok"
+      },
+      {
+        "name": "mfa_generation::mfa_confirmation_required_ledger_and_inactive_actor_roll_back_before_code_disclosure",
+        "outcome": "ok"
+      },
+      {
+        "name": "mfa_generation::mfa_disable_required_ledger_failure_rolls_back_current_generation_and_dependents",
+        "outcome": "ok"
+      },
+      {
+        "name": "mfa_generation::mfa_regeneration_required_ledger_and_inactive_actor_preserve_exact_old_backups",
+        "outcome": "ok"
+      },
+      {
+        "name": "mfa_generation::mfa_verified_g1_disable_preserves_fully_installed_g2_after_barrier",
+        "outcome": "ok"
+      },
+      {
+        "name": "mfa_generation_fences_late_remember_and_regeneration_after_clear_and_reenrollment",
+        "outcome": "ok"
+      },
+      {
+        "name": "mfa_two_consumed_backup_proofs_regenerate_serially_without_generation_lock_cycle",
+        "outcome": "ok"
+      },
+      {
+        "name": "server_mfa_verification_does_not_query_migrated_tables_directly",
+        "outcome": "ok"
+      }
+    ]
+  },
+  {
+    "name": "postgres-totp",
+    "command": [
+      "cargo",
+      "test",
+      "-p",
+      "nazo-postgres",
+      "--test",
+      "identity_repositories",
+      "totp"
+    ],
+    "exit_code": 0,
+    "passed": 5,
+    "failed": 0,
+    "ignored": 0,
+    "seconds": 235.755,
+    "log": "/workspace/scratch/f7903e352d2d/nazo-postgres-totp-07.log",
+    "raw_log_name": "nazo-postgres-totp-07.log",
+    "raw_log_bytes": 1293,
+    "raw_log_sha256": "9babd6da5d89492136ec0b922b3fc7a36597fbd79a16dcc7cc704e11157ba6a4",
+    "summary_counts": {
+      "passed": 5,
+      "failed": 0,
+      "ignored": 0
+    },
+    "individual_tests": [
+      {
+        "name": "concurrent_totp_enrollment_confirmation_has_one_audited_winner",
+        "outcome": "ok"
+      },
+      {
+        "name": "failed_totp_enrollment_confirmation_is_durably_audited_without_state_change",
+        "outcome": "ok"
+      },
+      {
+        "name": "totp_enrollment_orders_cross_store_changes_for_safe_recovery",
+        "outcome": "ok"
+      },
+      {
+        "name": "totp_last_step_compare_and_set_has_one_concurrent_winner",
+        "outcome": "ok"
+      },
+      {
+        "name": "totp_verification_classification_and_audit_are_atomic_and_replay_safe",
+        "outcome": "ok"
+      }
+    ]
+  },
+  {
+    "name": "postgres-passkey-audit",
+    "command": [
+      "cargo",
+      "test",
+      "-p",
+      "nazo-postgres",
+      "--test",
+      "audit_commit_boundary",
+      "identity_mutations_and_required_audit_share_the_commit_boundary"
+    ],
+    "exit_code": 0,
+    "passed": 1,
+    "failed": 0,
+    "ignored": 0,
+    "seconds": 160.679,
+    "log": "/workspace/scratch/f7903e352d2d/nazo-postgres-passkey-audit-08.log",
+    "raw_log_name": "nazo-postgres-passkey-audit-08.log",
+    "raw_log_bytes": 1030,
+    "raw_log_sha256": "0bf62e29d99338b2dc658848e813d3ea1b9c27a8262e99d4f1728530c45e4031",
+    "summary_counts": {
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0
+    },
+    "individual_tests": [
+      {
+        "name": "identity_mutations_and_required_audit_share_the_commit_boundary",
+        "outcome": "ok"
+      }
+    ]
+  },
+  {
+    "name": "valkey-passkey",
+    "command": [
+      "cargo",
+      "test",
+      "-p",
+      "nazo-valkey",
+      "--test",
+      "remaining_contract",
+      "passkey"
+    ],
+    "exit_code": 0,
+    "passed": 4,
+    "failed": 0,
+    "ignored": 0,
+    "seconds": 296.063,
+    "log": "/workspace/scratch/f7903e352d2d/nazo-valkey-passkey-09.log",
+    "raw_log_name": "nazo-valkey-passkey-09.log",
+    "raw_log_bytes": 4057,
+    "raw_log_sha256": "db246fff15c2c50906471142878452b0e022c64fad1941e952a201e3093dbc1e",
+    "summary_counts": {
+      "passed": 4,
+      "failed": 0,
+      "ignored": 0
+    },
+    "individual_tests": [
+      {
+        "name": "typed_passkey_authentication_keeps_legacy_default_fields",
+        "outcome": "ok"
+      },
+      {
+        "name": "typed_passkey_ceremony_is_atomically_consumed_once_under_concurrency",
+        "outcome": "ok"
+      },
+      {
+        "name": "typed_passkey_codec_preserves_legacy_json_unknown_fields_expiry_and_corrupt_consumption",
+        "outcome": "ok"
+      },
+      {
+        "name": "typed_passkey_duplicate_recognized_field_fails_closed_after_atomic_consumption",
+        "outcome": "ok"
+      }
+    ]
+  },
+  {
+    "name": "valkey-session",
+    "command": [
+      "cargo",
+      "test",
+      "-p",
+      "nazo-valkey",
+      "--test",
+      "session_contract"
+    ],
+    "exit_code": 0,
+    "passed": 6,
+    "failed": 0,
+    "ignored": 0,
+    "seconds": 7.114,
+    "log": "/workspace/scratch/f7903e352d2d/nazo-valkey-session-10.log",
+    "raw_log_name": "nazo-valkey-session-10.log",
+    "raw_log_bytes": 829,
+    "raw_log_sha256": "a2c6ed4cbb21f29c483d4c31920883784757411e30ea4514b0fbeebfef94f0c5",
+    "summary_counts": {
+      "passed": 6,
+      "failed": 0,
+      "ignored": 0
+    },
+    "individual_tests": [
+      {
+        "name": "concurrent_session_rotation_has_exactly_one_winner_and_no_partial_state",
+        "outcome": "ok"
+      },
+      {
+        "name": "session_authentication_precision_roundtrips_and_malformed_precision_is_rejected",
+        "outcome": "ok"
+      },
+      {
+        "name": "session_compare_and_set_preserves_ttl_and_logged_in_rps",
+        "outcome": "ok"
+      },
+      {
+        "name": "session_load_rejects_a_record_without_current_mfa_state",
+        "outcome": "ok"
+      },
+      {
+        "name": "session_store_preserves_exact_key_payload_and_ttl",
+        "outcome": "ok"
+      },
+      {
+        "name": "unversioned_sessions_require_fresh_login",
+        "outcome": "ok"
+      }
+    ]
+  },
+  {
+    "name": "http-passkey",
+    "command": [
+      "cargo",
+      "test",
+      "-p",
+      "nazoauth",
+      "--lib",
+      "passkey"
+    ],
+    "exit_code": 0,
+    "passed": 10,
+    "failed": 0,
+    "ignored": 0,
+    "seconds": 384.309,
+    "log": "/workspace/scratch/f7903e352d2d/nazo-http-passkey-11.log",
+    "raw_log_name": "nazo-http-passkey-11.log",
+    "raw_log_bytes": 6948,
+    "raw_log_sha256": "b25f97763f75335f111a0a175298a19637acca6041dd79d86b3f891b704bc79b",
+    "summary_counts": {
+      "passed": 10,
+      "failed": 0,
+      "ignored": 0
+    },
+    "individual_tests": [
+      {
+        "name": "config::validation::tests::issuer_defaults_allow_passkey_overrides_before_complete_validation",
+        "outcome": "ok"
+      },
+      {
+        "name": "http::passkey::tests::login_finish_extracts_security_context_and_sets_only_bound_session_material",
+        "outcome": "ok"
+      },
+      {
+        "name": "http::passkey::tests::login_only_allows_uv_initialization_with_the_existing_session_csrf_proof",
+        "outcome": "ok"
+      },
+      {
+        "name": "http::passkey::tests::login_routes_preserve_post_only_no_cors_surface",
+        "outcome": "ok"
+      },
+      {
+        "name": "http::passkey::tests::missing_profile_session_clears_both_cookies_with_exact_protocol_error",
+        "outcome": "ok"
+      },
+      {
+        "name": "http::passkey::tests::profile_routes_preserve_get_post_delete_options_preflight_contract",
+        "outcome": "ok"
+      },
+      {
+        "name": "http::passkey::tests::profile_routes_preserve_wrong_method_cors_and_security_contract",
+        "outcome": "ok"
+      },
+      {
+        "name": "http::passkey::tests::public_passkey_projection_excludes_tenant_user_and_credential_material",
+        "outcome": "ok"
+      },
+      {
+        "name": "http::passkey::tests::rate_limit_response_preserves_retry_after_and_does_not_call_core",
+        "outcome": "ok"
+      },
+      {
+        "name": "http::passkey::tests::write_rejects_invalid_csrf_before_session_or_core_lookup",
+        "outcome": "ok"
+      }
+    ]
+  },
+  {
+    "name": "http-mfa",
+    "command": [
+      "cargo",
+      "test",
+      "-p",
+      "nazoauth",
+      "--lib",
+      "mfa"
+    ],
+    "exit_code": 0,
+    "passed": 9,
+    "failed": 0,
+    "ignored": 0,
+    "seconds": 0.496,
+    "log": "/workspace/scratch/f7903e352d2d/nazo-http-mfa-12.log",
+    "raw_log_name": "nazo-http-mfa-12.log",
+    "raw_log_bytes": 1303,
+    "raw_log_sha256": "ad5380c0da95165b7f3cbcb6c565dfbed88c4a64a83149482950405794fec7f9",
+    "summary_counts": {
+      "passed": 9,
+      "failed": 0,
+      "ignored": 0
+    },
+    "individual_tests": [
+      {
+        "name": "http::profile_account::tests::pending_mfa_me_returns_cookie_csrf_token_and_reduced_profile",
+        "outcome": "ok"
+      },
+      {
+        "name": "http::runtime_modules::tests::patch_checks_csrf_before_session_and_recent_mfa_policy",
+        "outcome": "ok"
+      },
+      {
+        "name": "http::transport_tests::mfa_profile_transport::disabling_only_clears_remembered_device_cookie_when_state_changed",
+        "outcome": "ok"
+      },
+      {
+        "name": "http::transport_tests::mfa_profile_transport::malformed_json_and_rate_limit_fail_closed_with_stable_http_contract",
+        "outcome": "ok"
+      },
+      {
+        "name": "http::transport_tests::mfa_profile_transport::missing_mfa_challenge_does_not_clear_an_authenticated_session",
+        "outcome": "ok"
+      },
+      {
+        "name": "http::transport_tests::mfa_profile_transport::static_mfa_routes_lock_methods_cors_security_headers_and_no_store",
+        "outcome": "ok"
+      },
+      {
+        "name": "http::transport_tests::mfa_profile_transport::successful_step_up_rotates_session_and_csrf_as_a_no_store_pair",
+        "outcome": "ok"
+      },
+      {
+        "name": "http::transport_tests::mfa_profile_transport::user_agent_binding_is_only_collected_for_remembered_devices",
+        "outcome": "ok"
+      },
+      {
+        "name": "routes::tests::mfa_options_and_rejections_keep_their_protocol_response",
+        "outcome": "ok"
+      }
+    ]
+  },
+  {
+    "name": "http-configuration",
+    "command": [
+      "cargo",
+      "test",
+      "-p",
+      "nazoauth",
+      "--lib",
+      "config"
+    ],
+    "exit_code": 0,
+    "passed": 23,
+    "failed": 0,
+    "ignored": 0,
+    "seconds": 0.682,
+    "log": "/workspace/scratch/f7903e352d2d/nazo-http-configuration-13.log",
+    "raw_log_name": "nazo-http-configuration-13.log",
+    "raw_log_bytes": 2768,
+    "raw_log_sha256": "1316171176e946dd6a2242e022dd5db4c537569147cb38c6f7956b0badf09d5d",
+    "summary_counts": {
+      "passed": 23,
+      "failed": 0,
+      "ignored": 0
+    },
+    "individual_tests": [
+      {
+        "name": "composition::core::dynamic_registration_tests::dynamic_registration_config_copies_security_and_rate_limit_settings",
+        "outcome": "ok"
+      },
+      {
+        "name": "composition::core::metadata_tests::metadata_config_maps_both_ciba_profiles",
+        "outcome": "ok"
+      },
+      {
+        "name": "composition::core::metadata_tests::metadata_config_maps_only_the_focused_settings_boundary",
+        "outcome": "ok"
+      },
+      {
+        "name": "composition::core::metadata_tests::metadata_config_uses_composable_discovery_for_every_legacy_profile",
+        "outcome": "ok"
+      },
+      {
+        "name": "composition::core::metadata_tests::metadata_credential_scopes_come_from_the_issuer_configurations",
+        "outcome": "ok"
+      },
+      {
+        "name": "config::validation::tests::attestation_trust_rejects_private_material_and_wrong_key_purpose",
+        "outcome": "ok"
+      },
+      {
+        "name": "config::validation::tests::enabled_credential_roles_require_complete_separate_security_material",
+        "outcome": "ok"
+      },
+      {
+        "name": "config::validation::tests::existing_lifetime_bounds_apply_to_embedded_hosts",
+        "outcome": "ok"
+      },
+      {
+        "name": "config::validation::tests::issuer_defaults_allow_passkey_overrides_before_complete_validation",
+        "outcome": "ok"
+      },
+      {
+        "name": "config::validation::tests::mutable_configuration_is_revalidated_at_product_boundary",
+        "outcome": "ok"
+      },
+      {
+        "name": "config::validation::tests::product_defaults_preserve_native_policy",
+        "outcome": "ok"
+      },
+      {
+        "name": "config::validation::tests::typed_federation_registry_keeps_json_configuration_admission_rules",
+        "outcome": "ok"
+      },
+      {
+        "name": "http::cors::host_tests::cors_auth_api_credentials_are_limited_to_configured_origins_and_csrf_headers",
+        "outcome": "ok"
+      },
+      {
+        "name": "http::dpop::tests::target_uri_selects_only_the_configured_request_origin",
+        "outcome": "ok"
+      },
+      {
+        "name": "http::dynamic_client_registration::tests::client_configuration_read_preserves_authenticated_registration_token",
+        "outcome": "ok"
+      },
+      {
+        "name": "http::dynamic_client_registration::tests::client_configuration_update_preserves_server_managed_security_policy",
+        "outcome": "ok"
+      },
+      {
+        "name": "http::dynamic_client_registration::tests::client_configuration_update_validates_current_server_managed_policy",
+        "outcome": "ok"
+      },
+      {
+        "name": "http::dynamic_client_registration::tests::configured_initial_access_token_keeps_oauth_only_client_pkce_policy",
+        "outcome": "ok"
+      },
+      {
+        "name": "http::dynamic_client_registration::tests::configured_initial_access_token_registers_baseline_confidential_oidc_compatibility",
+        "outcome": "ok"
+      },
+      {
+        "name": "http::dynamic_client_registration::tests::configured_initial_access_update_preserves_security_policy",
+        "outcome": "ok"
+      },
+      {
+        "name": "http::dynamic_client_registration::tests::configured_public_client_keeps_strict_pkce_policy",
+        "outcome": "ok"
+      },
+      {
+        "name": "http::transport_tests::client_ip::client_ip_configuration_rejects_unknown_modes_and_invalid_cidrs",
+        "outcome": "ok"
+      },
+      {
+        "name": "http::transport_tests::scim_transport::provider_config_handler_preserves_http_contract",
+        "outcome": "ok"
+      }
+    ]
+  },
+  {
+    "name": "server-passkey",
+    "command": [
+      "cargo",
+      "test",
+      "-p",
+      "nazo-server",
+      "--lib",
+      "passkey"
+    ],
+    "exit_code": 101,
+    "passed": 35,
+    "failed": 2,
+    "ignored": 0,
+    "seconds": 1150.036,
+    "log": "/workspace/scratch/f7903e352d2d/nazo-server-passkey-14.log",
+    "raw_log_name": "nazo-server-passkey-14.log",
+    "raw_log_bytes": 15565,
+    "raw_log_sha256": "9f6d0f31c8cc0ef726f9dfc5fa06d88018b4cd9cac576fa173a323b15df5d2bd",
+    "summary_counts": {
+      "passed": 35,
+      "failed": 2,
+      "ignored": 0
+    },
+    "individual_tests": [
+      {
+        "name": "domain::passkey::login_tests::legacy_or_uninitialized_uv_needs_independent_mfa_before_future_eligibility",
+        "outcome": "FAILED"
+      },
+      {
+        "name": "domain::passkey::login_tests::passkey_ceremony_cannot_finish_through_a_different_tenant_service",
+        "outcome": "ok"
+      },
+      {
+        "name": "domain::passkey::login_tests::passkey_login_begin_does_not_enumerate_account_or_credential_state",
+        "outcome": "ok"
+      },
+      {
+        "name": "domain::passkey::login_tests::passkey_login_begin_rejects_malformed_stored_credentials_before_challenge_issue",
+        "outcome": "ok"
+      },
+      {
+        "name": "domain::passkey::login_tests::passkey_login_begin_reports_user_lookup_failure_before_challenge_issue",
+        "outcome": "ok"
+      },
+      {
+        "name": "domain::passkey::login_tests::passkey_login_finish_creates_session_updates_counter_and_consumes_ceremony_once",
+        "outcome": "ok"
+      },
+      {
+        "name": "domain::passkey::login_tests::passkey_login_finish_rejects_credential_mismatch_uniformly_and_consumes_ceremony",
+        "outcome": "ok"
+      },
+      {
+        "name": "domain::passkey::login_tests::passkey_login_finish_rejects_inactive_users_and_consumes_ceremony",
+        "outcome": "ok"
+      },
+      {
+        "name": "domain::passkey::login_tests::passkey_login_finish_rejects_invalid_ceremony_id_before_state_lookup",
+        "outcome": "ok"
+      },
+      {
+        "name": "domain::passkey::login_tests::passkey_login_finish_rejects_malformed_credential_id_before_credential_lookup",
+        "outcome": "ok"
+      },
+      {
+        "name": "domain::passkey::login_tests::passkey_login_finish_rejects_malformed_stored_credentials_before_webauthn_verification",
+        "outcome": "ok"
+      },
+      {
+        "name": "domain::passkey::login_tests::passkey_login_finish_rejects_origin_mismatch_and_consumes_ceremony",
+        "outcome": "ok"
+      },
+      {
+        "name": "domain::passkey::login_tests::passkey_login_finish_reports_user_lookup_failure_after_consuming_ceremony",
+        "outcome": "ok"
+      },
+      {
+        "name": "domain::passkey::login_tests::passkey_login_finish_skips_pending_mfa_for_remembered_device",
+        "outcome": "ok"
+      },
+      {
+        "name": "domain::passkey::login_tests::passkey_login_reuses_verified_uv_and_preserves_mfa_without_it",
+        "outcome": "ok"
+      },
+      {
+        "name": "domain::passkey::login_tests::passkey_login_transport_has_no_identity_or_storage_orchestration",
+        "outcome": "ok"
+      },
+      {
+        "name": "domain::passkey::profile_tests::delete_passkey_cannot_remove_another_users_credential",
+        "outcome": "ok"
+      },
+      {
+        "name": "domain::passkey::profile_tests::delete_passkey_rejects_session_request_without_csrf_before_credential_delete",
+        "outcome": "ok"
+      },
+      {
+        "name": "domain::passkey::profile_tests::delete_passkey_removes_authenticated_user_credential",
+        "outcome": "ok"
+      },
+      {
+        "name": "domain::passkey::profile_tests::delete_passkey_requires_login_before_credential_delete",
+        "outcome": "ok"
+      },
+      {
+        "name": "domain::passkey::profile_tests::passkey_ceremony_id_normalization_accepts_only_bounded_urlsafe_identifiers",
+        "outcome": "ok"
+      },
+      {
+        "name": "domain::passkey::profile_tests::passkey_label_normalization_defaults_trims_and_rejects_oversized_labels",
+        "outcome": "ok"
+      },
+      {
+        "name": "domain::passkey::profile_tests::passkey_list_requires_login_before_loading_credentials",
+        "outcome": "ok"
+      },
+      {
+        "name": "domain::passkey::profile_tests::passkey_list_returns_authenticated_user_credentials_from_database",
+        "outcome": "ok"
+      },
+      {
+        "name": "domain::passkey::profile_tests::passkey_profile_transport_has_no_identity_or_storage_orchestration",
+        "outcome": "ok"
+      },
+      {
+        "name": "domain::passkey::profile_tests::registration_begin_reads_only_scoped_credential_ids",
+        "outcome": "ok"
+      },
+      {
+        "name": "domain::passkey::profile_tests::registration_begin_rejects_session_request_without_csrf_before_ceremony_creation",
+        "outcome": "ok"
+      },
+      {
+        "name": "domain::passkey::profile_tests::registration_begin_requires_login_before_ceremony_creation",
+        "outcome": "ok"
+      },
+      {
+        "name": "domain::passkey::profile_tests::registration_finish_persists_credential_and_consumes_ceremony_once",
+        "outcome": "ok"
+      },
+      {
+        "name": "domain::passkey::profile_tests::registration_finish_projects_malformed_ceremony_state_as_expired",
+        "outcome": "ok"
+      },
+      {
+        "name": "domain::passkey::profile_tests::registration_finish_rejects_ceremony_user_mismatch_without_inserting_credential",
+        "outcome": "ok"
+      },
+      {
+        "name": "domain::passkey::profile_tests::registration_finish_rejects_invalid_authenticator_response_without_persisting_credential",
+        "outcome": "ok"
+      },
+      {
+        "name": "domain::passkey::profile_tests::registration_finish_rejects_session_request_without_csrf_before_ceremony_lookup",
+        "outcome": "ok"
+      },
+      {
+        "name": "domain::passkey::profile_tests::registration_finish_requires_login_before_ceremony_lookup",
+        "outcome": "ok"
+      },
+      {
+        "name": "domain::passkey::profile_tests::registration_finish_returns_conflict_without_second_row_on_duplicate_credential",
+        "outcome": "FAILED"
+      },
+      {
+        "name": "domain::passkey::profile_tests::stale_session_cannot_begin_finish_or_delete_a_passkey",
+        "outcome": "ok"
+      },
+      {
+        "name": "settings::tests::passkey_settings_validate_the_serialized_origin_and_rp_binding",
+        "outcome": "ok"
+      }
+    ]
+  },
+  {
+    "name": "server-passkey",
+    "command": [
+      "cargo",
+      "test",
+      "-p",
+      "nazo-server",
+      "--lib",
+      "passkey"
+    ],
+    "exit_code": 0,
+    "passed": 37,
+    "failed": 0,
+    "ignored": 0,
+    "seconds": 362.715,
+    "log": "/workspace/scratch/f7903e352d2d/nazo-server-passkey-15.log",
+    "source_head": "500c550200a22cb15b12b593227bbb19f06ecceb",
+    "source_diff_sha256": "3a28a07598d93e1a47e54bbc0761958d3370c67917b13a38cb8f77513e9b3a8a",
+    "passkey_revision": "b3ecfa40c8f626903f36d6065640236ac87fe472",
+    "raw_log_name": "nazo-server-passkey-15.log",
+    "raw_log_bytes": 5940,
+    "raw_log_sha256": "cfdc34ae3758fac12d0368ea1a901c70f285220d766b70b0fe98de5b07d4629f",
+    "summary_counts": {
+      "passed": 37,
+      "failed": 0,
+      "ignored": 0
+    },
+    "individual_tests": [
+      {
+        "name": "domain::passkey::login_tests::legacy_or_uninitialized_uv_needs_independent_mfa_before_future_eligibility",
+        "outcome": "ok"
+      },
+      {
+        "name": "domain::passkey::login_tests::passkey_ceremony_cannot_finish_through_a_different_tenant_service",
+        "outcome": "ok"
+      },
+      {
+        "name": "domain::passkey::login_tests::passkey_login_begin_does_not_enumerate_account_or_credential_state",
+        "outcome": "ok"
+      },
+      {
+        "name": "domain::passkey::login_tests::passkey_login_begin_rejects_malformed_stored_credentials_before_challenge_issue",
+        "outcome": "ok"
+      },
+      {
+        "name": "domain::passkey::login_tests::passkey_login_begin_reports_user_lookup_failure_before_challenge_issue",
+        "outcome": "ok"
+      },
+      {
+        "name": "domain::passkey::login_tests::passkey_login_finish_creates_session_updates_counter_and_consumes_ceremony_once",
+        "outcome": "ok"
+      },
+      {
+        "name": "domain::passkey::login_tests::passkey_login_finish_rejects_credential_mismatch_uniformly_and_consumes_ceremony",
+        "outcome": "ok"
+      },
+      {
+        "name": "domain::passkey::login_tests::passkey_login_finish_rejects_inactive_users_and_consumes_ceremony",
+        "outcome": "ok"
+      },
+      {
+        "name": "domain::passkey::login_tests::passkey_login_finish_rejects_invalid_ceremony_id_before_state_lookup",
+        "outcome": "ok"
+      },
+      {
+        "name": "domain::passkey::login_tests::passkey_login_finish_rejects_malformed_credential_id_before_credential_lookup",
+        "outcome": "ok"
+      },
+      {
+        "name": "domain::passkey::login_tests::passkey_login_finish_rejects_malformed_stored_credentials_before_webauthn_verification",
+        "outcome": "ok"
+      },
+      {
+        "name": "domain::passkey::login_tests::passkey_login_finish_rejects_origin_mismatch_and_consumes_ceremony",
+        "outcome": "ok"
+      },
+      {
+        "name": "domain::passkey::login_tests::passkey_login_finish_reports_user_lookup_failure_after_consuming_ceremony",
+        "outcome": "ok"
+      },
+      {
+        "name": "domain::passkey::login_tests::passkey_login_finish_skips_pending_mfa_for_remembered_device",
+        "outcome": "ok"
+      },
+      {
+        "name": "domain::passkey::login_tests::passkey_login_reuses_verified_uv_and_preserves_mfa_without_it",
+        "outcome": "ok"
+      },
+      {
+        "name": "domain::passkey::login_tests::passkey_login_transport_has_no_identity_or_storage_orchestration",
+        "outcome": "ok"
+      },
+      {
+        "name": "domain::passkey::profile_tests::delete_passkey_cannot_remove_another_users_credential",
+        "outcome": "ok"
+      },
+      {
+        "name": "domain::passkey::profile_tests::delete_passkey_rejects_session_request_without_csrf_before_credential_delete",
+        "outcome": "ok"
+      },
+      {
+        "name": "domain::passkey::profile_tests::delete_passkey_removes_authenticated_user_credential",
+        "outcome": "ok"
+      },
+      {
+        "name": "domain::passkey::profile_tests::delete_passkey_requires_login_before_credential_delete",
+        "outcome": "ok"
+      },
+      {
+        "name": "domain::passkey::profile_tests::passkey_ceremony_id_normalization_accepts_only_bounded_urlsafe_identifiers",
+        "outcome": "ok"
+      },
+      {
+        "name": "domain::passkey::profile_tests::passkey_label_normalization_defaults_trims_and_rejects_oversized_labels",
+        "outcome": "ok"
+      },
+      {
+        "name": "domain::passkey::profile_tests::passkey_list_requires_login_before_loading_credentials",
+        "outcome": "ok"
+      },
+      {
+        "name": "domain::passkey::profile_tests::passkey_list_returns_authenticated_user_credentials_from_database",
+        "outcome": "ok"
+      },
+      {
+        "name": "domain::passkey::profile_tests::passkey_profile_transport_has_no_identity_or_storage_orchestration",
+        "outcome": "ok"
+      },
+      {
+        "name": "domain::passkey::profile_tests::registration_begin_reads_only_scoped_credential_ids",
+        "outcome": "ok"
+      },
+      {
+        "name": "domain::passkey::profile_tests::registration_begin_rejects_session_request_without_csrf_before_ceremony_creation",
+        "outcome": "ok"
+      },
+      {
+        "name": "domain::passkey::profile_tests::registration_begin_requires_login_before_ceremony_creation",
+        "outcome": "ok"
+      },
+      {
+        "name": "domain::passkey::profile_tests::registration_finish_persists_credential_and_consumes_ceremony_once",
+        "outcome": "ok"
+      },
+      {
+        "name": "domain::passkey::profile_tests::registration_finish_projects_malformed_ceremony_state_as_expired",
+        "outcome": "ok"
+      },
+      {
+        "name": "domain::passkey::profile_tests::registration_finish_rejects_ceremony_user_mismatch_without_inserting_credential",
+        "outcome": "ok"
+      },
+      {
+        "name": "domain::passkey::profile_tests::registration_finish_rejects_invalid_authenticator_response_without_persisting_credential",
+        "outcome": "ok"
+      },
+      {
+        "name": "domain::passkey::profile_tests::registration_finish_rejects_session_request_without_csrf_before_ceremony_lookup",
+        "outcome": "ok"
+      },
+      {
+        "name": "domain::passkey::profile_tests::registration_finish_requires_login_before_ceremony_lookup",
+        "outcome": "ok"
+      },
+      {
+        "name": "domain::passkey::profile_tests::registration_finish_returns_conflict_without_second_row_on_duplicate_credential",
+        "outcome": "ok"
+      },
+      {
+        "name": "domain::passkey::profile_tests::stale_session_cannot_begin_finish_or_delete_a_passkey",
+        "outcome": "ok"
+      },
+      {
+        "name": "settings::tests::passkey_settings_validate_the_serialized_origin_and_rp_binding",
+        "outcome": "ok"
+      }
+    ]
+  },
+  {
+    "name": "server-mfa",
+    "command": [
+      "cargo",
+      "test",
+      "-p",
+      "nazo-server",
+      "--lib",
+      "mfa"
+    ],
+    "exit_code": 0,
+    "passed": 11,
+    "failed": 0,
+    "ignored": 0,
+    "seconds": 27.435,
+    "log": "/workspace/scratch/f7903e352d2d/nazo-server-mfa-16.log",
+    "source_head": "500c550200a22cb15b12b593227bbb19f06ecceb",
+    "source_diff_sha256": "3a28a07598d93e1a47e54bbc0761958d3370c67917b13a38cb8f77513e9b3a8a",
+    "passkey_revision": "b3ecfa40c8f626903f36d6065640236ac87fe472",
+    "raw_log_name": "nazo-server-mfa-16.log",
+    "raw_log_bytes": 1438,
+    "raw_log_sha256": "02f565aaae1383c7c67dc07ddd7917b0f2fabd5d83870a1f76d5853f8d952fba",
+    "summary_counts": {
+      "passed": 11,
+      "failed": 0,
+      "ignored": 0
+    },
+    "individual_tests": [
+      {
+        "name": "adapters::audit::tests::audit_event_definitions_include_mfa_step_up",
+        "outcome": "ok"
+      },
+      {
+        "name": "adapters::security::tests::mfa_secret_hasher_preserves_candidate_order_and_rejects_wrong_secret",
+        "outcome": "ok"
+      },
+      {
+        "name": "config::tests::mfa_controls_are_loaded_from_yaml_and_environment",
+        "outcome": "ok"
+      },
+      {
+        "name": "domain::passkey::login_tests::legacy_or_uninitialized_uv_needs_independent_mfa_before_future_eligibility",
+        "outcome": "ok"
+      },
+      {
+        "name": "domain::passkey::login_tests::passkey_login_finish_skips_pending_mfa_for_remembered_device",
+        "outcome": "ok"
+      },
+      {
+        "name": "domain::passkey::login_tests::passkey_login_reuses_verified_uv_and_preserves_mfa_without_it",
+        "outcome": "ok"
+      },
+      {
+        "name": "http::admin::openid4vc::tests::admin_dataset_mutations_fail_closed_on_csrf_and_recent_mfa",
+        "outcome": "ok"
+      },
+      {
+        "name": "http::auth::federation::tests::federation_response_exposes_pending_mfa_and_matching_cookie_lifetime",
+        "outcome": "ok"
+      },
+      {
+        "name": "http::profile::tests::mfa_required::mfa_confirm_committed_unknown_http_withholds_backup_codes_and_new_cookies",
+        "outcome": "ok"
+      },
+      {
+        "name": "http::profile::tests::mfa_required::mfa_regenerate_committed_unknown_http_withholds_backup_codes_and_new_cookies",
+        "outcome": "ok"
+      },
+      {
+        "name": "settings::tests::pending_mfa_session_ttl_must_be_shorter_than_full_session_ttl",
+        "outcome": "ok"
+      }
+    ]
+  },
+  {
+    "name": "server-settings",
+    "command": [
+      "cargo",
+      "test",
+      "-p",
+      "nazo-server",
+      "--lib",
+      "settings"
+    ],
+    "exit_code": 0,
+    "passed": 70,
+    "failed": 0,
+    "ignored": 0,
+    "seconds": 0.946,
+    "log": "/workspace/scratch/f7903e352d2d/nazo-server-settings-17.log",
+    "source_head": "500c550200a22cb15b12b593227bbb19f06ecceb",
+    "source_diff_sha256": "3a28a07598d93e1a47e54bbc0761958d3370c67917b13a38cb8f77513e9b3a8a",
+    "passkey_revision": "b3ecfa40c8f626903f36d6065640236ac87fe472",
+    "raw_log_name": "nazo-server-settings-17.log",
+    "raw_log_bytes": 6366,
+    "raw_log_sha256": "de21fbe0a79ac12602aec6b77a0ecb67e95d9d3b7ccc080a7f76fc54d6e32974",
+    "summary_counts": {
+      "passed": 70,
+      "failed": 0,
+      "ignored": 0
+    },
+    "individual_tests": [
+      {
+        "name": "settings::tests::additional_discovery_scopes_follow_oauth_scope_token_grammar",
+        "outcome": "ok"
+      },
+      {
+        "name": "settings::tests::attestation_trust_stores_reject_private_key_material",
+        "outcome": "ok"
+      },
+      {
+        "name": "settings::tests::baseline_profile_can_use_optional_dpop_nonce_policy",
+        "outcome": "ok"
+      },
+      {
+        "name": "settings::tests::ciba_security_profile_accepts_canonical_fapi2_ciba_value",
+        "outcome": "ok"
+      },
+      {
+        "name": "settings::tests::ciba_security_profile_rejects_noncanonical_aliases",
+        "outcome": "ok"
+      },
+      {
+        "name": "settings::tests::client_attestation_requires_its_own_trust_store",
+        "outcome": "ok"
+      },
+      {
+        "name": "settings::tests::configured_module_dependencies_default_closed_and_accept_explicit_values",
+        "outcome": "ok"
+      },
+      {
+        "name": "settings::tests::data_dir_drives_default_persistent_storage_paths",
+        "outcome": "ok"
+      },
+      {
+        "name": "settings::tests::default_ciba_security_profile_is_fapi_ciba_id1",
+        "outcome": "ok"
+      },
+      {
+        "name": "settings::tests::default_dpop_nonce_policy_is_required",
+        "outcome": "ok"
+      },
+      {
+        "name": "settings::tests::directory_direct_tls_advertises_the_deployment_mtls_port_for_each_tenant_host",
+        "outcome": "ok"
+      },
+      {
+        "name": "settings::tests::directory_openid4vc_derives_tenant_secrets",
+        "outcome": "ok"
+      },
+      {
+        "name": "settings::tests::directory_tenant_rejects_host_mismatch_but_namespaces_explicit_storage_roots",
+        "outcome": "ok"
+      },
+      {
+        "name": "settings::tests::directory_tenant_uses_the_authoritative_host_and_tenant_storage_roots",
+        "outcome": "ok"
+      },
+      {
+        "name": "settings::tests::dpop_nonce_policy_rejects_legacy_compatibility_alias",
+        "outcome": "ok"
+      },
+      {
+        "name": "settings::tests::dynamic_client_registration_initial_access_token_is_optional",
+        "outcome": "ok"
+      },
+      {
+        "name": "settings::tests::email_code_dev_response_requires_debug_loopback_issuer",
+        "outcome": "ok"
+      },
+      {
+        "name": "settings::tests::explicit_endpoint_overrides_still_require_url_admission",
+        "outcome": "ok"
+      },
+      {
+        "name": "settings::tests::explicit_global_par_requirement_remains_supported",
+        "outcome": "ok"
+      },
+      {
+        "name": "settings::tests::explicit_legacy_url_settings_override_public_base_url_derivations",
+        "outcome": "ok"
+      },
+      {
+        "name": "settings::tests::explicit_protected_resource_identifier_overrides_issuer_default",
+        "outcome": "ok"
+      },
+      {
+        "name": "settings::tests::explicit_storage_paths_override_data_dir_derivations",
+        "outcome": "ok"
+      },
+      {
+        "name": "settings::tests::fapi_http_signature_defaults_are_bounded",
+        "outcome": "ok"
+      },
+      {
+        "name": "settings::tests::fapi_http_signature_max_age_accepts_inclusive_boundaries",
+        "outcome": "ok"
+      },
+      {
+        "name": "settings::tests::fapi_http_signature_max_age_rejects_invalid_values",
+        "outcome": "ok"
+      },
+      {
+        "name": "settings::tests::fapi_profiles_can_use_optional_dpop_nonce_policy",
+        "outcome": "ok"
+      },
+      {
+        "name": "settings::tests::fapi_profiles_default_to_required_dpop_nonce_policy",
+        "outcome": "ok"
+      },
+      {
+        "name": "settings::tests::fapi_profiles_reject_protocol_ttls_above_profile_limits",
+        "outcome": "ok"
+      },
+      {
+        "name": "settings::tests::fapi_resource_nonce_policy_is_independent_from_token_nonce_policy",
+        "outcome": "ok"
+      },
+      {
+        "name": "settings::tests::federation_endpoint_policy_preserves_credentials_and_legal_query_urls",
+        "outcome": "ok"
+      },
+      {
+        "name": "settings::tests::federation_provider_registry_fails_closed_for_incomplete_enabled_provider",
+        "outcome": "ok"
+      },
+      {
+        "name": "settings::tests::federation_provider_registry_parses_enabled_oidc_and_social_modules",
+        "outcome": "ok"
+      },
+      {
+        "name": "settings::tests::federation_provider_registry_rejects_duplicate_provider_ids",
+        "outcome": "ok"
+      },
+      {
+        "name": "settings::tests::federation_provider_strings_preserve_unicode_trimming_and_empty_options",
+        "outcome": "ok"
+      },
+      {
+        "name": "settings::tests::initial_directory_binding_uses_the_fixed_system_boundary",
+        "outcome": "ok"
+      },
+      {
+        "name": "settings::tests::invalid_dpop_nonce_policy_is_rejected",
+        "outcome": "ok"
+      },
+      {
+        "name": "settings::tests::invalid_fapi_resource_dpop_nonce_policy_is_rejected",
+        "outcome": "ok"
+      },
+      {
+        "name": "settings::tests::invalid_request_object_jti_policy_is_rejected",
+        "outcome": "ok"
+      },
+      {
+        "name": "settings::tests::issuer_and_verifier_management_credentials_must_be_distinct",
+        "outcome": "ok"
+      },
+      {
+        "name": "settings::tests::key_attestation_policy_can_defer_trust_to_scoped_runtime_policy",
+        "outcome": "ok"
+      },
+      {
+        "name": "settings::tests::mdoc_issuing_country_helper_is_required_and_validated_for_local_generation",
+        "outcome": "ok"
+      },
+      {
+        "name": "settings::tests::mdoc_issuing_country_helper_is_unused_without_mdoc_configuration",
+        "outcome": "ok"
+      },
+      {
+        "name": "settings::tests::oidc_federation_rejects_insecure_runtime_urls",
+        "outcome": "ok"
+      },
+      {
+        "name": "settings::tests::oidc_federation_requires_openid_scope",
+        "outcome": "ok"
+      },
+      {
+        "name": "settings::tests::pairwise_subject_secret_must_be_configured_and_strong_enough",
+        "outcome": "ok"
+      },
+      {
+        "name": "settings::tests::passkey_settings_validate_the_serialized_origin_and_rp_binding",
+        "outcome": "ok"
+      },
+      {
+        "name": "settings::tests::pending_mfa_session_ttl_must_be_shorter_than_full_session_ttl",
+        "outcome": "ok"
+      },
+      {
+        "name": "settings::tests::persistence_totp_key_ring_validates_configuration_once_at_construction",
+        "outcome": "ok"
+      },
+      {
+        "name": "settings::tests::process_settings_cannot_override_the_system_tenant_context",
+        "outcome": "ok"
+      },
+      {
+        "name": "settings::tests::protected_resource_identifier_rejects_fragment_and_non_https_remote_url",
+        "outcome": "ok"
+      },
+      {
+        "name": "settings::tests::public_base_url_drives_same_origin_defaults",
+        "outcome": "ok"
+      },
+      {
+        "name": "settings::tests::public_transport_mode_is_explicit_and_fail_closed",
+        "outcome": "ok"
+      },
+      {
+        "name": "settings::tests::request_object_jti_is_optional_unless_the_operator_requires_it",
+        "outcome": "ok"
+      },
+      {
+        "name": "settings::tests::request_object_jti_policy_can_require_signed_jar_jti",
+        "outcome": "ok"
+      },
+      {
+        "name": "settings::tests::saml_gateway_requires_strong_shared_secret_when_enabled",
+        "outcome": "ok"
+      },
+      {
+        "name": "settings::tests::scim_event_retention_is_bounded_for_delivery_and_data_minimization",
+        "outcome": "ok"
+      },
+      {
+        "name": "settings::tests::secure_deployments_default_to_host_only_cookie_names",
+        "outcome": "ok"
+      },
+      {
+        "name": "settings::tests::security_state_lifetimes_and_cooldowns_must_be_positive",
+        "outcome": "ok"
+      },
+      {
+        "name": "settings::tests::settings_require_materialized_client_secret_pepper",
+        "outcome": "ok"
+      },
+      {
+        "name": "settings::tests::shared_ip_admission_defaults_do_not_replace_failed_login_throttling",
+        "outcome": "ok"
+      },
+      {
+        "name": "settings::tests::signing_key_rotation_settings_default_to_automatic_lifecycle",
+        "outcome": "ok"
+      },
+      {
+        "name": "settings::tests::signing_key_rotation_settings_reject_unsafe_windows",
+        "outcome": "ok"
+      },
+      {
+        "name": "settings::tests::smtp_delivery_accepts_encrypted_tls_modes_without_secret_leakage",
+        "outcome": "ok"
+      },
+      {
+        "name": "settings::tests::smtp_delivery_allows_cleartext_only_for_credential_free_loopback_development",
+        "outcome": "ok"
+      },
+      {
+        "name": "settings::tests::smtp_delivery_rejects_invalid_sender_and_tls_mode",
+        "outcome": "ok"
+      },
+      {
+        "name": "settings::tests::smtp_delivery_requires_paired_credentials",
+        "outcome": "ok"
+      },
+      {
+        "name": "settings::tests::tenants_with_the_same_avatar_base_are_isolated_by_uuid",
+        "outcome": "ok"
+      },
+      {
+        "name": "settings::tests::token_issuance_loads_without_dedicated_response_key_material",
+        "outcome": "ok"
+      },
+      {
+        "name": "settings::tests::transport_modes_reject_conflicting_endpoint_ownership",
+        "outcome": "ok"
+      },
+      {
+        "name": "settings::tests::trusted_proxy_requires_peer_boundary_and_certificate_contract",
+        "outcome": "ok"
+      }
+    ]
+  },
+  {
+    "name": "server-all-targets-build",
+    "command": [
+      "cargo",
+      "test",
+      "-p",
+      "nazo-server",
+      "--all-targets",
+      "--all-features",
+      "--no-run",
+      "--locked"
+    ],
+    "exit_code": 0,
+    "passed": 0,
+    "failed": 0,
+    "ignored": 0,
+    "seconds": 45.528,
+    "log": "/workspace/scratch/f7903e352d2d/nazo-server-all-targets-build-18.log",
+    "source_head": "500c550200a22cb15b12b593227bbb19f06ecceb",
+    "source_diff_sha256": "3a28a07598d93e1a47e54bbc0761958d3370c67917b13a38cb8f77513e9b3a8a",
+    "passkey_revision": "b3ecfa40c8f626903f36d6065640236ac87fe472",
+    "raw_log_name": "nazo-server-all-targets-build-18.log",
+    "raw_log_bytes": 1535,
+    "raw_log_sha256": "423c5a33b3a3ef743b8a3bd3b7ace353a34af3e1414bef85c0eca6cc16864b30",
+    "summary_counts": {
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0
+    },
+    "individual_tests": []
+  },
+  {
+    "name": "native-http-adapter",
+    "command": [
+      "cargo",
+      "test",
+      "-p",
+      "nazo-http-actix",
+      "--lib"
+    ],
+    "exit_code": 0,
+    "passed": 9,
+    "failed": 0,
+    "ignored": 0,
+    "seconds": 111.871,
+    "log": "/workspace/scratch/f7903e352d2d/nazo-native-http-adapter-19.log",
+    "source_head": "500c550200a22cb15b12b593227bbb19f06ecceb",
+    "source_diff_sha256": "3a28a07598d93e1a47e54bbc0761958d3370c67917b13a38cb8f77513e9b3a8a",
+    "passkey_revision": "b3ecfa40c8f626903f36d6065640236ac87fe472",
+    "raw_log_name": "nazo-native-http-adapter-19.log",
+    "raw_log_bytes": 2789,
+    "raw_log_sha256": "814913cf9056f6de2def2cef18684e26ee7c77a8049024eb8443949a42e7b22f",
+    "summary_counts": {
+      "passed": 9,
+      "failed": 0,
+      "ignored": 0
+    },
+    "individual_tests": [
+      {
+        "name": "tests::compressed_stream_is_bounded_before_delivering_an_oversized_chunk",
+        "outcome": "ok"
+      },
+      {
+        "name": "tests::connection_facts_come_from_the_connection_and_ignore_proxy_claims",
+        "outcome": "ok"
+      },
+      {
+        "name": "tests::every_manifest_binding_reaches_the_production_forwarder",
+        "outcome": "ok"
+      },
+      {
+        "name": "tests::host_response_middleware_uses_neutral_policy_without_overwriting_headers",
+        "outcome": "ok"
+      },
+      {
+        "name": "tests::metadata_version_conversion_preserves_all_supported_versions",
+        "outcome": "ok"
+      },
+      {
+        "name": "tests::production_response_presenters_survive_conversion_without_body_copy",
+        "outcome": "ok"
+      },
+      {
+        "name": "tests::raw_request_targets_duplicate_values_and_body_storage_are_preserved",
+        "outcome": "ok"
+      },
+      {
+        "name": "tests::registered_request_conversion_obeys_resource_head_requirements",
+        "outcome": "ok"
+      },
+      {
+        "name": "tests::uncompressed_stream_chunks_keep_their_original_storage",
+        "outcome": "ok"
+      }
+    ]
+  },
+  {
+    "name": "native-direct-tls",
+    "command": [
+      "cargo",
+      "test",
+      "-p",
+      "nazo-server",
+      "--lib",
+      "direct_tls_serves_real_https_and_mtls_without_trusting_forged_headers"
+    ],
+    "exit_code": 0,
+    "passed": 1,
+    "failed": 0,
+    "ignored": 0,
+    "seconds": 0.777,
+    "log": "/workspace/scratch/f7903e352d2d/nazo-native-direct-tls-20.log",
+    "source_head": "500c550200a22cb15b12b593227bbb19f06ecceb",
+    "source_diff_sha256": "3a28a07598d93e1a47e54bbc0761958d3370c67917b13a38cb8f77513e9b3a8a",
+    "passkey_revision": "b3ecfa40c8f626903f36d6065640236ac87fe472",
+    "raw_log_name": "nazo-native-direct-tls-20.log",
+    "raw_log_bytes": 393,
+    "raw_log_sha256": "080f47fefb49436a07074933fe963b18c50162575e75bbc1dfe2a56774194c1f",
+    "summary_counts": {
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0
+    },
+    "individual_tests": [
+      {
+        "name": "bootstrap::tests::direct_tls_serves_real_https_and_mtls_without_trusting_forged_headers",
+        "outcome": "ok"
+      }
+    ]
+  },
+  {
+    "name": "identity-unit",
+    "command": [
+      "cargo",
+      "test",
+      "-p",
+      "nazo-identity",
+      "--lib"
+    ],
+    "exit_code": 0,
+    "passed": 63,
+    "failed": 0,
+    "ignored": 0,
+    "seconds": 55.997,
+    "log": "/workspace/scratch/f7903e352d2d/nazo-identity-unit-21.log",
+    "source_head": "c002858a138a134544c1cc64875f7e11a5af2629",
+    "source_diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "passkey_revision": "b3ecfa40c8f626903f36d6065640236ac87fe472",
+    "raw_log_name": "nazo-identity-unit-21.log",
+    "raw_log_bytes": 7220,
+    "raw_log_sha256": "80c4a64c02ab8552bf5c6973fb3fe714e4bf810107cfd8b700da8bd484307919",
+    "summary_counts": {
+      "passed": 63,
+      "failed": 0,
+      "ignored": 0
+    },
+    "individual_tests": [
+      {
+        "name": "avatar::tests::avatar_reference_rejects_extra_query_or_path_components",
+        "outcome": "ok"
+      },
+      {
+        "name": "avatar::tests::content_detection_uses_file_signatures",
+        "outcome": "ok"
+      },
+      {
+        "name": "avatar::tests::direct_avatar_read_and_delete_preserve_repository_and_storage_boundaries",
+        "outcome": "ok"
+      },
+      {
+        "name": "avatar::tests::direct_candidates_are_deleted_only_after_revision_fenced_miss",
+        "outcome": "ok"
+      },
+      {
+        "name": "avatar::tests::direct_replacement_retires_previous_final_before_completing_upload",
+        "outcome": "ok"
+      },
+      {
+        "name": "avatar::tests::direct_upload_begin_rejects_invalid_references_and_provider_failures",
+        "outcome": "ok"
+      },
+      {
+        "name": "avatar::tests::direct_upload_claim_states_fail_closed_and_release_invalid_pending_claims",
+        "outcome": "ok"
+      },
+      {
+        "name": "avatar::tests::direct_upload_fixes_validated_snapshot_before_database_cas",
+        "outcome": "ok"
+      },
+      {
+        "name": "avatar::tests::direct_upload_handles_retries_repository_failures_and_overview_failures",
+        "outcome": "ok"
+      },
+      {
+        "name": "avatar::tests::direct_upload_recognizes_completed_and_already_recorded_candidates",
+        "outcome": "ok"
+      },
+      {
+        "name": "avatar::tests::direct_upload_rejects_empty_declared_length_before_storage_authorization",
+        "outcome": "ok"
+      },
+      {
+        "name": "avatar::tests::direct_upload_rejects_oversized_declared_length_before_storage_authorization",
+        "outcome": "ok"
+      },
+      {
+        "name": "avatar::tests::direct_upload_releases_pending_claim_after_invalid_staged_bytes",
+        "outcome": "ok"
+      },
+      {
+        "name": "avatar::tests::direct_upload_retry_from_another_service_returns_the_selected_candidate",
+        "outcome": "ok"
+      },
+      {
+        "name": "avatar::tests::direct_upload_validates_staged_snapshots_and_storage_transitions",
+        "outcome": "ok"
+      },
+      {
+        "name": "avatar::tests::final_object_identifier_binds_upload_and_exact_bytes",
+        "outcome": "ok"
+      },
+      {
+        "name": "avatar::tests::pending_reads_once_and_keeps_validated_mime_while_candidate_failures_never_publish",
+        "outcome": "ok"
+      },
+      {
+        "name": "avatar::tests::pending_validates_and_hashes_once_and_drops_bytes_before_recording",
+        "outcome": "ok"
+      },
+      {
+        "name": "federation::tests::browser_binding_digest_is_tenant_scoped_and_canonical_hex",
+        "outcome": "ok"
+      },
+      {
+        "name": "federation::tests::every_account_result_passes_active_gate_before_link_audit_or_session_creation",
+        "outcome": "ok"
+      },
+      {
+        "name": "federation::tests::legacy_state_deserializes_without_inventing_a_browser_binding",
+        "outcome": "ok"
+      },
+      {
+        "name": "mfa_service::tests::backup_code_hash_order_keeps_candidate_identity_and_single_consumption",
+        "outcome": "ok"
+      },
+      {
+        "name": "mfa_service::tests::begin_enrollment_uses_the_atomic_write_without_reading_the_old_secret",
+        "outcome": "ok"
+      },
+      {
+        "name": "mfa_service::tests::disable_reuses_verified_generation_without_consuming_another_factor",
+        "outcome": "ok"
+      },
+      {
+        "name": "mfa_service::tests::failed_or_replayed_confirmation_cannot_return_backup_code_secrets",
+        "outcome": "ok"
+      },
+      {
+        "name": "mfa_service::tests::required_confirmation_has_no_bare_repository_fallback_or_backup_code_disclosure",
+        "outcome": "ok"
+      },
+      {
+        "name": "model::tests::authentication_identity_debug_never_exposes_password_hash",
+        "outcome": "ok"
+      },
+      {
+        "name": "model::tests::password_hash_accepts_argon2_0_5_phc_vector",
+        "outcome": "ok"
+      },
+      {
+        "name": "model::tests::password_hash_verifies_candidates_without_exposing_the_verifier",
+        "outcome": "ok"
+      },
+      {
+        "name": "passkey::tests::credential_id_is_bounded_before_decode_and_keeps_strict_base64",
+        "outcome": "ok"
+      },
+      {
+        "name": "passkey::tests::uv_initialization_requires_fresh_independent_mfa_bound_to_the_account",
+        "outcome": "ok"
+      },
+      {
+        "name": "profile::tests::applications_are_loaded_from_the_accounts_tenant",
+        "outcome": "ok"
+      },
+      {
+        "name": "profile::tests::oidc_profile_fields_validate_their_declared_syntax",
+        "outcome": "ok"
+      },
+      {
+        "name": "profile::tests::overview_failure_precedes_profile_write_and_retry_commits_once",
+        "outcome": "ok"
+      },
+      {
+        "name": "profile::tests::profile_normalization_reuses_owned_text_and_scope_strings",
+        "outcome": "ok"
+      },
+      {
+        "name": "profile::tests::profile_text_trims_blanks_and_enforces_byte_limit",
+        "outcome": "ok"
+      },
+      {
+        "name": "profile::tests::profile_update_normalizes_only_writable_profile_fields",
+        "outcome": "ok"
+      },
+      {
+        "name": "profile::tests::profile_url_accepts_only_absolute_http_urls",
+        "outcome": "ok"
+      },
+      {
+        "name": "registration::tests::denied_email_reservation_releases_peer_and_skips_code_delivery",
+        "outcome": "ok"
+      },
+      {
+        "name": "registration::tests::failed_delivery_deletes_code_and_releases_tenant_scoped_reservations",
+        "outcome": "ok"
+      },
+      {
+        "name": "registration::tests::failed_email_reservation_releases_peer_and_skips_code_delivery",
+        "outcome": "ok"
+      },
+      {
+        "name": "registration::tests::failed_hash_and_uncertain_code_store_release_only_this_attempt",
+        "outcome": "ok"
+      },
+      {
+        "name": "registration::tests::registration_scopes_code_load_and_consumption_to_service_tenant",
+        "outcome": "ok"
+      },
+      {
+        "name": "registration::tests::successful_send_scopes_code_and_cooldowns_to_service_tenant",
+        "outcome": "ok"
+      },
+      {
+        "name": "registration::tests::verification_codes_are_fixed_width_decimal_values",
+        "outcome": "ok"
+      },
+      {
+        "name": "session::tests::add_amr_deduplicates_methods_and_preserves_claim_order",
+        "outcome": "ok"
+      },
+      {
+        "name": "session::tests::authentication_metadata_requires_time_methods_and_session_id",
+        "outcome": "ok"
+      },
+      {
+        "name": "session::tests::authentication_precision_is_owned_by_the_record_and_legacy_updates_clear_it",
+        "outcome": "ok"
+      },
+      {
+        "name": "session::tests::binding_client_fails_closed_for_invalid_or_missing_sessions",
+        "outcome": "ok"
+      },
+      {
+        "name": "session::tests::binding_client_rejects_repeated_compare_and_set_conflicts",
+        "outcome": "ok"
+      },
+      {
+        "name": "session::tests::binding_clients_is_session_scoped_and_idempotent",
+        "outcome": "ok"
+      },
+      {
+        "name": "session::tests::corrupt_session_is_deleted_and_resolves_as_missing",
+        "outcome": "ok"
+      },
+      {
+        "name": "session::tests::current_session_exposes_exact_logged_in_clients",
+        "outcome": "ok"
+      },
+      {
+        "name": "session::tests::invalid_authentication_metadata_is_deleted_fail_closed",
+        "outcome": "ok"
+      },
+      {
+        "name": "session::tests::mfa_resolution_invalidates_inactive_or_corrupt_sessions_but_keeps_dependency_failures",
+        "outcome": "ok"
+      },
+      {
+        "name": "session::tests::mfa_resolution_reads_one_snapshot_and_one_account_for_either_session_state",
+        "outcome": "ok"
+      },
+      {
+        "name": "session::tests::principal_guard_uses_one_narrow_lookup_and_preserves_session_gates",
+        "outcome": "ok"
+      },
+      {
+        "name": "session::tests::recent_interactive_mfa_has_one_strict_time_and_factor_policy",
+        "outcome": "ok"
+      },
+      {
+        "name": "session::tests::step_up_builds_a_fresh_session_and_csrf_pair_for_atomic_rotation",
+        "outcome": "ok"
+      },
+      {
+        "name": "session::tests::unavailable_session_store_is_not_downgraded_to_anonymous",
+        "outcome": "ok"
+      },
+      {
+        "name": "tenancy::tests::tenant_host_has_one_canonical_form",
+        "outcome": "ok"
+      },
+      {
+        "name": "tenancy::tests::tenant_host_matches_the_validated_issuer_host_for_dns_and_ip_addresses",
+        "outcome": "ok"
+      },
+      {
+        "name": "tenancy::tests::tenant_host_rejects_url_components_and_empty_domains",
+        "outcome": "ok"
+      }
+    ]
+  },
+  {
+    "name": "identity-authentication-contracts",
+    "command": [
+      "cargo",
+      "test",
+      "-p",
+      "nazo-identity",
+      "--test",
+      "policy",
+      "--test",
+      "authentication_method_authority",
+      "--test",
+      "password_authentication",
+      "--test",
+      "federation_authentication"
+    ],
+    "exit_code": 0,
+    "passed": 23,
+    "failed": 0,
+    "ignored": 0,
+    "seconds": 7.753,
+    "log": "/workspace/scratch/f7903e352d2d/nazo-identity-authentication-contracts-22.log",
+    "source_head": "c002858a138a134544c1cc64875f7e11a5af2629",
+    "source_diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "passkey_revision": "b3ecfa40c8f626903f36d6065640236ac87fe472",
+    "raw_log_name": "nazo-identity-authentication-contracts-22.log",
+    "raw_log_bytes": 2797,
+    "raw_log_sha256": "2c16721d50c1eb0c1812d8c410342f21b2a0758016ea9aa5c046632844aa3e69",
+    "summary_counts": {
+      "passed": 23,
+      "failed": 0,
+      "ignored": 0
+    },
+    "individual_tests": [
+      {
+        "name": "credential_management_reuses_only_fresh_sufficient_authentication",
+        "outcome": "ok"
+      },
+      {
+        "name": "real_session_metadata_rejects_empty_evidence_and_invalid_time_or_sid",
+        "outcome": "ok"
+      },
+      {
+        "name": "session_amr_preserves_unknown_evidence_without_inventing_federation",
+        "outcome": "ok"
+      },
+      {
+        "name": "totp_credentials_do_not_expose_seeds_in_debug_output",
+        "outcome": "ok"
+      },
+      {
+        "name": "linked_federation_obeys_local_mfa_and_uses_pending_session_lifetime",
+        "outcome": "ok"
+      },
+      {
+        "name": "login_uses_current_account_state_after_password_verification",
+        "outcome": "ok"
+      },
+      {
+        "name": "missing_and_inactive_accounts_share_dummy_verification_and_failure_behavior",
+        "outcome": "ok"
+      },
+      {
+        "name": "password_login_can_manage_credentials_with_recent_authentication",
+        "outcome": "ok"
+      },
+      {
+        "name": "backup_code_normalization_preserves_strict_display_contract",
+        "outcome": "ok"
+      },
+      {
+        "name": "base32_decode_accepts_transport_whitespace_case_and_padding_only",
+        "outcome": "ok"
+      },
+      {
+        "name": "email_policy_normalizes_addresses_and_renders_existing_template",
+        "outcome": "ok"
+      },
+      {
+        "name": "email_policy_preserves_lettre_address_syntax_contract",
+        "outcome": "ok"
+      },
+      {
+        "name": "federation_callback_token_policy_is_exact",
+        "outcome": "ok"
+      },
+      {
+        "name": "generated_backup_code_uses_two_fixed_width_numeric_chunks",
+        "outcome": "ok"
+      },
+      {
+        "name": "generated_totp_secret_is_base32_without_padding",
+        "outcome": "ok"
+      },
+      {
+        "name": "mfa_policy_preserves_totp_and_backup_code_contracts",
+        "outcome": "ok"
+      },
+      {
+        "name": "otpauth_uri_keeps_existing_encoding_contract",
+        "outcome": "ok"
+      },
+      {
+        "name": "passkey_policy_binds_tenant_user_and_validates_user_input",
+        "outcome": "ok"
+      },
+      {
+        "name": "scim_policy_normalizes_identity_filter_payload_and_patch",
+        "outcome": "ok"
+      },
+      {
+        "name": "scim_policy_rejects_invalid_email_dot_placement",
+        "outcome": "ok"
+      },
+      {
+        "name": "session_policy_validates_metadata_and_preserves_amr_order",
+        "outcome": "ok"
+      },
+      {
+        "name": "totp_verification_rejects_replay_and_keeps_one_step_skew",
+        "outcome": "ok"
+      },
+      {
+        "name": "totp_verifier_rejects_malformed_code_or_secret_without_fallback",
+        "outcome": "ok"
+      }
+    ]
+  },
+  {
+    "name": "postgres-passkey-jsonb",
+    "command": [
+      "cargo",
+      "test",
+      "-p",
+      "nazo-postgres",
+      "--lib",
+      "passkey"
+    ],
+    "exit_code": 0,
+    "passed": 5,
+    "failed": 0,
+    "ignored": 0,
+    "seconds": 93.708,
+    "log": "/workspace/scratch/f7903e352d2d/nazo-postgres-passkey-jsonb-23.log",
+    "source_head": "c002858a138a134544c1cc64875f7e11a5af2629",
+    "source_diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "passkey_revision": "b3ecfa40c8f626903f36d6065640236ac87fe472",
+    "raw_log_name": "nazo-postgres-passkey-jsonb-23.log",
+    "raw_log_bytes": 1481,
+    "raw_log_sha256": "7a9b587445cc9223fb4db0f7b01190752fc7e54d2420dd9c167e6ccc91f9b6f1",
+    "summary_counts": {
+      "passed": 5,
+      "failed": 0,
+      "ignored": 0
+    },
+    "individual_tests": [
+      {
+        "name": "convert::identity::passkey_tests::legacy_jsonb_es256_and_ed25519_credentials_authenticate_without_registration",
+        "outcome": "ok"
+      },
+      {
+        "name": "convert::identity::passkey_tests::malformed_owned_credential_keeps_the_existing_consistency_failure",
+        "outcome": "ok"
+      },
+      {
+        "name": "convert::identity::passkey_tests::owned_credential_value_keeps_existing_webauthn_key_material_and_wire",
+        "outcome": "ok"
+      },
+      {
+        "name": "convert::identity::tests::compact_passkey_material_has_one_id_and_counter_authority",
+        "outcome": "ok"
+      },
+      {
+        "name": "convert::identity::tests::passkey_adapter_rejects_conflicting_credential_authorities",
+        "outcome": "ok"
+      }
+    ]
+  },
+  {
+    "name": "postgres-migrations",
+    "command": [
+      "cargo",
+      "test",
+      "-p",
+      "nazo-postgres",
+      "--test",
+      "migrations",
+      "pending_migrations_create_all_runtime_module_state_tables"
+    ],
+    "exit_code": 0,
+    "passed": 1,
+    "failed": 0,
+    "ignored": 0,
+    "seconds": 271.256,
+    "log": "/workspace/scratch/f7903e352d2d/nazo-postgres-migrations-24.log",
+    "source_head": "c002858a138a134544c1cc64875f7e11a5af2629",
+    "source_diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "passkey_revision": "b3ecfa40c8f626903f36d6065640236ac87fe472",
+    "raw_log_name": "nazo-postgres-migrations-24.log",
+    "raw_log_bytes": 466,
+    "raw_log_sha256": "69c5cef1078504c965b16a3c185cdc625f30c22b7aea0d7491cbc03a2c0dca3d",
+    "summary_counts": {
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0
+    },
+    "individual_tests": [
+      {
+        "name": "pending_migrations_create_all_runtime_module_state_tables",
+        "outcome": "ok"
+      }
+    ]
+  },
+  {
+    "name": "postgres-passkey-cas",
+    "command": [
+      "cargo",
+      "test",
+      "-p",
+      "nazo-postgres",
+      "--test",
+      "identity_repositories",
+      "passkey"
+    ],
+    "exit_code": 0,
+    "passed": 2,
+    "failed": 0,
+    "ignored": 0,
+    "seconds": 21.161,
+    "log": "/workspace/scratch/f7903e352d2d/nazo-postgres-passkey-cas-25.log",
+    "source_head": "c002858a138a134544c1cc64875f7e11a5af2629",
+    "source_diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "passkey_revision": "b3ecfa40c8f626903f36d6065640236ac87fe472",
+    "raw_log_name": "nazo-postgres-passkey-cas-25.log",
+    "raw_log_bytes": 550,
+    "raw_log_sha256": "e074c175bf956508af2337edc846711820fc59be06387d79458f3ac372764e05",
+    "summary_counts": {
+      "passed": 2,
+      "failed": 0,
+      "ignored": 0
+    },
+    "individual_tests": [
+      {
+        "name": "passkey_and_federation_uniqueness_are_typed_conflicts",
+        "outcome": "ok"
+      },
+      {
+        "name": "passkey_counter_update_is_monotonic_compare_and_set",
+        "outcome": "ok"
+      }
+    ]
+  },
+  {
+    "name": "postgres-mfa",
+    "command": [
+      "cargo",
+      "test",
+      "-p",
+      "nazo-postgres",
+      "--test",
+      "identity_repositories",
+      "mfa"
+    ],
+    "exit_code": 0,
+    "passed": 14,
+    "failed": 0,
+    "ignored": 0,
+    "seconds": 8.797,
+    "log": "/workspace/scratch/f7903e352d2d/nazo-postgres-mfa-26.log",
+    "source_head": "c002858a138a134544c1cc64875f7e11a5af2629",
+    "source_diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "passkey_revision": "b3ecfa40c8f626903f36d6065640236ac87fe472",
+    "raw_log_name": "nazo-postgres-mfa-26.log",
+    "raw_log_bytes": 1614,
+    "raw_log_sha256": "6694a109bb52cd70ba025d4e7aba3f64248c89abd65fc237ec77eb87eb46ec31",
+    "summary_counts": {
+      "passed": 14,
+      "failed": 0,
+      "ignored": 0
+    },
+    "individual_tests": [
+      {
+        "name": "mfa_backup_code_bounds_and_enrollment_conflict_are_explicit",
+        "outcome": "ok"
+      },
+      {
+        "name": "mfa_clear_waits_for_actual_remember_key_share_then_removes_committed_device",
+        "outcome": "ok"
+      },
+      {
+        "name": "mfa_encrypted_lifecycle_and_trait_boundary_are_tenant_safe",
+        "outcome": "ok"
+      },
+      {
+        "name": "mfa_generation::mfa_clear_committed_unknown_retry_cannot_clear_formal_g2",
+        "outcome": "ok"
+      },
+      {
+        "name": "mfa_generation::mfa_clear_failure_after_dependent_deletes_rolls_back_every_generation_field",
+        "outcome": "ok"
+      },
+      {
+        "name": "mfa_generation::mfa_clear_generation_lock_orders_formal_g2_install_after_commit",
+        "outcome": "ok"
+      },
+      {
+        "name": "mfa_generation::mfa_confirm_and_regenerate_hidden_committed_ack_return_no_backup_codes",
+        "outcome": "ok"
+      },
+      {
+        "name": "mfa_generation::mfa_confirmation_required_ledger_and_inactive_actor_roll_back_before_code_disclosure",
+        "outcome": "ok"
+      },
+      {
+        "name": "mfa_generation::mfa_disable_required_ledger_failure_rolls_back_current_generation_and_dependents",
+        "outcome": "ok"
+      },
+      {
+        "name": "mfa_generation::mfa_regeneration_required_ledger_and_inactive_actor_preserve_exact_old_backups",
+        "outcome": "ok"
+      },
+      {
+        "name": "mfa_generation::mfa_verified_g1_disable_preserves_fully_installed_g2_after_barrier",
+        "outcome": "ok"
+      },
+      {
+        "name": "mfa_generation_fences_late_remember_and_regeneration_after_clear_and_reenrollment",
+        "outcome": "ok"
+      },
+      {
+        "name": "mfa_two_consumed_backup_proofs_regenerate_serially_without_generation_lock_cycle",
+        "outcome": "ok"
+      },
+      {
+        "name": "server_mfa_verification_does_not_query_migrated_tables_directly",
+        "outcome": "ok"
+      }
+    ]
+  },
+  {
+    "name": "postgres-totp",
+    "command": [
+      "cargo",
+      "test",
+      "-p",
+      "nazo-postgres",
+      "--test",
+      "identity_repositories",
+      "totp"
+    ],
+    "exit_code": 0,
+    "passed": 5,
+    "failed": 0,
+    "ignored": 0,
+    "seconds": 6.148,
+    "log": "/workspace/scratch/f7903e352d2d/nazo-postgres-totp-27.log",
+    "source_head": "c002858a138a134544c1cc64875f7e11a5af2629",
+    "source_diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "passkey_revision": "b3ecfa40c8f626903f36d6065640236ac87fe472",
+    "raw_log_name": "nazo-postgres-totp-27.log",
+    "raw_log_bytes": 701,
+    "raw_log_sha256": "c034502f4d714b5258af307d1422deed3c046a8aa97a399d5efd9d979539b378",
+    "summary_counts": {
+      "passed": 5,
+      "failed": 0,
+      "ignored": 0
+    },
+    "individual_tests": [
+      {
+        "name": "concurrent_totp_enrollment_confirmation_has_one_audited_winner",
+        "outcome": "ok"
+      },
+      {
+        "name": "failed_totp_enrollment_confirmation_is_durably_audited_without_state_change",
+        "outcome": "ok"
+      },
+      {
+        "name": "totp_enrollment_orders_cross_store_changes_for_safe_recovery",
+        "outcome": "ok"
+      },
+      {
+        "name": "totp_last_step_compare_and_set_has_one_concurrent_winner",
+        "outcome": "ok"
+      },
+      {
+        "name": "totp_verification_classification_and_audit_are_atomic_and_replay_safe",
+        "outcome": "ok"
+      }
+    ]
+  },
+  {
+    "name": "postgres-passkey-audit",
+    "command": [
+      "cargo",
+      "test",
+      "-p",
+      "nazo-postgres",
+      "--test",
+      "audit_commit_boundary",
+      "identity_mutations_and_required_audit_share_the_commit_boundary"
+    ],
+    "exit_code": 0,
+    "passed": 1,
+    "failed": 0,
+    "ignored": 0,
+    "seconds": 9.052,
+    "log": "/workspace/scratch/f7903e352d2d/nazo-postgres-passkey-audit-28.log",
+    "source_head": "c002858a138a134544c1cc64875f7e11a5af2629",
+    "source_diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "passkey_revision": "b3ecfa40c8f626903f36d6065640236ac87fe472",
+    "raw_log_name": "nazo-postgres-passkey-audit-28.log",
+    "raw_log_bytes": 493,
+    "raw_log_sha256": "29f722ce8eb1680aa7b038423405afb985c37c54964821e89fb7adfeb17f4973",
+    "summary_counts": {
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0
+    },
+    "individual_tests": [
+      {
+        "name": "identity_mutations_and_required_audit_share_the_commit_boundary",
+        "outcome": "ok"
+      }
+    ]
+  },
+  {
+    "name": "valkey-passkey",
+    "command": [
+      "cargo",
+      "test",
+      "-p",
+      "nazo-valkey",
+      "--test",
+      "remaining_contract",
+      "passkey"
+    ],
+    "exit_code": 0,
+    "passed": 4,
+    "failed": 0,
+    "ignored": 0,
+    "seconds": 43.315,
+    "log": "/workspace/scratch/f7903e352d2d/nazo-valkey-passkey-29.log",
+    "source_head": "c002858a138a134544c1cc64875f7e11a5af2629",
+    "source_diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "passkey_revision": "b3ecfa40c8f626903f36d6065640236ac87fe472",
+    "raw_log_name": "nazo-valkey-passkey-29.log",
+    "raw_log_bytes": 1081,
+    "raw_log_sha256": "033a5a27de023e979bc068f054d39a45c8bbd30fbfa3c9c08d2fc133fe6b7cf9",
+    "summary_counts": {
+      "passed": 4,
+      "failed": 0,
+      "ignored": 0
+    },
+    "individual_tests": [
+      {
+        "name": "typed_passkey_authentication_keeps_legacy_default_fields",
+        "outcome": "ok"
+      },
+      {
+        "name": "typed_passkey_ceremony_is_atomically_consumed_once_under_concurrency",
+        "outcome": "ok"
+      },
+      {
+        "name": "typed_passkey_codec_preserves_legacy_json_unknown_fields_expiry_and_corrupt_consumption",
+        "outcome": "ok"
+      },
+      {
+        "name": "typed_passkey_duplicate_recognized_field_fails_closed_after_atomic_consumption",
+        "outcome": "ok"
+      }
+    ]
+  },
+  {
+    "name": "valkey-session",
+    "command": [
+      "cargo",
+      "test",
+      "-p",
+      "nazo-valkey",
+      "--test",
+      "session_contract"
+    ],
+    "exit_code": 0,
+    "passed": 6,
+    "failed": 0,
+    "ignored": 0,
+    "seconds": 2.071,
+    "log": "/workspace/scratch/f7903e352d2d/nazo-valkey-session-30.log",
+    "source_head": "c002858a138a134544c1cc64875f7e11a5af2629",
+    "source_diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "passkey_revision": "b3ecfa40c8f626903f36d6065640236ac87fe472",
+    "raw_log_name": "nazo-valkey-session-30.log",
+    "raw_log_bytes": 829,
+    "raw_log_sha256": "75503af9b9c47083f158d921c7015b5a0333f726f5fafbb8a4bd2b297e461451",
+    "summary_counts": {
+      "passed": 6,
+      "failed": 0,
+      "ignored": 0
+    },
+    "individual_tests": [
+      {
+        "name": "concurrent_session_rotation_has_exactly_one_winner_and_no_partial_state",
+        "outcome": "ok"
+      },
+      {
+        "name": "session_authentication_precision_roundtrips_and_malformed_precision_is_rejected",
+        "outcome": "ok"
+      },
+      {
+        "name": "session_compare_and_set_preserves_ttl_and_logged_in_rps",
+        "outcome": "ok"
+      },
+      {
+        "name": "session_load_rejects_a_record_without_current_mfa_state",
+        "outcome": "ok"
+      },
+      {
+        "name": "session_store_preserves_exact_key_payload_and_ttl",
+        "outcome": "ok"
+      },
+      {
+        "name": "unversioned_sessions_require_fresh_login",
+        "outcome": "ok"
+      }
+    ]
+  },
+  {
+    "name": "valkey-authentication-state",
+    "command": [
+      "cargo",
+      "test",
+      "-p",
+      "nazo-valkey",
+      "--test",
+      "remaining_contract",
+      "authentication_short_state"
+    ],
+    "exit_code": 0,
+    "passed": 1,
+    "failed": 0,
+    "ignored": 0,
+    "seconds": 0.501,
+    "log": "/workspace/scratch/f7903e352d2d/nazo-valkey-authentication-state-31.log",
+    "source_head": "c002858a138a134544c1cc64875f7e11a5af2629",
+    "source_diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "passkey_revision": "b3ecfa40c8f626903f36d6065640236ac87fe472",
+    "raw_log_name": "nazo-valkey-authentication-state-31.log",
+    "raw_log_bytes": 388,
+    "raw_log_sha256": "b29f5bd3ab49163ee7c9773682e0366e72b6258060ccb423ee6a0d99b978a00c",
+    "summary_counts": {
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0
+    },
+    "individual_tests": [
+      {
+        "name": "authentication_short_state_preserves_exact_keys_and_one_time_semantics",
+        "outcome": "ok"
+      }
+    ]
+  },
+  {
+    "name": "valkey-login-session",
+    "command": [
+      "cargo",
+      "test",
+      "-p",
+      "nazo-valkey",
+      "--test",
+      "remaining_contract",
+      "login_session"
+    ],
+    "exit_code": 0,
+    "passed": 2,
+    "failed": 0,
+    "ignored": 0,
+    "seconds": 0.388,
+    "log": "/workspace/scratch/f7903e352d2d/nazo-valkey-login-session-32.log",
+    "source_head": "c002858a138a134544c1cc64875f7e11a5af2629",
+    "source_diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "passkey_revision": "b3ecfa40c8f626903f36d6065640236ac87fe472",
+    "raw_log_name": "nazo-valkey-login-session-32.log",
+    "raw_log_bytes": 464,
+    "raw_log_sha256": "d9465d9f4792f2a68ebd06d389839bfdf679e2603d06e2db879aa24efdf5c234",
+    "summary_counts": {
+      "passed": 2,
+      "failed": 0,
+      "ignored": 0
+    },
+    "individual_tests": [
+      {
+        "name": "login_session_create_is_atomic_and_never_overwrites_a_collision",
+        "outcome": "ok"
+      },
+      {
+        "name": "login_session_replacement_atomically_invalidates_the_previous_session",
+        "outcome": "ok"
+      }
+    ]
+  },
+  {
+    "name": "valkey-mfa",
+    "command": [
+      "cargo",
+      "test",
+      "-p",
+      "nazo-valkey",
+      "--test",
+      "remaining_contract",
+      "mfa_failure"
+    ],
+    "exit_code": 0,
+    "passed": 1,
+    "failed": 0,
+    "ignored": 0,
+    "seconds": 0.441,
+    "log": "/workspace/scratch/f7903e352d2d/nazo-valkey-mfa-33.log",
+    "source_head": "c002858a138a134544c1cc64875f7e11a5af2629",
+    "source_diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "passkey_revision": "b3ecfa40c8f626903f36d6065640236ac87fe472",
+    "raw_log_name": "nazo-valkey-mfa-33.log",
+    "raw_log_bytes": 378,
+    "raw_log_sha256": "61b9d0c3bee5962dc8b468b188c940eb84136f904e64bceaf51761424aaef142",
+    "summary_counts": {
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0
+    },
+    "individual_tests": [
+      {
+        "name": "mfa_failure_budget_is_account_bound_and_clears_after_success",
+        "outcome": "ok"
+      }
+    ]
+  },
+  {
+    "name": "http-passkey",
+    "command": [
+      "cargo",
+      "test",
+      "-p",
+      "nazoauth",
+      "--lib",
+      "passkey"
+    ],
+    "exit_code": 0,
+    "passed": 10,
+    "failed": 0,
+    "ignored": 0,
+    "seconds": 80.516,
+    "log": "/workspace/scratch/f7903e352d2d/nazo-http-passkey-34.log",
+    "source_head": "c002858a138a134544c1cc64875f7e11a5af2629",
+    "source_diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "passkey_revision": "b3ecfa40c8f626903f36d6065640236ac87fe472",
+    "raw_log_name": "nazo-http-passkey-34.log",
+    "raw_log_bytes": 1893,
+    "raw_log_sha256": "59c77f86879d75b253a090cb5853e7ffb8130cebc164e8264b6e77821934ec51",
+    "summary_counts": {
+      "passed": 10,
+      "failed": 0,
+      "ignored": 0
+    },
+    "individual_tests": [
+      {
+        "name": "config::validation::tests::issuer_defaults_allow_passkey_overrides_before_complete_validation",
+        "outcome": "ok"
+      },
+      {
+        "name": "http::passkey::tests::login_finish_extracts_security_context_and_sets_only_bound_session_material",
+        "outcome": "ok"
+      },
+      {
+        "name": "http::passkey::tests::login_only_allows_uv_initialization_with_the_existing_session_csrf_proof",
+        "outcome": "ok"
+      },
+      {
+        "name": "http::passkey::tests::login_routes_preserve_post_only_no_cors_surface",
+        "outcome": "ok"
+      },
+      {
+        "name": "http::passkey::tests::missing_profile_session_clears_both_cookies_with_exact_protocol_error",
+        "outcome": "ok"
+      },
+      {
+        "name": "http::passkey::tests::profile_routes_preserve_get_post_delete_options_preflight_contract",
+        "outcome": "ok"
+      },
+      {
+        "name": "http::passkey::tests::profile_routes_preserve_wrong_method_cors_and_security_contract",
+        "outcome": "ok"
+      },
+      {
+        "name": "http::passkey::tests::public_passkey_projection_excludes_tenant_user_and_credential_material",
+        "outcome": "ok"
+      },
+      {
+        "name": "http::passkey::tests::rate_limit_response_preserves_retry_after_and_does_not_call_core",
+        "outcome": "ok"
+      },
+      {
+        "name": "http::passkey::tests::write_rejects_invalid_csrf_before_session_or_core_lookup",
+        "outcome": "ok"
+      }
+    ]
+  },
+  {
+    "name": "http-mfa",
+    "command": [
+      "cargo",
+      "test",
+      "-p",
+      "nazoauth",
+      "--lib",
+      "mfa"
+    ],
+    "exit_code": 0,
+    "passed": 9,
+    "failed": 0,
+    "ignored": 0,
+    "seconds": 0.54,
+    "log": "/workspace/scratch/f7903e352d2d/nazo-http-mfa-35.log",
+    "source_head": "c002858a138a134544c1cc64875f7e11a5af2629",
+    "source_diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "passkey_revision": "b3ecfa40c8f626903f36d6065640236ac87fe472",
+    "raw_log_name": "nazo-http-mfa-35.log",
+    "raw_log_bytes": 1303,
+    "raw_log_sha256": "9634d2f05bc4e95501d8c709b71a3990907369a3b4561456609a741c15bb105d",
+    "summary_counts": {
+      "passed": 9,
+      "failed": 0,
+      "ignored": 0
+    },
+    "individual_tests": [
+      {
+        "name": "http::profile_account::tests::pending_mfa_me_returns_cookie_csrf_token_and_reduced_profile",
+        "outcome": "ok"
+      },
+      {
+        "name": "http::runtime_modules::tests::patch_checks_csrf_before_session_and_recent_mfa_policy",
+        "outcome": "ok"
+      },
+      {
+        "name": "http::transport_tests::mfa_profile_transport::disabling_only_clears_remembered_device_cookie_when_state_changed",
+        "outcome": "ok"
+      },
+      {
+        "name": "http::transport_tests::mfa_profile_transport::malformed_json_and_rate_limit_fail_closed_with_stable_http_contract",
+        "outcome": "ok"
+      },
+      {
+        "name": "http::transport_tests::mfa_profile_transport::missing_mfa_challenge_does_not_clear_an_authenticated_session",
+        "outcome": "ok"
+      },
+      {
+        "name": "http::transport_tests::mfa_profile_transport::static_mfa_routes_lock_methods_cors_security_headers_and_no_store",
+        "outcome": "ok"
+      },
+      {
+        "name": "http::transport_tests::mfa_profile_transport::successful_step_up_rotates_session_and_csrf_as_a_no_store_pair",
+        "outcome": "ok"
+      },
+      {
+        "name": "http::transport_tests::mfa_profile_transport::user_agent_binding_is_only_collected_for_remembered_devices",
+        "outcome": "ok"
+      },
+      {
+        "name": "routes::tests::mfa_options_and_rejections_keep_their_protocol_response",
+        "outcome": "ok"
+      }
+    ]
+  },
+  {
+    "name": "http-configuration",
+    "command": [
+      "cargo",
+      "test",
+      "-p",
+      "nazoauth",
+      "--lib",
+      "config"
+    ],
+    "exit_code": 0,
+    "passed": 23,
+    "failed": 0,
+    "ignored": 0,
+    "seconds": 2.032,
+    "log": "/workspace/scratch/f7903e352d2d/nazo-http-configuration-36.log",
+    "source_head": "c002858a138a134544c1cc64875f7e11a5af2629",
+    "source_diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "passkey_revision": "b3ecfa40c8f626903f36d6065640236ac87fe472",
+    "raw_log_name": "nazo-http-configuration-36.log",
+    "raw_log_bytes": 2768,
+    "raw_log_sha256": "2b960a5320ef8c1923e28a75ea76e058c166dd0562c1ea49435de025567ccfff",
+    "summary_counts": {
+      "passed": 23,
+      "failed": 0,
+      "ignored": 0
+    },
+    "individual_tests": [
+      {
+        "name": "composition::core::dynamic_registration_tests::dynamic_registration_config_copies_security_and_rate_limit_settings",
+        "outcome": "ok"
+      },
+      {
+        "name": "composition::core::metadata_tests::metadata_config_maps_both_ciba_profiles",
+        "outcome": "ok"
+      },
+      {
+        "name": "composition::core::metadata_tests::metadata_config_maps_only_the_focused_settings_boundary",
+        "outcome": "ok"
+      },
+      {
+        "name": "composition::core::metadata_tests::metadata_config_uses_composable_discovery_for_every_legacy_profile",
+        "outcome": "ok"
+      },
+      {
+        "name": "composition::core::metadata_tests::metadata_credential_scopes_come_from_the_issuer_configurations",
+        "outcome": "ok"
+      },
+      {
+        "name": "config::validation::tests::attestation_trust_rejects_private_material_and_wrong_key_purpose",
+        "outcome": "ok"
+      },
+      {
+        "name": "config::validation::tests::enabled_credential_roles_require_complete_separate_security_material",
+        "outcome": "ok"
+      },
+      {
+        "name": "config::validation::tests::existing_lifetime_bounds_apply_to_embedded_hosts",
+        "outcome": "ok"
+      },
+      {
+        "name": "config::validation::tests::issuer_defaults_allow_passkey_overrides_before_complete_validation",
+        "outcome": "ok"
+      },
+      {
+        "name": "config::validation::tests::mutable_configuration_is_revalidated_at_product_boundary",
+        "outcome": "ok"
+      },
+      {
+        "name": "config::validation::tests::product_defaults_preserve_native_policy",
+        "outcome": "ok"
+      },
+      {
+        "name": "config::validation::tests::typed_federation_registry_keeps_json_configuration_admission_rules",
+        "outcome": "ok"
+      },
+      {
+        "name": "http::cors::host_tests::cors_auth_api_credentials_are_limited_to_configured_origins_and_csrf_headers",
+        "outcome": "ok"
+      },
+      {
+        "name": "http::dpop::tests::target_uri_selects_only_the_configured_request_origin",
+        "outcome": "ok"
+      },
+      {
+        "name": "http::dynamic_client_registration::tests::client_configuration_read_preserves_authenticated_registration_token",
+        "outcome": "ok"
+      },
+      {
+        "name": "http::dynamic_client_registration::tests::client_configuration_update_preserves_server_managed_security_policy",
+        "outcome": "ok"
+      },
+      {
+        "name": "http::dynamic_client_registration::tests::client_configuration_update_validates_current_server_managed_policy",
+        "outcome": "ok"
+      },
+      {
+        "name": "http::dynamic_client_registration::tests::configured_initial_access_token_keeps_oauth_only_client_pkce_policy",
+        "outcome": "ok"
+      },
+      {
+        "name": "http::dynamic_client_registration::tests::configured_initial_access_token_registers_baseline_confidential_oidc_compatibility",
+        "outcome": "ok"
+      },
+      {
+        "name": "http::dynamic_client_registration::tests::configured_initial_access_update_preserves_security_policy",
+        "outcome": "ok"
+      },
+      {
+        "name": "http::dynamic_client_registration::tests::configured_public_client_keeps_strict_pkce_policy",
+        "outcome": "ok"
+      },
+      {
+        "name": "http::transport_tests::client_ip::client_ip_configuration_rejects_unknown_modes_and_invalid_cidrs",
+        "outcome": "ok"
+      },
+      {
+        "name": "http::transport_tests::scim_transport::provider_config_handler_preserves_http_contract",
+        "outcome": "ok"
+      }
+    ]
+  },
+  {
+    "name": "server-passkey",
+    "command": [
+      "cargo",
+      "test",
+      "-p",
+      "nazo-server",
+      "--lib",
+      "passkey"
+    ],
+    "exit_code": 0,
+    "passed": 38,
+    "failed": 0,
+    "ignored": 0,
+    "seconds": 402.169,
+    "log": "/workspace/scratch/f7903e352d2d/nazo-server-passkey-37.log",
+    "source_head": "c002858a138a134544c1cc64875f7e11a5af2629",
+    "source_diff_sha256": "ef7c92cdc02da82e77b0324179daaa25c5ba2782e8f011c9fa6ca0683dc62e30",
+    "passkey_revision": "8260480634fac09e1151ca2b1a9eaa1c02af6f67",
+    "raw_log_name": "nazo-server-passkey-37.log",
+    "raw_log_bytes": 6058,
+    "raw_log_sha256": "642d0804ba4ec8ef91208ef4ce95768e8425163723ce91089b645a4039592e10",
+    "summary_counts": {
+      "passed": 38,
+      "failed": 0,
+      "ignored": 0
+    },
+    "individual_tests": [
+      {
+        "name": "domain::passkey::login_tests::legacy_or_uninitialized_uv_needs_independent_mfa_before_future_eligibility",
+        "outcome": "ok"
+      },
+      {
+        "name": "domain::passkey::login_tests::passkey_ceremony_cannot_finish_through_a_different_tenant_service",
+        "outcome": "ok"
+      },
+      {
+        "name": "domain::passkey::login_tests::passkey_login_begin_does_not_enumerate_account_or_credential_state",
+        "outcome": "ok"
+      },
+      {
+        "name": "domain::passkey::login_tests::passkey_login_begin_rejects_malformed_stored_credentials_before_challenge_issue",
+        "outcome": "ok"
+      },
+      {
+        "name": "domain::passkey::login_tests::passkey_login_begin_reports_user_lookup_failure_before_challenge_issue",
+        "outcome": "ok"
+      },
+      {
+        "name": "domain::passkey::login_tests::passkey_login_finish_creates_session_updates_counter_and_consumes_ceremony_once",
+        "outcome": "ok"
+      },
+      {
+        "name": "domain::passkey::login_tests::passkey_login_finish_rejects_credential_mismatch_uniformly_and_consumes_ceremony",
+        "outcome": "ok"
+      },
+      {
+        "name": "domain::passkey::login_tests::passkey_login_finish_rejects_inactive_users_and_consumes_ceremony",
+        "outcome": "ok"
+      },
+      {
+        "name": "domain::passkey::login_tests::passkey_login_finish_rejects_invalid_ceremony_id_before_state_lookup",
+        "outcome": "ok"
+      },
+      {
+        "name": "domain::passkey::login_tests::passkey_login_finish_rejects_malformed_credential_id_before_credential_lookup",
+        "outcome": "ok"
+      },
+      {
+        "name": "domain::passkey::login_tests::passkey_login_finish_rejects_malformed_stored_credentials_before_webauthn_verification",
+        "outcome": "ok"
+      },
+      {
+        "name": "domain::passkey::login_tests::passkey_login_finish_rejects_origin_mismatch_and_consumes_ceremony",
+        "outcome": "ok"
+      },
+      {
+        "name": "domain::passkey::login_tests::passkey_login_finish_reports_user_lookup_failure_after_consuming_ceremony",
+        "outcome": "ok"
+      },
+      {
+        "name": "domain::passkey::login_tests::passkey_login_finish_skips_pending_mfa_for_remembered_device",
+        "outcome": "ok"
+      },
+      {
+        "name": "domain::passkey::login_tests::passkey_login_reuses_verified_uv_and_preserves_mfa_without_it",
+        "outcome": "ok"
+      },
+      {
+        "name": "domain::passkey::login_tests::passkey_login_transport_has_no_identity_or_storage_orchestration",
+        "outcome": "ok"
+      },
+      {
+        "name": "domain::passkey::profile_tests::delete_passkey_cannot_remove_another_users_credential",
+        "outcome": "ok"
+      },
+      {
+        "name": "domain::passkey::profile_tests::delete_passkey_rejects_session_request_without_csrf_before_credential_delete",
+        "outcome": "ok"
+      },
+      {
+        "name": "domain::passkey::profile_tests::delete_passkey_removes_authenticated_user_credential",
+        "outcome": "ok"
+      },
+      {
+        "name": "domain::passkey::profile_tests::delete_passkey_requires_login_before_credential_delete",
+        "outcome": "ok"
+      },
+      {
+        "name": "domain::passkey::profile_tests::excluded_credential_with_invalid_packed_signature_is_rejected_and_audited",
+        "outcome": "ok"
+      },
+      {
+        "name": "domain::passkey::profile_tests::passkey_ceremony_id_normalization_accepts_only_bounded_urlsafe_identifiers",
+        "outcome": "ok"
+      },
+      {
+        "name": "domain::passkey::profile_tests::passkey_label_normalization_defaults_trims_and_rejects_oversized_labels",
+        "outcome": "ok"
+      },
+      {
+        "name": "domain::passkey::profile_tests::passkey_list_requires_login_before_loading_credentials",
+        "outcome": "ok"
+      },
+      {
+        "name": "domain::passkey::profile_tests::passkey_list_returns_authenticated_user_credentials_from_database",
+        "outcome": "ok"
+      },
+      {
+        "name": "domain::passkey::profile_tests::passkey_profile_transport_has_no_identity_or_storage_orchestration",
+        "outcome": "ok"
+      },
+      {
+        "name": "domain::passkey::profile_tests::registration_begin_reads_only_scoped_credential_ids",
+        "outcome": "ok"
+      },
+      {
+        "name": "domain::passkey::profile_tests::registration_begin_rejects_session_request_without_csrf_before_ceremony_creation",
+        "outcome": "ok"
+      },
+      {
+        "name": "domain::passkey::profile_tests::registration_begin_requires_login_before_ceremony_creation",
+        "outcome": "ok"
+      },
+      {
+        "name": "domain::passkey::profile_tests::registration_finish_persists_credential_and_consumes_ceremony_once",
+        "outcome": "ok"
+      },
+      {
+        "name": "domain::passkey::profile_tests::registration_finish_projects_malformed_ceremony_state_as_expired",
+        "outcome": "ok"
+      },
+      {
+        "name": "domain::passkey::profile_tests::registration_finish_rejects_ceremony_user_mismatch_without_inserting_credential",
+        "outcome": "ok"
+      },
+      {
+        "name": "domain::passkey::profile_tests::registration_finish_rejects_invalid_authenticator_response_without_persisting_credential",
+        "outcome": "ok"
+      },
+      {
+        "name": "domain::passkey::profile_tests::registration_finish_rejects_session_request_without_csrf_before_ceremony_lookup",
+        "outcome": "ok"
+      },
+      {
+        "name": "domain::passkey::profile_tests::registration_finish_requires_login_before_ceremony_lookup",
+        "outcome": "ok"
+      },
+      {
+        "name": "domain::passkey::profile_tests::registration_finish_returns_conflict_without_second_row_on_duplicate_credential",
+        "outcome": "ok"
+      },
+      {
+        "name": "domain::passkey::profile_tests::stale_session_cannot_begin_finish_or_delete_a_passkey",
+        "outcome": "ok"
+      },
+      {
+        "name": "settings::tests::passkey_settings_validate_the_serialized_origin_and_rp_binding",
+        "outcome": "ok"
+      }
+    ]
+  }
+]

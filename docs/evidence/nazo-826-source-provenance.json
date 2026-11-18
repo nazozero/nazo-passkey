@@ -1,0 +1,14 @@
+{
+  "local_commit": "c8214e5a32a3f19fb7a7b5cac82a5bb5f4268070",
+  "remote_commit": "2d5c335fc6563e874d8626a5067b4fa8df89bacc",
+  "identical_tree": "f01983bb64f094ec7c88ccda0de7551297be6127",
+  "tested_base": "c002858a138a134544c1cc64875f7e11a5af2629",
+  "tested_worktree_diff_sha256": "ef7c92cdc02da82e77b0324179daaa25c5ba2782e8f011c9fa6ca0683dc62e30",
+  "remote_diff_sha256": "ef7c92cdc02da82e77b0324179daaa25c5ba2782e8f011c9fa6ca0683dc62e30",
+  "worktree_clean": true,
+  "passkey_revision": "8260480634fac09e1151ca2b1a9eaa1c02af6f67",
+  "test_log": "nazo-server-passkey-37.log",
+  "passed": 38,
+  "failed": 0,
+  "ignored": 0
+}

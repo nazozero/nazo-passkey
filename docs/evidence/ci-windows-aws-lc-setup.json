@@ -1,0 +1,102 @@
+{
+  "workflow_url": "https://github.com/nazozero/passkey-auth-rs/actions/runs/44065263386",
+  "job_url": "https://github.com/nazozero/passkey-auth-rs/actions/runs/44065263386/job/133977227744",
+  "implementation_commit": "fa0f0c869b88c8609fbd6097a8ecfefacff2a6b3",
+  "runner": "windows-2022",
+  "backend": "aws-lc",
+  "aws_lc_rs": "1.19.0",
+  "aws_lc_sys": "0.47.0",
+  "failed_command": "cargo test --locked --all-targets --features aws-lc",
+  "command_exit_code": 1,
+  "failed_before_tests": true,
+  "subsequent_doc_tests": "skipped",
+  "log_file": "ci-windows-aws-lc-job-133977227744.log",
+  "log_normalization": "CRLF converted to LF",
+  "log_bytes": 95048,
+  "log_sha256": "b50f2330674d3986866a30036c715b573093b9544d44b43d80c525802d7d2fe5",
+  "failure_lines": [
+    "2026-11-17T10:30:28.5638501Z \u001b[1m\u001b[93mwarning\u001b[0m: aws-lc-sys@0.47.0: NASM command not found or failed to execute.",
+    "2026-11-17T10:30:28.5639373Z \u001b[1m\u001b[93mwarning\u001b[0m: aws-lc-sys@0.47.0: NASM command not found or failed to execute.",
+    "2026-11-17T10:30:28.5888543Z   cargo:warning=NASM command not found or failed to execute.",
+    "2026-11-17T10:30:28.5888929Z   cargo:warning=NASM command not found or failed to execute.",
+    "2026-11-17T10:30:28.5889932Z   thread 'main' (2036) panicked at C:\\Users\\runneradmin\\.cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\aws-lc-sys-0.47.0\\builder\\nasm_builder.rs:137:13:",
+    "2026-11-17T10:30:28.5890587Z   NASM command not found! Build cannot continue.",
+    "2026-11-17T10:30:29.1132441Z ##[error]Process completed with exit code 1."
+  ],
+  "official_requirements": "https://aws.github.io/aws-lc-rs/requirements/windows",
+  "correction": {
+    "commit": "0f2bf0061796a123f7b64adbe5ccc8ab649ae0a3",
+    "scope": "Windows AWS-LC test matrix entry only",
+    "chocolatey_nasm_version": "3.2.0",
+    "upstream_nasm_version": "3.02",
+    "package_source": "https://community.chocolatey.org/packages/nasm/3.2.0",
+    "actions": [
+      "Install NASM and check installer exit code",
+      "Append Program Files/NASM to GITHUB_PATH",
+      "Execute nasm.exe -v before original cargo test commands"
+    ],
+    "local_checks": [
+      "YAML parsed",
+      "All eight native matrix entries preserved",
+      "All-targets and doc test commands preserved",
+      "git diff --check passed"
+    ],
+    "windows_execution": "passed in corrected CI run 44067111623, job 133983529674"
+  },
+  "verification": {
+    "workflow_url": "https://github.com/nazozero/passkey-auth-rs/actions/runs/44067111623",
+    "job_url": "https://github.com/nazozero/passkey-auth-rs/actions/runs/44067111623/job/133983529674",
+    "workflow_commit": "0f2bf0061796a123f7b64adbe5ccc8ab649ae0a3",
+    "production_implementation_commit": "fa0f0c869b88c8609fbd6097a8ecfefacff2a6b3",
+    "conclusion": "success",
+    "nasm_installation": "success",
+    "nasm_version": "3.02",
+    "all_targets": {
+      "passed": 105,
+      "failed": 0,
+      "ignored": 0
+    },
+    "doc_tests": {
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0
+    },
+    "log_file": "ci-windows-aws-lc-job-133983529674.log",
+    "log_normalization": "CRLF converted to LF; one trailing newline",
+    "log_bytes": 67778,
+    "log_sha256": "7746a4ea1f19e415b19a1397e56a708b94a48e3fed5526d8c25fa8138b7adbe4",
+    "log_excerpt": [
+      "2026-11-17T10:42:05.3692177Z nasm v3.2.0 [Approved]",
+      "2026-11-17T10:42:12.8433733Z NASM version 3.02 compiled on Jun 28 2026",
+      "2026-11-17T10:43:49.2021851Z test result: ok. 57 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 6.89s",
+      "2026-11-17T10:43:49.2716023Z test result: ok. 15 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s",
+      "2026-11-17T10:43:49.2930475Z test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s",
+      "2026-11-17T10:43:49.3672177Z test result: ok. 20 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.07s",
+      "2026-11-17T10:43:49.4176961Z test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s",
+      "2026-11-17T10:43:56.1774131Z test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s",
+      "2026-11-17T10:43:56.1840463Z test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s",
+      "2026-11-17T10:43:57.1154208Z test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.92s",
+      "2026-11-17T10:43:57.1232048Z test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s",
+      "2026-11-17T10:43:57.1295418Z test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s",
+      "2026-11-17T10:43:57.6640352Z    Doc-tests passkey_auth",
+      "2026-11-17T10:43:58.5111396Z test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s"
+    ],
+    "other_jobs_at_checkpoint": {
+      "success": [
+        "Linux x86-64 RustCrypto",
+        "Linux x86-64 AWS-LC",
+        "Linux ARM64 RustCrypto",
+        "Linux ARM64 AWS-LC",
+        "Windows RustCrypto",
+        "quality",
+        "audit",
+        "wasm",
+        "fuzz"
+      ],
+      "queued": [
+        "macOS RustCrypto",
+        "macOS AWS-LC"
+      ]
+    }
+  }
+}

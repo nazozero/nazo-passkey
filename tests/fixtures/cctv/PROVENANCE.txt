@@ -1,0 +1,7 @@
+C2SP/CCTV ed25519vectors
+Source commit: 5ea85644bd035c555900a2f707f7e4c31ea65ced
+Source URL: https://github.com/C2SP/CCTV/tree/5ea85644bd035c555900a2f707f7e4c31ea65ced/ed25519vectors
+914 independent point-encoding/signature edge cases.
+The upstream BSD-3-Clause license is retained in LICENSE.
+SHA-256 ed25519vectors.json: b38e84caf3e7e89170ff520292dbeae421b0a794c27408ce5ce973018fe3d7f9
+SHA-256 LICENSE: 9fe727c21f00a770a683a4c8491bf24203ec839628bad09b026258c5afc17076

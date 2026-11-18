@@ -1,0 +1,94 @@
+[
+  {
+    "scope": "main",
+    "command": [
+      "cargo",
+      "audit",
+      "--json",
+      "--file",
+      "Cargo.lock"
+    ],
+    "exit_code": 0,
+    "seconds": 22.951,
+    "vulnerabilities": {
+      "found": false,
+      "count": 0,
+      "list": []
+    },
+    "warnings": {},
+    "database": {
+      "advisory-count": 1527,
+      "last-commit": "233155b4025b854c68a4b199c0e32d7fd53291a2",
+      "last-updated": "2026-11-17T11:14:35+01:00"
+    }
+  },
+  {
+    "scope": "perf",
+    "command": [
+      "cargo",
+      "audit",
+      "--json",
+      "--file",
+      "perf/Cargo.lock"
+    ],
+    "exit_code": 0,
+    "seconds": 15.753,
+    "vulnerabilities": {
+      "found": false,
+      "count": 0,
+      "list": []
+    },
+    "warnings": {},
+    "database": {
+      "advisory-count": 1527,
+      "last-commit": "233155b4025b854c68a4b199c0e32d7fd53291a2",
+      "last-updated": "2026-11-17T11:14:35+01:00"
+    }
+  },
+  {
+    "scope": "fuzz",
+    "command": [
+      "cargo",
+      "audit",
+      "--json",
+      "--file",
+      "fuzz/Cargo.lock"
+    ],
+    "exit_code": 0,
+    "seconds": 17.846,
+    "vulnerabilities": {
+      "found": false,
+      "count": 0,
+      "list": []
+    },
+    "warnings": {},
+    "database": {
+      "advisory-count": 1527,
+      "last-commit": "233155b4025b854c68a4b199c0e32d7fd53291a2",
+      "last-updated": "2026-11-17T11:14:35+01:00"
+    }
+  },
+  {
+    "scope": "backends",
+    "command": [
+      "cargo",
+      "audit",
+      "--json",
+      "--file",
+      "perf/backend-comparison/Cargo.lock"
+    ],
+    "exit_code": 0,
+    "seconds": 17.685,
+    "vulnerabilities": {
+      "found": false,
+      "count": 0,
+      "list": []
+    },
+    "warnings": {},
+    "database": {
+      "advisory-count": 1527,
+      "last-commit": "233155b4025b854c68a4b199c0e32d7fd53291a2",
+      "last-updated": "2026-11-17T11:14:35+01:00"
+    }
+  }
+]

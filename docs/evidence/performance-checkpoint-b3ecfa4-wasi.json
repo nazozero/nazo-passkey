@@ -1,0 +1,1471 @@
+{
+  "environment": {
+    "utc": "2026-11-17T11:30:45Z",
+    "platform": "Linux-6.18.57-x86_64-with-glibc2.41",
+    "cpu": {
+      "model name": "AMD EPYC 9V74 80-Core Processor",
+      "cpu MHz": "2596.126",
+      "cpu cores": "9"
+    },
+    "logical_cpus": 9,
+    "affinity": [
+      0
+    ],
+    "memory": [
+      "MemTotal:       10206472 kB",
+      "MemFree:         1453136 kB",
+      "MemAvailable:    4914908 kB"
+    ],
+    "node": "v24.22.1",
+    "mode": "WASI preview1 / Node",
+    "artifacts": {
+      "baseline": {
+        "path": "/workspace/scratch/f7903e352d2d/perf-artifacts/baseline-wasi.wasm",
+        "bytes": 735591,
+        "sha256": "65bbf403be82f859f0df4128273f5a24f84422cb3c50ee3015f4004ac02ae3b2"
+      },
+      "candidate": {
+        "path": "/workspace/scratch/f7903e352d2d/perf-artifacts/candidate-final-wasi.wasm",
+        "bytes": 952662,
+        "sha256": "af042f30b359158443df7b83798713292f01c660f7db0035d92a9a83449ed006"
+      }
+    },
+    "iterations": 5000,
+    "rounds": 5
+  },
+  "runs": [
+    {
+      "round": 1,
+      "label": "baseline",
+      "wall_seconds": 16.63148017200001,
+      "cpu_seconds": 16.377476,
+      "cpu_percent_of_one_core": 98.47275065494388,
+      "rows": [
+        {
+          "allocated_bytes_per_op": 168.0,
+          "allocations_per_op": 9.0,
+          "case": "es256.registration_begin",
+          "concurrency": 1,
+          "iterations": 5000,
+          "p50_ns": 1252,
+          "p95_ns": 5688,
+          "p99_ns": 6100,
+          "throughput_per_sec": 138979.58851256984
+        },
+        {
+          "allocated_bytes_per_op": 2848.0,
+          "allocations_per_op": 28.0,
+          "case": "es256.registration_finish",
+          "concurrency": 1,
+          "iterations": 5000,
+          "p50_ns": 9414,
+          "p95_ns": 25098,
+          "p99_ns": 50556,
+          "throughput_per_sec": 26749.432692681567
+        },
+        {
+          "allocated_bytes_per_op": 283.0,
+          "allocations_per_op": 12.0,
+          "case": "es256.authentication_begin",
+          "concurrency": 1,
+          "iterations": 5000,
+          "p50_ns": 1142,
+          "p95_ns": 2143,
+          "p99_ns": 2344,
+          "throughput_per_sec": 336956.5825378182
+        },
+        {
+          "allocated_bytes_per_op": 1363.0,
+          "allocations_per_op": 16.0,
+          "case": "es256.authentication_finish",
+          "concurrency": 1,
+          "iterations": 5000,
+          "p50_ns": 1200613,
+          "p95_ns": 1387305,
+          "p99_ns": 2876714,
+          "throughput_per_sec": 776.9814524397018
+        },
+        {
+          "allocated_bytes_per_op": 168.0,
+          "allocations_per_op": 9.0,
+          "case": "ed25519.registration_begin",
+          "concurrency": 1,
+          "iterations": 5000,
+          "p50_ns": 831,
+          "p95_ns": 1873,
+          "p99_ns": 2754,
+          "throughput_per_sec": 688676.5867315162
+        },
+        {
+          "allocated_bytes_per_op": 1587.0,
+          "allocations_per_op": 23.0,
+          "case": "ed25519.registration_finish",
+          "concurrency": 1,
+          "iterations": 5000,
+          "p50_ns": 8123,
+          "p95_ns": 9014,
+          "p99_ns": 38899,
+          "throughput_per_sec": 111152.75387283428
+        },
+        {
+          "allocated_bytes_per_op": 283.0,
+          "allocations_per_op": 12.0,
+          "case": "ed25519.authentication_begin",
+          "concurrency": 1,
+          "iterations": 5000,
+          "p50_ns": 1052,
+          "p95_ns": 2143,
+          "p99_ns": 2764,
+          "throughput_per_sec": 485694.59426773526
+        },
+        {
+          "allocated_bytes_per_op": 781.0,
+          "allocations_per_op": 13.0,
+          "case": "ed25519.authentication_finish",
+          "concurrency": 1,
+          "iterations": 5000,
+          "p50_ns": 181324,
+          "p95_ns": 250638,
+          "p99_ns": 1303158,
+          "throughput_per_sec": 4459.194158618324
+        },
+        {
+          "allocated_bytes_per_op": 0.0,
+          "allocations_per_op": 0.0,
+          "case": "primitive.es256.rustcrypto",
+          "concurrency": 1,
+          "iterations": 5000,
+          "p50_ns": 1168995,
+          "p95_ns": 1889383,
+          "p99_ns": 4184268,
+          "throughput_per_sec": 765.9821622823137
+        },
+        {
+          "allocated_bytes_per_op": 0.0,
+          "allocations_per_op": 0.0,
+          "case": "primitive.ed25519_strict.rustcrypto",
+          "concurrency": 1,
+          "iterations": 5000,
+          "p50_ns": 171549,
+          "p95_ns": 245311,
+          "p99_ns": 468147,
+          "throughput_per_sec": 5203.83796538295
+        }
+      ]
+    },
+    {
+      "round": 1,
+      "label": "candidate",
+      "wall_seconds": 18.657648891001372,
+      "cpu_seconds": 18.260946,
+      "cpu_percent_of_one_core": 97.87377877395527,
+      "rows": [
+        {
+          "allocated_bytes_per_op": 168.0,
+          "allocations_per_op": 9.0,
+          "case": "es256.registration_begin",
+          "concurrency": 1,
+          "iterations": 5000,
+          "p50_ns": 1733,
+          "p95_ns": 2204,
+          "p99_ns": 4406,
+          "throughput_per_sec": 171759.71434298388
+        },
+        {
+          "allocated_bytes_per_op": 507.0,
+          "allocations_per_op": 8.0,
+          "case": "es256.registration_finish",
+          "concurrency": 1,
+          "iterations": 5000,
+          "p50_ns": 7171,
+          "p95_ns": 12159,
+          "p99_ns": 45800,
+          "throughput_per_sec": 32226.773981909966
+        },
+        {
+          "allocated_bytes_per_op": 239.0,
+          "allocations_per_op": 10.0,
+          "case": "es256.authentication_begin",
+          "concurrency": 1,
+          "iterations": 5000,
+          "p50_ns": 1653,
+          "p95_ns": 1913,
+          "p99_ns": 2183,
+          "throughput_per_sec": 193243.89954130855
+        },
+        {
+          "allocated_bytes_per_op": 324.0,
+          "allocations_per_op": 6.0,
+          "case": "es256.authentication_finish",
+          "concurrency": 1,
+          "iterations": 5000,
+          "p50_ns": 1188144,
+          "p95_ns": 4033049,
+          "p99_ns": 7842041,
+          "throughput_per_sec": 611.1678445997896
+        },
+        {
+          "allocated_bytes_per_op": 168.0,
+          "allocations_per_op": 9.0,
+          "case": "ed25519.registration_begin",
+          "concurrency": 1,
+          "iterations": 5000,
+          "p50_ns": 1492,
+          "p95_ns": 1642,
+          "p99_ns": 3706,
+          "throughput_per_sec": 498219.2150596124
+        },
+        {
+          "allocated_bytes_per_op": 436.0,
+          "allocations_per_op": 8.0,
+          "case": "ed25519.registration_finish",
+          "concurrency": 1,
+          "iterations": 5000,
+          "p50_ns": 17947,
+          "p95_ns": 22293,
+          "p99_ns": 84568,
+          "throughput_per_sec": 39172.458621524784
+        },
+        {
+          "allocated_bytes_per_op": 239.0,
+          "allocations_per_op": 10.0,
+          "case": "ed25519.authentication_begin",
+          "concurrency": 1,
+          "iterations": 5000,
+          "p50_ns": 1352,
+          "p95_ns": 1533,
+          "p99_ns": 3125,
+          "throughput_per_sec": 483593.04214068456
+        },
+        {
+          "allocated_bytes_per_op": 396.0,
+          "allocations_per_op": 7.0,
+          "case": "ed25519.authentication_finish",
+          "concurrency": 1,
+          "iterations": 5000,
+          "p50_ns": 197468,
+          "p95_ns": 376068,
+          "p99_ns": 3162495,
+          "throughput_per_sec": 3151.9796873014125
+        },
+        {
+          "allocated_bytes_per_op": 0.0,
+          "allocations_per_op": 0.0,
+          "case": "primitive.es256.rustcrypto",
+          "concurrency": 1,
+          "iterations": 5000,
+          "p50_ns": 1164949,
+          "p95_ns": 1666626,
+          "p99_ns": 4161774,
+          "throughput_per_sec": 775.7885256311079
+        },
+        {
+          "allocated_bytes_per_op": 0.0,
+          "allocations_per_op": 0.0,
+          "case": "primitive.ed25519_strict.rustcrypto",
+          "concurrency": 1,
+          "iterations": 5000,
+          "p50_ns": 169506,
+          "p95_ns": 211399,
+          "p99_ns": 276508,
+          "throughput_per_sec": 5543.287539603034
+        }
+      ]
+    },
+    {
+      "round": 2,
+      "label": "candidate",
+      "wall_seconds": 15.664127418000135,
+      "cpu_seconds": 15.349577000000004,
+      "cpu_percent_of_one_core": 97.99190590317421,
+      "rows": [
+        {
+          "allocated_bytes_per_op": 168.0,
+          "allocations_per_op": 9.0,
+          "case": "es256.registration_begin",
+          "concurrency": 1,
+          "iterations": 5000,
+          "p50_ns": 1672,
+          "p95_ns": 2003,
+          "p99_ns": 4106,
+          "throughput_per_sec": 181507.74417311134
+        },
+        {
+          "allocated_bytes_per_op": 507.0,
+          "allocations_per_op": 8.0,
+          "case": "es256.registration_finish",
+          "concurrency": 1,
+          "iterations": 5000,
+          "p50_ns": 7531,
+          "p95_ns": 18207,
+          "p99_ns": 38298,
+          "throughput_per_sec": 33534.07186448179
+        },
+        {
+          "allocated_bytes_per_op": 239.0,
+          "allocations_per_op": 10.0,
+          "case": "es256.authentication_begin",
+          "concurrency": 1,
+          "iterations": 5000,
+          "p50_ns": 1482,
+          "p95_ns": 1723,
+          "p99_ns": 2083,
+          "throughput_per_sec": 300638.6406515633
+        },
+        {
+          "allocated_bytes_per_op": 324.0,
+          "allocations_per_op": 6.0,
+          "case": "es256.authentication_finish",
+          "concurrency": 1,
+          "iterations": 5000,
+          "p50_ns": 1152731,
+          "p95_ns": 1810473,
+          "p99_ns": 4491617,
+          "throughput_per_sec": 751.3331995896125
+        },
+        {
+          "allocated_bytes_per_op": 168.0,
+          "allocations_per_op": 9.0,
+          "case": "ed25519.registration_begin",
+          "concurrency": 1,
+          "iterations": 5000,
+          "p50_ns": 1362,
+          "p95_ns": 1582,
+          "p99_ns": 3525,
+          "throughput_per_sec": 516583.6258488115
+        },
+        {
+          "allocated_bytes_per_op": 436.0,
+          "allocations_per_op": 8.0,
+          "case": "ed25519.registration_finish",
+          "concurrency": 1,
+          "iterations": 5000,
+          "p50_ns": 16936,
+          "p95_ns": 21031,
+          "p99_ns": 50856,
+          "throughput_per_sec": 49842.785884762285
+        },
+        {
+          "allocated_bytes_per_op": 239.0,
+          "allocations_per_op": 10.0,
+          "case": "ed25519.authentication_begin",
+          "concurrency": 1,
+          "iterations": 5000,
+          "p50_ns": 1212,
+          "p95_ns": 1522,
+          "p99_ns": 1813,
+          "throughput_per_sec": 560148.9010214652
+        },
+        {
+          "allocated_bytes_per_op": 396.0,
+          "allocations_per_op": 7.0,
+          "case": "ed25519.authentication_finish",
+          "concurrency": 1,
+          "iterations": 5000,
+          "p50_ns": 192691,
+          "p95_ns": 236847,
+          "p99_ns": 286242,
+          "throughput_per_sec": 4886.339711955981
+        },
+        {
+          "allocated_bytes_per_op": 0.0,
+          "allocations_per_op": 0.0,
+          "case": "primitive.es256.rustcrypto",
+          "concurrency": 1,
+          "iterations": 5000,
+          "p50_ns": 1072750,
+          "p95_ns": 1234704,
+          "p99_ns": 2027752,
+          "throughput_per_sec": 862.4392267364925
+        },
+        {
+          "allocated_bytes_per_op": 0.0,
+          "allocations_per_op": 0.0,
+          "case": "primitive.ed25519_strict.rustcrypto",
+          "concurrency": 1,
+          "iterations": 5000,
+          "p50_ns": 158990,
+          "p95_ns": 203227,
+          "p99_ns": 239562,
+          "throughput_per_sec": 5938.385111847132
+        }
+      ]
+    },
+    {
+      "round": 2,
+      "label": "baseline",
+      "wall_seconds": 14.757618736999575,
+      "cpu_seconds": 14.405390000000006,
+      "cpu_percent_of_one_core": 97.61324138211758,
+      "rows": [
+        {
+          "allocated_bytes_per_op": 168.0,
+          "allocations_per_op": 9.0,
+          "case": "es256.registration_begin",
+          "concurrency": 1,
+          "iterations": 5000,
+          "p50_ns": 1121,
+          "p95_ns": 3736,
+          "p99_ns": 5899,
+          "throughput_per_sec": 184529.67427227864
+        },
+        {
+          "allocated_bytes_per_op": 2848.0,
+          "allocations_per_op": 28.0,
+          "case": "es256.registration_finish",
+          "concurrency": 1,
+          "iterations": 5000,
+          "p50_ns": 8793,
+          "p95_ns": 24998,
+          "p99_ns": 55845,
+          "throughput_per_sec": 30005.735836451026
+        },
+        {
+          "allocated_bytes_per_op": 283.0,
+          "allocations_per_op": 12.0,
+          "case": "es256.authentication_begin",
+          "concurrency": 1,
+          "iterations": 5000,
+          "p50_ns": 1032,
+          "p95_ns": 2023,
+          "p99_ns": 2404,
+          "throughput_per_sec": 234273.72054218812
+        },
+        {
+          "allocated_bytes_per_op": 1363.0,
+          "allocations_per_op": 16.0,
+          "case": "es256.authentication_finish",
+          "concurrency": 1,
+          "iterations": 5000,
+          "p50_ns": 1069685,
+          "p95_ns": 1389447,
+          "p99_ns": 3563691,
+          "throughput_per_sec": 823.1940162771124
+        },
+        {
+          "allocated_bytes_per_op": 168.0,
+          "allocations_per_op": 9.0,
+          "case": "ed25519.registration_begin",
+          "concurrency": 1,
+          "iterations": 5000,
+          "p50_ns": 691,
+          "p95_ns": 1573,
+          "p99_ns": 2684,
+          "throughput_per_sec": 438413.0884194147
+        },
+        {
+          "allocated_bytes_per_op": 1587.0,
+          "allocations_per_op": 23.0,
+          "case": "ed25519.registration_finish",
+          "concurrency": 1,
+          "iterations": 5000,
+          "p50_ns": 6911,
+          "p95_ns": 7902,
+          "p99_ns": 27942,
+          "throughput_per_sec": 125155.09532300165
+        },
+        {
+          "allocated_bytes_per_op": 283.0,
+          "allocations_per_op": 12.0,
+          "case": "ed25519.authentication_begin",
+          "concurrency": 1,
+          "iterations": 5000,
+          "p50_ns": 801,
+          "p95_ns": 1663,
+          "p99_ns": 2544,
+          "throughput_per_sec": 343838.11496392416
+        },
+        {
+          "allocated_bytes_per_op": 781.0,
+          "allocations_per_op": 13.0,
+          "case": "ed25519.authentication_finish",
+          "concurrency": 1,
+          "iterations": 5000,
+          "p50_ns": 166241,
+          "p95_ns": 211349,
+          "p99_ns": 276608,
+          "throughput_per_sec": 5545.567784637937
+        },
+        {
+          "allocated_bytes_per_op": 0.0,
+          "allocations_per_op": 0.0,
+          "case": "primitive.es256.rustcrypto",
+          "concurrency": 1,
+          "iterations": 5000,
+          "p50_ns": 1030296,
+          "p95_ns": 1226472,
+          "p99_ns": 1801019,
+          "throughput_per_sec": 934.1262663148547
+        },
+        {
+          "allocated_bytes_per_op": 0.0,
+          "allocations_per_op": 0.0,
+          "case": "primitive.ed25519_strict.rustcrypto",
+          "concurrency": 1,
+          "iterations": 5000,
+          "p50_ns": 164828,
+          "p95_ns": 214684,
+          "p99_ns": 333884,
+          "throughput_per_sec": 5026.046829280613
+        }
+      ]
+    },
+    {
+      "round": 3,
+      "label": "baseline",
+      "wall_seconds": 14.867582610000682,
+      "cpu_seconds": 14.684851,
+      "cpu_percent_of_one_core": 98.77093933295002,
+      "rows": [
+        {
+          "allocated_bytes_per_op": 168.0,
+          "allocations_per_op": 9.0,
+          "case": "es256.registration_begin",
+          "concurrency": 1,
+          "iterations": 5000,
+          "p50_ns": 1132,
+          "p95_ns": 3225,
+          "p99_ns": 6150,
+          "throughput_per_sec": 187428.79111653505
+        },
+        {
+          "allocated_bytes_per_op": 2848.0,
+          "allocations_per_op": 28.0,
+          "case": "es256.registration_finish",
+          "concurrency": 1,
+          "iterations": 5000,
+          "p50_ns": 8993,
+          "p95_ns": 24858,
+          "p99_ns": 51648,
+          "throughput_per_sec": 31918.990113795033
+        },
+        {
+          "allocated_bytes_per_op": 283.0,
+          "allocations_per_op": 12.0,
+          "case": "es256.authentication_begin",
+          "concurrency": 1,
+          "iterations": 5000,
+          "p50_ns": 1052,
+          "p95_ns": 2003,
+          "p99_ns": 2434,
+          "throughput_per_sec": 295427.5380061619
+        },
+        {
+          "allocated_bytes_per_op": 1363.0,
+          "allocations_per_op": 16.0,
+          "case": "es256.authentication_finish",
+          "concurrency": 1,
+          "iterations": 5000,
+          "p50_ns": 1078308,
+          "p95_ns": 1238190,
+          "p99_ns": 2658104,
+          "throughput_per_sec": 850.7795574741699
+        },
+        {
+          "allocated_bytes_per_op": 168.0,
+          "allocations_per_op": 9.0,
+          "case": "ed25519.registration_begin",
+          "concurrency": 1,
+          "iterations": 5000,
+          "p50_ns": 781,
+          "p95_ns": 1802,
+          "p99_ns": 2754,
+          "throughput_per_sec": 717721.7559263721
+        },
+        {
+          "allocated_bytes_per_op": 1587.0,
+          "allocations_per_op": 23.0,
+          "case": "ed25519.registration_finish",
+          "concurrency": 1,
+          "iterations": 5000,
+          "p50_ns": 7502,
+          "p95_ns": 8423,
+          "p99_ns": 37857,
+          "throughput_per_sec": 120348.45402542231
+        },
+        {
+          "allocated_bytes_per_op": 283.0,
+          "allocations_per_op": 12.0,
+          "case": "ed25519.authentication_begin",
+          "concurrency": 1,
+          "iterations": 5000,
+          "p50_ns": 902,
+          "p95_ns": 1883,
+          "p99_ns": 2394,
+          "throughput_per_sec": 538447.2903178562
+        },
+        {
+          "allocated_bytes_per_op": 781.0,
+          "allocations_per_op": 13.0,
+          "case": "ed25519.authentication_finish",
+          "concurrency": 1,
+          "iterations": 5000,
+          "p50_ns": 166972,
+          "p95_ns": 209887,
+          "p99_ns": 247524,
+          "throughput_per_sec": 5509.943878918437
+        },
+        {
+          "allocated_bytes_per_op": 0.0,
+          "allocations_per_op": 0.0,
+          "case": "primitive.es256.rustcrypto",
+          "concurrency": 1,
+          "iterations": 5000,
+          "p50_ns": 1026379,
+          "p95_ns": 1161614,
+          "p99_ns": 3013089,
+          "throughput_per_sec": 848.4409883433823
+        },
+        {
+          "allocated_bytes_per_op": 0.0,
+          "allocations_per_op": 0.0,
+          "case": "primitive.ed25519_strict.rustcrypto",
+          "concurrency": 1,
+          "iterations": 5000,
+          "p50_ns": 167803,
+          "p95_ns": 207563,
+          "p99_ns": 239551,
+          "throughput_per_sec": 5689.647343459049
+        }
+      ]
+    },
+    {
+      "round": 3,
+      "label": "candidate",
+      "wall_seconds": 16.83979711000029,
+      "cpu_seconds": 16.672235999999984,
+      "cpu_percent_of_one_core": 99.0049695438385,
+      "rows": [
+        {
+          "allocated_bytes_per_op": 168.0,
+          "allocations_per_op": 9.0,
+          "case": "es256.registration_begin",
+          "concurrency": 1,
+          "iterations": 5000,
+          "p50_ns": 1663,
+          "p95_ns": 2283,
+          "p99_ns": 4426,
+          "throughput_per_sec": 125041.13853457787
+        },
+        {
+          "allocated_bytes_per_op": 507.0,
+          "allocations_per_op": 8.0,
+          "case": "es256.registration_finish",
+          "concurrency": 1,
+          "iterations": 5000,
+          "p50_ns": 6760,
+          "p95_ns": 16706,
+          "p99_ns": 34873,
+          "throughput_per_sec": 30899.374943342136
+        },
+        {
+          "allocated_bytes_per_op": 239.0,
+          "allocations_per_op": 10.0,
+          "case": "es256.authentication_begin",
+          "concurrency": 1,
+          "iterations": 5000,
+          "p50_ns": 1432,
+          "p95_ns": 1863,
+          "p99_ns": 2113,
+          "throughput_per_sec": 229193.07352862172
+        },
+        {
+          "allocated_bytes_per_op": 324.0,
+          "allocations_per_op": 6.0,
+          "case": "es256.authentication_finish",
+          "concurrency": 1,
+          "iterations": 5000,
+          "p50_ns": 1130157,
+          "p95_ns": 2305291,
+          "p99_ns": 9113450,
+          "throughput_per_sec": 647.431284402502
+        },
+        {
+          "allocated_bytes_per_op": 168.0,
+          "allocations_per_op": 9.0,
+          "case": "ed25519.registration_begin",
+          "concurrency": 1,
+          "iterations": 5000,
+          "p50_ns": 1232,
+          "p95_ns": 1532,
+          "p99_ns": 3335,
+          "throughput_per_sec": 322929.45063629374
+        },
+        {
+          "allocated_bytes_per_op": 436.0,
+          "allocations_per_op": 8.0,
+          "case": "ed25519.registration_finish",
+          "concurrency": 1,
+          "iterations": 5000,
+          "p50_ns": 18178,
+          "p95_ns": 21622,
+          "p99_ns": 56204,
+          "throughput_per_sec": 43833.71648092684
+        },
+        {
+          "allocated_bytes_per_op": 239.0,
+          "allocations_per_op": 10.0,
+          "case": "ed25519.authentication_begin",
+          "concurrency": 1,
+          "iterations": 5000,
+          "p50_ns": 1302,
+          "p95_ns": 1472,
+          "p99_ns": 3375,
+          "throughput_per_sec": 248677.44630345204
+        },
+        {
+          "allocated_bytes_per_op": 396.0,
+          "allocations_per_op": 7.0,
+          "case": "ed25519.authentication_finish",
+          "concurrency": 1,
+          "iterations": 5000,
+          "p50_ns": 192230,
+          "p95_ns": 257819,
+          "p99_ns": 1662510,
+          "throughput_per_sec": 4310.94552068119
+        },
+        {
+          "allocated_bytes_per_op": 0.0,
+          "allocations_per_op": 0.0,
+          "case": "primitive.es256.rustcrypto",
+          "concurrency": 1,
+          "iterations": 5000,
+          "p50_ns": 1066400,
+          "p95_ns": 1229567,
+          "p99_ns": 1645835,
+          "throughput_per_sec": 901.6852260272245
+        },
+        {
+          "allocated_bytes_per_op": 0.0,
+          "allocations_per_op": 0.0,
+          "case": "primitive.ed25519_strict.rustcrypto",
+          "concurrency": 1,
+          "iterations": 5000,
+          "p50_ns": 169986,
+          "p95_ns": 210148,
+          "p99_ns": 237418,
+          "throughput_per_sec": 5740.214130307419
+        }
+      ]
+    },
+    {
+      "round": 4,
+      "label": "candidate",
+      "wall_seconds": 14.551068295000732,
+      "cpu_seconds": 14.43465100000001,
+      "cpu_percent_of_one_core": 99.19993987629954,
+      "rows": [
+        {
+          "allocated_bytes_per_op": 168.0,
+          "allocations_per_op": 9.0,
+          "case": "es256.registration_begin",
+          "concurrency": 1,
+          "iterations": 5000,
+          "p50_ns": 1642,
+          "p95_ns": 2143,
+          "p99_ns": 4156,
+          "throughput_per_sec": 171473.13876710675
+        },
+        {
+          "allocated_bytes_per_op": 507.0,
+          "allocations_per_op": 8.0,
+          "case": "es256.registration_finish",
+          "concurrency": 1,
+          "iterations": 5000,
+          "p50_ns": 6780,
+          "p95_ns": 16294,
+          "p99_ns": 35283,
+          "throughput_per_sec": 39885.63862060656
+        },
+        {
+          "allocated_bytes_per_op": 239.0,
+          "allocations_per_op": 10.0,
+          "case": "es256.authentication_begin",
+          "concurrency": 1,
+          "iterations": 5000,
+          "p50_ns": 1302,
+          "p95_ns": 1663,
+          "p99_ns": 2083,
+          "throughput_per_sec": 219884.96234448033
+        },
+        {
+          "allocated_bytes_per_op": 324.0,
+          "allocations_per_op": 6.0,
+          "case": "es256.authentication_finish",
+          "concurrency": 1,
+          "iterations": 5000,
+          "p50_ns": 1087302,
+          "p95_ns": 1213462,
+          "p99_ns": 1555388,
+          "throughput_per_sec": 898.0860535703396
+        },
+        {
+          "allocated_bytes_per_op": 168.0,
+          "allocations_per_op": 9.0,
+          "case": "ed25519.registration_begin",
+          "concurrency": 1,
+          "iterations": 5000,
+          "p50_ns": 1353,
+          "p95_ns": 1623,
+          "p99_ns": 3636,
+          "throughput_per_sec": 539195.6408836251
+        },
+        {
+          "allocated_bytes_per_op": 436.0,
+          "allocations_per_op": 8.0,
+          "case": "ed25519.registration_finish",
+          "concurrency": 1,
+          "iterations": 5000,
+          "p50_ns": 17637,
+          "p95_ns": 21403,
+          "p99_ns": 54372,
+          "throughput_per_sec": 48940.19996965707
+        },
+        {
+          "allocated_bytes_per_op": 239.0,
+          "allocations_per_op": 10.0,
+          "case": "ed25519.authentication_begin",
+          "concurrency": 1,
+          "iterations": 5000,
+          "p50_ns": 1212,
+          "p95_ns": 1493,
+          "p99_ns": 2043,
+          "throughput_per_sec": 537295.2193298187
+        },
+        {
+          "allocated_bytes_per_op": 396.0,
+          "allocations_per_op": 7.0,
+          "case": "ed25519.authentication_finish",
+          "concurrency": 1,
+          "iterations": 5000,
+          "p50_ns": 187914,
+          "p95_ns": 237869,
+          "p99_ns": 393885,
+          "throughput_per_sec": 4315.760560178193
+        },
+        {
+          "allocated_bytes_per_op": 0.0,
+          "allocations_per_op": 0.0,
+          "case": "primitive.es256.rustcrypto",
+          "concurrency": 1,
+          "iterations": 5000,
+          "p50_ns": 1075324,
+          "p95_ns": 1218370,
+          "p99_ns": 1558643,
+          "throughput_per_sec": 898.6560973163689
+        },
+        {
+          "allocated_bytes_per_op": 0.0,
+          "allocations_per_op": 0.0,
+          "case": "primitive.ed25519_strict.rustcrypto",
+          "concurrency": 1,
+          "iterations": 5000,
+          "p50_ns": 171719,
+          "p95_ns": 229957,
+          "p99_ns": 379142,
+          "throughput_per_sec": 5467.650055751878
+        }
+      ]
+    },
+    {
+      "round": 4,
+      "label": "baseline",
+      "wall_seconds": 17.831995414999255,
+      "cpu_seconds": 17.51656,
+      "cpu_percent_of_one_core": 98.23107056917517,
+      "rows": [
+        {
+          "allocated_bytes_per_op": 168.0,
+          "allocations_per_op": 9.0,
+          "case": "es256.registration_begin",
+          "concurrency": 1,
+          "iterations": 5000,
+          "p50_ns": 1272,
+          "p95_ns": 2564,
+          "p99_ns": 6400,
+          "throughput_per_sec": 158531.7172821449
+        },
+        {
+          "allocated_bytes_per_op": 2848.0,
+          "allocations_per_op": 28.0,
+          "case": "es256.registration_finish",
+          "concurrency": 1,
+          "iterations": 5000,
+          "p50_ns": 9294,
+          "p95_ns": 25869,
+          "p99_ns": 49875,
+          "throughput_per_sec": 28544.703551949908
+        },
+        {
+          "allocated_bytes_per_op": 283.0,
+          "allocations_per_op": 12.0,
+          "case": "es256.authentication_begin",
+          "concurrency": 1,
+          "iterations": 5000,
+          "p50_ns": 1112,
+          "p95_ns": 2163,
+          "p99_ns": 2584,
+          "throughput_per_sec": 288672.7358762245
+        },
+        {
+          "allocated_bytes_per_op": 1363.0,
+          "allocations_per_op": 16.0,
+          "case": "es256.authentication_finish",
+          "concurrency": 1,
+          "iterations": 5000,
+          "p50_ns": 1153071,
+          "p95_ns": 1910014,
+          "p99_ns": 5510771,
+          "throughput_per_sec": 721.7881130511181
+        },
+        {
+          "allocated_bytes_per_op": 168.0,
+          "allocations_per_op": 9.0,
+          "case": "ed25519.registration_begin",
+          "concurrency": 1,
+          "iterations": 5000,
+          "p50_ns": 781,
+          "p95_ns": 1782,
+          "p99_ns": 2534,
+          "throughput_per_sec": 588622.6770888983
+        },
+        {
+          "allocated_bytes_per_op": 1587.0,
+          "allocations_per_op": 23.0,
+          "case": "ed25519.registration_finish",
+          "concurrency": 1,
+          "iterations": 5000,
+          "p50_ns": 7051,
+          "p95_ns": 8663,
+          "p99_ns": 57006,
+          "throughput_per_sec": 105020.54054744351
+        },
+        {
+          "allocated_bytes_per_op": 283.0,
+          "allocations_per_op": 12.0,
+          "case": "ed25519.authentication_begin",
+          "concurrency": 1,
+          "iterations": 5000,
+          "p50_ns": 531,
+          "p95_ns": 1121,
+          "p99_ns": 2674,
+          "throughput_per_sec": 491064.68520101934
+        },
+        {
+          "allocated_bytes_per_op": 781.0,
+          "allocations_per_op": 13.0,
+          "case": "ed25519.authentication_finish",
+          "concurrency": 1,
+          "iterations": 5000,
+          "p50_ns": 179511,
+          "p95_ns": 336218,
+          "p99_ns": 1520025,
+          "throughput_per_sec": 3953.7737738736673
+        },
+        {
+          "allocated_bytes_per_op": 0.0,
+          "allocations_per_op": 0.0,
+          "case": "primitive.es256.rustcrypto",
+          "concurrency": 1,
+          "iterations": 5000,
+          "p50_ns": 1159030,
+          "p95_ns": 2249136,
+          "p99_ns": 8319051,
+          "throughput_per_sec": 702.8092369353836
+        },
+        {
+          "allocated_bytes_per_op": 0.0,
+          "allocations_per_op": 0.0,
+          "case": "primitive.ed25519_strict.rustcrypto",
+          "concurrency": 1,
+          "iterations": 5000,
+          "p50_ns": 184889,
+          "p95_ns": 225070,
+          "p99_ns": 279392,
+          "throughput_per_sec": 5088.645616188845
+        }
+      ]
+    },
+    {
+      "round": 5,
+      "label": "baseline",
+      "wall_seconds": 17.62611869000102,
+      "cpu_seconds": 17.388789999999997,
+      "cpu_percent_of_one_core": 98.65353970335138,
+      "rows": [
+        {
+          "allocated_bytes_per_op": 168.0,
+          "allocations_per_op": 9.0,
+          "case": "es256.registration_begin",
+          "concurrency": 1,
+          "iterations": 5000,
+          "p50_ns": 1362,
+          "p95_ns": 2414,
+          "p99_ns": 5999,
+          "throughput_per_sec": 167993.26467963785
+        },
+        {
+          "allocated_bytes_per_op": 2848.0,
+          "allocations_per_op": 28.0,
+          "case": "es256.registration_finish",
+          "concurrency": 1,
+          "iterations": 5000,
+          "p50_ns": 9124,
+          "p95_ns": 24738,
+          "p99_ns": 37807,
+          "throughput_per_sec": 31823.4739172421
+        },
+        {
+          "allocated_bytes_per_op": 283.0,
+          "allocations_per_op": 12.0,
+          "case": "es256.authentication_begin",
+          "concurrency": 1,
+          "iterations": 5000,
+          "p50_ns": 1122,
+          "p95_ns": 2083,
+          "p99_ns": 2134,
+          "throughput_per_sec": 347335.46805712
+        },
+        {
+          "allocated_bytes_per_op": 1363.0,
+          "allocations_per_op": 16.0,
+          "case": "es256.authentication_finish",
+          "concurrency": 1,
+          "iterations": 5000,
+          "p50_ns": 1191799,
+          "p95_ns": 1352311,
+          "p99_ns": 2772597,
+          "throughput_per_sec": 803.919943227431
+        },
+        {
+          "allocated_bytes_per_op": 168.0,
+          "allocations_per_op": 9.0,
+          "case": "ed25519.registration_begin",
+          "concurrency": 1,
+          "iterations": 5000,
+          "p50_ns": 831,
+          "p95_ns": 1863,
+          "p99_ns": 2904,
+          "throughput_per_sec": 663697.3731123451
+        },
+        {
+          "allocated_bytes_per_op": 1587.0,
+          "allocations_per_op": 23.0,
+          "case": "ed25519.registration_finish",
+          "concurrency": 1,
+          "iterations": 5000,
+          "p50_ns": 7822,
+          "p95_ns": 8833,
+          "p99_ns": 38458,
+          "throughput_per_sec": 116330.75308620835
+        },
+        {
+          "allocated_bytes_per_op": 283.0,
+          "allocations_per_op": 12.0,
+          "case": "ed25519.authentication_begin",
+          "concurrency": 1,
+          "iterations": 5000,
+          "p50_ns": 962,
+          "p95_ns": 2023,
+          "p99_ns": 2594,
+          "throughput_per_sec": 521893.211463614
+        },
+        {
+          "allocated_bytes_per_op": 781.0,
+          "allocations_per_op": 13.0,
+          "case": "ed25519.authentication_finish",
+          "concurrency": 1,
+          "iterations": 5000,
+          "p50_ns": 186672,
+          "p95_ns": 227553,
+          "p99_ns": 293022,
+          "throughput_per_sec": 5034.448348756471
+        },
+        {
+          "allocated_bytes_per_op": 0.0,
+          "allocations_per_op": 0.0,
+          "case": "primitive.es256.rustcrypto",
+          "concurrency": 1,
+          "iterations": 5000,
+          "p50_ns": 1161564,
+          "p95_ns": 3085048,
+          "p99_ns": 8067921,
+          "throughput_per_sec": 655.0505706147813
+        },
+        {
+          "allocated_bytes_per_op": 0.0,
+          "allocations_per_op": 0.0,
+          "case": "primitive.ed25519_strict.rustcrypto",
+          "concurrency": 1,
+          "iterations": 5000,
+          "p50_ns": 174864,
+          "p95_ns": 275646,
+          "p99_ns": 823113,
+          "throughput_per_sec": 3812.3926051862413
+        }
+      ]
+    },
+    {
+      "round": 5,
+      "label": "candidate",
+      "wall_seconds": 22.892380535000484,
+      "cpu_seconds": 20.869899000000004,
+      "cpu_percent_of_one_core": 91.16526334206144,
+      "rows": [
+        {
+          "allocated_bytes_per_op": 168.0,
+          "allocations_per_op": 9.0,
+          "case": "es256.registration_begin",
+          "concurrency": 1,
+          "iterations": 5000,
+          "p50_ns": 1583,
+          "p95_ns": 2323,
+          "p99_ns": 6751,
+          "throughput_per_sec": 94836.29283262198
+        },
+        {
+          "allocated_bytes_per_op": 507.0,
+          "allocations_per_op": 8.0,
+          "case": "es256.registration_finish",
+          "concurrency": 1,
+          "iterations": 5000,
+          "p50_ns": 7041,
+          "p95_ns": 17597,
+          "p99_ns": 122024,
+          "throughput_per_sec": 20321.494248901294
+        },
+        {
+          "allocated_bytes_per_op": 239.0,
+          "allocations_per_op": 10.0,
+          "case": "es256.authentication_begin",
+          "concurrency": 1,
+          "iterations": 5000,
+          "p50_ns": 1362,
+          "p95_ns": 1773,
+          "p99_ns": 5448,
+          "throughput_per_sec": 74307.51636578463
+        },
+        {
+          "allocated_bytes_per_op": 324.0,
+          "allocations_per_op": 6.0,
+          "case": "es256.authentication_finish",
+          "concurrency": 1,
+          "iterations": 5000,
+          "p50_ns": 1146691,
+          "p95_ns": 3413254,
+          "p99_ns": 16509016,
+          "throughput_per_sec": 563.1685079947614
+        },
+        {
+          "allocated_bytes_per_op": 168.0,
+          "allocations_per_op": 9.0,
+          "case": "ed25519.registration_begin",
+          "concurrency": 1,
+          "iterations": 5000,
+          "p50_ns": 1152,
+          "p95_ns": 1572,
+          "p99_ns": 91117,
+          "throughput_per_sec": 47478.715458035666
+        },
+        {
+          "allocated_bytes_per_op": 436.0,
+          "allocations_per_op": 8.0,
+          "case": "ed25519.registration_finish",
+          "concurrency": 1,
+          "iterations": 5000,
+          "p50_ns": 17506,
+          "p95_ns": 34532,
+          "p99_ns": 154833,
+          "throughput_per_sec": 31374.29219988976
+        },
+        {
+          "allocated_bytes_per_op": 239.0,
+          "allocations_per_op": 10.0,
+          "case": "ed25519.authentication_begin",
+          "concurrency": 1,
+          "iterations": 5000,
+          "p50_ns": 1152,
+          "p95_ns": 1542,
+          "p99_ns": 6269,
+          "throughput_per_sec": 18069.21085974028
+        },
+        {
+          "allocated_bytes_per_op": 396.0,
+          "allocations_per_op": 7.0,
+          "case": "ed25519.authentication_finish",
+          "concurrency": 1,
+          "iterations": 5000,
+          "p50_ns": 191719,
+          "p95_ns": 371631,
+          "p99_ns": 2840439,
+          "throughput_per_sec": 2427.7904248313694
+        },
+        {
+          "allocated_bytes_per_op": 0.0,
+          "allocations_per_op": 0.0,
+          "case": "primitive.es256.rustcrypto",
+          "concurrency": 1,
+          "iterations": 5000,
+          "p50_ns": 1109014,
+          "p95_ns": 1722501,
+          "p99_ns": 6734607,
+          "throughput_per_sec": 731.8695116380771
+        },
+        {
+          "allocated_bytes_per_op": 0.0,
+          "allocations_per_op": 0.0,
+          "case": "primitive.ed25519_strict.rustcrypto",
+          "concurrency": 1,
+          "iterations": 5000,
+          "p50_ns": 170808,
+          "p95_ns": 267924,
+          "p99_ns": 1805886,
+          "throughput_per_sec": 4237.900343395116
+        }
+      ]
+    }
+  ],
+  "median_by_case": {
+    "baseline": {
+      "ed25519.authentication_begin": {
+        "allocated_bytes_per_op": 283.0,
+        "allocations_per_op": 12.0,
+        "concurrency": 1,
+        "iterations": 5000,
+        "p50_ns": 902,
+        "p95_ns": 1883,
+        "p99_ns": 2594,
+        "throughput_per_sec": 491064.68520101934
+      },
+      "ed25519.authentication_finish": {
+        "allocated_bytes_per_op": 781.0,
+        "allocations_per_op": 13.0,
+        "concurrency": 1,
+        "iterations": 5000,
+        "p50_ns": 179511,
+        "p95_ns": 227553,
+        "p99_ns": 293022,
+        "throughput_per_sec": 5034.448348756471
+      },
+      "ed25519.registration_begin": {
+        "allocated_bytes_per_op": 168.0,
+        "allocations_per_op": 9.0,
+        "concurrency": 1,
+        "iterations": 5000,
+        "p50_ns": 781,
+        "p95_ns": 1802,
+        "p99_ns": 2754,
+        "throughput_per_sec": 663697.3731123451
+      },
+      "ed25519.registration_finish": {
+        "allocated_bytes_per_op": 1587.0,
+        "allocations_per_op": 23.0,
+        "concurrency": 1,
+        "iterations": 5000,
+        "p50_ns": 7502,
+        "p95_ns": 8663,
+        "p99_ns": 38458,
+        "throughput_per_sec": 116330.75308620835
+      },
+      "es256.authentication_begin": {
+        "allocated_bytes_per_op": 283.0,
+        "allocations_per_op": 12.0,
+        "concurrency": 1,
+        "iterations": 5000,
+        "p50_ns": 1112,
+        "p95_ns": 2083,
+        "p99_ns": 2404,
+        "throughput_per_sec": 295427.5380061619
+      },
+      "es256.authentication_finish": {
+        "allocated_bytes_per_op": 1363.0,
+        "allocations_per_op": 16.0,
+        "concurrency": 1,
+        "iterations": 5000,
+        "p50_ns": 1153071,
+        "p95_ns": 1387305,
+        "p99_ns": 2876714,
+        "throughput_per_sec": 803.919943227431
+      },
+      "es256.registration_begin": {
+        "allocated_bytes_per_op": 168.0,
+        "allocations_per_op": 9.0,
+        "concurrency": 1,
+        "iterations": 5000,
+        "p50_ns": 1252,
+        "p95_ns": 3225,
+        "p99_ns": 6100,
+        "throughput_per_sec": 167993.26467963785
+      },
+      "es256.registration_finish": {
+        "allocated_bytes_per_op": 2848.0,
+        "allocations_per_op": 28.0,
+        "concurrency": 1,
+        "iterations": 5000,
+        "p50_ns": 9124,
+        "p95_ns": 24998,
+        "p99_ns": 50556,
+        "throughput_per_sec": 30005.735836451026
+      },
+      "primitive.ed25519_strict.rustcrypto": {
+        "allocated_bytes_per_op": 0.0,
+        "allocations_per_op": 0.0,
+        "concurrency": 1,
+        "iterations": 5000,
+        "p50_ns": 171549,
+        "p95_ns": 225070,
+        "p99_ns": 333884,
+        "throughput_per_sec": 5088.645616188845
+      },
+      "primitive.es256.rustcrypto": {
+        "allocated_bytes_per_op": 0.0,
+        "allocations_per_op": 0.0,
+        "concurrency": 1,
+        "iterations": 5000,
+        "p50_ns": 1159030,
+        "p95_ns": 1889383,
+        "p99_ns": 4184268,
+        "throughput_per_sec": 765.9821622823137
+      }
+    },
+    "candidate": {
+      "ed25519.authentication_begin": {
+        "allocated_bytes_per_op": 239.0,
+        "allocations_per_op": 10.0,
+        "concurrency": 1,
+        "iterations": 5000,
+        "p50_ns": 1212,
+        "p95_ns": 1522,
+        "p99_ns": 3125,
+        "throughput_per_sec": 483593.04214068456
+      },
+      "ed25519.authentication_finish": {
+        "allocated_bytes_per_op": 396.0,
+        "allocations_per_op": 7.0,
+        "concurrency": 1,
+        "iterations": 5000,
+        "p50_ns": 192230,
+        "p95_ns": 257819,
+        "p99_ns": 1662510,
+        "throughput_per_sec": 4310.94552068119
+      },
+      "ed25519.registration_begin": {
+        "allocated_bytes_per_op": 168.0,
+        "allocations_per_op": 9.0,
+        "concurrency": 1,
+        "iterations": 5000,
+        "p50_ns": 1353,
+        "p95_ns": 1582,
+        "p99_ns": 3636,
+        "throughput_per_sec": 498219.2150596124
+      },
+      "ed25519.registration_finish": {
+        "allocated_bytes_per_op": 436.0,
+        "allocations_per_op": 8.0,
+        "concurrency": 1,
+        "iterations": 5000,
+        "p50_ns": 17637,
+        "p95_ns": 21622,
+        "p99_ns": 56204,
+        "throughput_per_sec": 43833.71648092684
+      },
+      "es256.authentication_begin": {
+        "allocated_bytes_per_op": 239.0,
+        "allocations_per_op": 10.0,
+        "concurrency": 1,
+        "iterations": 5000,
+        "p50_ns": 1432,
+        "p95_ns": 1773,
+        "p99_ns": 2113,
+        "throughput_per_sec": 219884.96234448033
+      },
+      "es256.authentication_finish": {
+        "allocated_bytes_per_op": 324.0,
+        "allocations_per_op": 6.0,
+        "concurrency": 1,
+        "iterations": 5000,
+        "p50_ns": 1146691,
+        "p95_ns": 2305291,
+        "p99_ns": 7842041,
+        "throughput_per_sec": 647.431284402502
+      },
+      "es256.registration_begin": {
+        "allocated_bytes_per_op": 168.0,
+        "allocations_per_op": 9.0,
+        "concurrency": 1,
+        "iterations": 5000,
+        "p50_ns": 1663,
+        "p95_ns": 2204,
+        "p99_ns": 4406,
+        "throughput_per_sec": 171473.13876710675
+      },
+      "es256.registration_finish": {
+        "allocated_bytes_per_op": 507.0,
+        "allocations_per_op": 8.0,
+        "concurrency": 1,
+        "iterations": 5000,
+        "p50_ns": 7041,
+        "p95_ns": 16706,
+        "p99_ns": 38298,
+        "throughput_per_sec": 32226.773981909966
+      },
+      "primitive.ed25519_strict.rustcrypto": {
+        "allocated_bytes_per_op": 0.0,
+        "allocations_per_op": 0.0,
+        "concurrency": 1,
+        "iterations": 5000,
+        "p50_ns": 169986,
+        "p95_ns": 211399,
+        "p99_ns": 276508,
+        "throughput_per_sec": 5543.287539603034
+      },
+      "primitive.es256.rustcrypto": {
+        "allocated_bytes_per_op": 0.0,
+        "allocations_per_op": 0.0,
+        "concurrency": 1,
+        "iterations": 5000,
+        "p50_ns": 1075324,
+        "p95_ns": 1234704,
+        "p99_ns": 2027752,
+        "throughput_per_sec": 862.4392267364925
+      }
+    }
+  },
+  "provenance": {
+    "baseline_commit": "d59b317998e56f4a16a69133d7a854c5c34f795b",
+    "implementation_commit": "b3ecfa40c8f626903f36d6065640236ac87fe472",
+    "candidate_backend": "wasi",
+    "aws_lc_rs": null,
+    "aws_lc_sys": null,
+    "rustc": "rustc 1.100.0 (0ef1bc386 2026-11-09)\nbinary: rustc\ncommit-hash: 0ef1bc386059596dada8fb65b50425aab2ea637a\ncommit-date: 2026-11-09\nhost: x86_64-unknown-linux-gnu\nrelease: 1.100.0\nLLVM version: 23.1.5\n",
+    "harness_sha256": "7d5fa01b880c39b22f7f7d0bf7b439f47f09ffd9236aefd2a18d1cee5b8984a2",
+    "baseline_perf_lock_sha256": "3e2d7e987e3ad5d424e9e74163733dfc9457f119dc810114dfe4ba5e908ee1f8",
+    "candidate_perf_lock_sha256": "645d102bd3e224321b930de031c61d1d2cd55f2619d0c1a22f4dd368b2bd67ee",
+    "build_profile": {
+      "profile": "release",
+      "lto": "thin",
+      "codegen_units": 1,
+      "strip": "symbols",
+      "panic": "abort"
+    },
+    "quiet_workload": "No local builds, fuzz campaigns, allocation traces or NazoAuth tests during timings; PostgreSQL and Valkey stopped; other shared-host tenants are not observable.",
+    "aggregation": "Each reported P50/P95/P99 is the median of the five per-round quantiles, not a pooled 25000-sample quantile.",
+    "command": [
+      "python3",
+      "perf/run.py",
+      "--baseline",
+      "/workspace/scratch/f7903e352d2d/perf-artifacts/baseline-wasi.wasm",
+      "--candidate",
+      "/workspace/scratch/f7903e352d2d/perf-artifacts/candidate-final-wasi.wasm",
+      "--cpu",
+      "0",
+      "--rounds",
+      "5",
+      "--iterations",
+      "5000",
+      "--output",
+      "/workspace/scratch/f7903e352d2d/passkey-auth-rs/docs/evidence/performance-final-wasi.json",
+      "--wasi"
+    ]
+  }
+}

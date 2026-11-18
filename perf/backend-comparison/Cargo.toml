@@ -1,0 +1,19 @@
+[package]
+name = "passkey-backend-comparison"
+version = "0.0.0"
+edition = "2024"
+publish = false
+
+[dependencies]
+aws-lc-rs = "1.19.0"
+ed25519-dalek = "3.0.0"
+p256 = { version = "0.14.0", features = ["ecdsa"] }
+serde_json = "1.0.154"
+
+[workspace]
+
+[profile.release]
+lto = "thin"
+codegen-units = 1
+strip = "symbols"
+panic = "abort"

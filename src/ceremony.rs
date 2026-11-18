@@ -13,7 +13,7 @@ use crate::types::{
     AuthSuccess, AuthenticationChallenge, AuthenticationResponse, AuthenticationState,
     AuthenticatorSelection, Challenge, CosePublicKey, CredentialDescriptor, CredentialId,
     PasskeyCredential, PubKeyCredParam, RegistrationChallenge, RegistrationResponse,
-    RegistrationState, RpId, RpInfo, UserInfo, b64url_decode, b64url_decode_strict, now_secs,
+    RegistrationState, RpId, RpInfo, UserInfo, decode_b64_bounded, decode_b64_into, now_secs,
 };
 
 const CEREMONY_TIMEOUT_MS: u32 = 60_000;
@@ -53,8 +53,8 @@ pub enum Attachment {
     /// iCloud "synced passkey" flow lives here. **Default.**
     Platform,
     /// Roaming / removable authenticators: USB Yubikeys, NFC, BLE
-    /// security keys. Use this for "enterprise hardware key only"
-    /// deployments.
+    /// security keys. This is a browser selection preference, not proof
+    /// of hardware protection or manufacturer identity.
     CrossPlatform,
     /// No preference - the browser offers both platform and roaming
     /// authenticators and lets the user pick. Use this when you want
@@ -93,15 +93,9 @@ pub struct Webauthn {
     /// registration time. Does NOT affect authentication - by then
     /// the user already has a specific credential.
     attachment: Attachment,
-    /// When `true`, response-side wire fields (credential id,
-    /// attestationObject, clientDataJSON, authenticatorData,
-    /// signature, userHandle) MUST be encoded as strict
-    /// url-safe-no-pad base64. When `false` (default), the lenient
-    /// `b64url_decode` is used — accepting padding and the standard
-    /// alphabet for compatibility with buggy client JS that uses
-    /// `btoa(...)`. Production deployments that control the client
-    /// should set this to `true` to surface client-side encoding
-    /// bugs rather than silently working around them.
+    /// Require canonical base64url on the outer response fields. The default
+    /// accepts padding and the standard alphabet for existing JSON adapters.
+    /// The signed client-data challenge is always canonical base64url.
     strict_base64: bool,
     /// When `true`, `finish_authentication` REQUIRES the assertion
     /// response to include a `userHandle` whenever the ceremony was
@@ -114,6 +108,8 @@ pub struct Webauthn {
     /// non-resident mode, where the user_handle may legitimately be
     /// absent.
     require_user_handle: bool,
+    rp_id_hash: [u8; 32],
+    context_binding: [u8; 32],
 }
 
 impl Webauthn {
@@ -123,12 +119,8 @@ impl Webauthn {
     ///
     /// # Panics
     ///
-    /// Panics in debug builds if `rp_id` contains a scheme separator
-    /// (`://`), a `/`, or a `:` — these are tell-tale signs the caller
-    /// passed an origin or URL by mistake. Release builds accept the
-    /// input verbatim (consistent with [`RpId::new`]) so a misconfigured
-    /// production deployment fails LOUDLY at the first ceremony rather
-    /// than silently issuing challenges no browser will satisfy.
+    /// Panics if the configuration fails [`Self::try_new`]. Applications
+    /// loading external configuration should use the fallible constructor.
     ///
     /// Use [`RpId::try_from_url`] if you have a URL/origin string and
     /// want a graceful conversion.
@@ -138,13 +130,56 @@ impl Webauthn {
     /// Call [`Self::require_user_verification`] to flip the server
     /// check to strict before using it in production.
     pub fn new(rp_id: &str, rp_name: &str, origin: &str) -> Self {
-        debug_assert!(
-            !rp_id.contains("://") && !rp_id.contains('/') && !rp_id.contains(':'),
-            "Webauthn::new: rp_id ({rp_id:?}) looks like a URL/origin, not a bare domain. \
-             Pass just the host (e.g. \"example.com\"), or use RpId::try_from_url to extract \
-             the host from an origin string.",
-        );
-        Self {
+        Self::try_new(rp_id, rp_name, origin).expect("invalid WebAuthn RP configuration")
+    }
+
+    /// Validate RP configuration once, before issuing any ceremonies.
+    /// This implementation supports HTTPS web origins (HTTP only for local
+    /// development), and the RP host itself or a parent domain. Related-origin
+    /// and embedded cross-origin ceremonies are not enabled.
+    pub fn try_new(rp_id: &str, rp_name: &str, origin: &str) -> Result<Self> {
+        let url =
+            url::Url::parse(origin).map_err(|_| Error::Configuration("origin is not a URL"))?;
+        if url.origin().ascii_serialization() != origin
+            || !url.username().is_empty()
+            || url.password().is_some()
+        {
+            return Err(Error::Configuration(
+                "origin must be its exact scheme/host/port serialization",
+            ));
+        }
+        let host = url
+            .host_str()
+            .ok_or(Error::Configuration("origin has no host"))?;
+        let local = host == "localhost"
+            || host.ends_with(".localhost")
+            || host
+                .trim_matches(['[', ']'])
+                .parse::<std::net::IpAddr>()
+                .is_ok_and(|ip| ip.is_loopback());
+        if url.scheme() != "https" && !(url.scheme() == "http" && local) {
+            return Err(Error::Configuration(
+                "origin must use HTTPS, except localhost/loopback",
+            ));
+        }
+        if rp_id.is_empty()
+            || rp_id.len() > 253
+            || origin.len() > 2048
+            || rp_id
+                .bytes()
+                .any(|b| b.is_ascii_whitespace() || matches!(b, b'/' | b'@' | b'?' | b'#'))
+            || !(host == rp_id
+                || (matches!(url.host(), Some(url::Host::Domain(_)))
+                    && host
+                        .strip_suffix(rp_id)
+                        .is_some_and(|prefix| prefix.ends_with('.'))))
+        {
+            return Err(Error::Configuration(
+                "RP ID must be the origin host or its domain suffix",
+            ));
+        }
+        let rp_id_hash = sha256_32(rp_id.as_bytes());
+        let mut this = Self {
             rp_id: RpId::new(rp_id),
             rp_name: rp_name.to_owned(),
             origin: origin.to_owned(),
@@ -152,24 +187,54 @@ impl Webauthn {
             attachment: Attachment::Platform,
             strict_base64: false,
             require_user_handle: false,
-        }
+            rp_id_hash,
+            context_binding: [0; 32],
+        };
+        this.bind_context();
+        Ok(this)
     }
 
-    /// Builder: when `true`, response-side wire fields are decoded
-    /// as strict url-safe-no-pad base64 — the only encoding the
-    /// WebAuthn spec permits. When `false` (default) lenient decoding
-    /// also accepts url-safe-with-padding and the standard alphabet,
-    /// papering over buggy client JS that uses `btoa(...)` instead
-    /// of a proper base64url encoder.
-    ///
-    /// Production deployments that control their own client JS should
-    /// flip this to `true` so client-side encoding bugs surface as
-    /// `Error::Base64` instead of silently working. Skip if you are
-    /// integrating with a third-party browser SDK whose encoding you
-    /// cannot guarantee.
+    fn bind_context(&mut self) {
+        let mut digest = Sha256::new();
+        digest.update([
+            1,
+            u8::from(self.require_uv),
+            u8::from(self.strict_base64),
+            u8::from(self.require_user_handle),
+        ]);
+        digest.update(self.rp_id_hash);
+        digest.update(self.origin.as_bytes());
+        self.context_binding = digest.finalize().into();
+    }
+
+    fn check_state(
+        &self,
+        created_at: u64,
+        binding: Option<[u8; 32]>,
+        challenge: &Challenge,
+    ) -> Result<()> {
+        check_not_expired(created_at)?;
+        if binding != Some(self.context_binding) {
+            return Err(Error::InvalidState(
+                "RP/origin/policy binding missing or changed; restart ceremony",
+            ));
+        }
+        if !(16..=64).contains(&challenge.as_bytes().len()) {
+            return Err(Error::InvalidState(
+                "challenge length must be 16..=64 bytes",
+            ));
+        }
+        Ok(())
+    }
+
+    /// Require canonical unpadded base64url on the outer response fields.
+    /// The default also accepts padding and the standard alphabet for existing
+    /// JSON adapters. The signed `clientDataJSON.challenge` always requires
+    /// canonical unpadded base64url, independently of this setting.
     #[must_use]
     pub fn strict_base64(mut self, strict: bool) -> Self {
         self.strict_base64 = strict;
+        self.bind_context();
         self
     }
 
@@ -187,22 +252,19 @@ impl Webauthn {
     /// hardware keys in non-resident mode, where the user_handle is
     /// legitimately absent.
     ///
-    /// No effect on ceremonies started via [`Self::start_authentication`]
-    /// (which has no expected user_handle to compare against).
+    /// Also applies to the generic entry points. A stored handle or the
+    /// explicit discoverable-account binding supplies the expected value.
     #[must_use]
     pub fn require_user_handle(mut self, require: bool) -> Self {
         self.require_user_handle = require;
+        self.bind_context();
         self
     }
 
     /// Internal: pick the right base64 decoder for response-side
     /// wire fields based on the `strict_base64` toggle.
-    fn decode_b64(&self, s: &str) -> Result<Vec<u8>> {
-        if self.strict_base64 {
-            b64url_decode_strict(s)
-        } else {
-            b64url_decode(s)
-        }
+    fn decode_b64(&self, s: &str, limit: usize, field: &'static str) -> Result<Vec<u8>> {
+        decode_b64_bounded(s, self.strict_base64, limit, field)
     }
 
     /// Builder method: when set to `true`, the server REJECTS any
@@ -217,6 +279,7 @@ impl Webauthn {
     #[must_use]
     pub fn require_user_verification(mut self, require: bool) -> Self {
         self.require_uv = require;
+        self.bind_context();
         self
     }
 
@@ -263,6 +326,22 @@ impl Webauthn {
         user_display_name: &str,
         existing: &[CredentialId],
     ) -> (RegistrationChallenge, RegistrationState) {
+        self.try_start_registration(user_id, user_name, user_display_name, existing)
+            .expect("user handle must contain 1..=64 bytes")
+    }
+
+    /// Fallible registration entry point for applications accepting user handles
+    /// from an external source. The infallible variant requires a valid handle.
+    pub fn try_start_registration(
+        &self,
+        user_id: &[u8],
+        user_name: &str,
+        user_display_name: &str,
+        existing: &[CredentialId],
+    ) -> Result<(RegistrationChallenge, RegistrationState)> {
+        if !(1..=64).contains(&user_id.len()) {
+            return Err(Error::InvalidState("user handle must contain 1..=64 bytes"));
+        }
         let challenge = Challenge::random();
         let exclude = existing
             .iter()
@@ -313,22 +392,24 @@ impl Webauthn {
             challenge,
             user_id: user_id.to_vec(),
             created_at: now_secs(),
+            context_binding: Some(self.context_binding),
+            exclude_credentials: existing.to_vec(),
         };
-        (chal, state)
+        Ok((chal, state))
     }
 
-    /// Verify the registration response. On success returns the
-    /// `PasskeyCredential` the caller persists.
+    /// Verify the registration response and return the credential to persist.
+    /// The caller must consume the ceremony state once, authorize enrollment,
+    /// and enforce RP-wide credential-ID uniqueness when inserting the record.
     pub fn finish_registration(
         &self,
         state: &RegistrationState,
         response: &RegistrationResponse,
     ) -> Result<PasskeyCredential> {
         // 0. Reject ceremonies older than the hard ceiling. Defence
-        // in depth - the caller's session store should TTL these
-        // out already, but a forgetful caller cannot do worse than
-        // 5 minutes of replay window.
-        check_not_expired(state.created_at)?;
+        // in depth. The caller must atomically consume state as well:
+        // a TTL does not prevent reuse within that time window.
+        self.check_state(state.created_at, state.context_binding, &state.challenge)?;
 
         // 1. Validate clientDataJSON.
         let cdj_raw = client_data::validate(
@@ -341,15 +422,24 @@ impl Webauthn {
         let cdj_hash = sha256_32(&cdj_raw);
 
         // 2. Parse the attestation object.
-        let att_bytes = self.decode_b64(&response.attestation_object)?;
+        if !(1..=64).contains(&state.user_id.len()) {
+            return Err(Error::InvalidState("user handle must contain 1..=64 bytes"));
+        }
+        if response.transports.len() > 16 || response.transports.iter().any(|s| s.len() > 32) {
+            return Err(Error::InputTooLarge {
+                field: "transports",
+                limit: 512,
+            });
+        }
+        let att_bytes =
+            self.decode_b64(&response.attestation_object, 65536, "attestationObject")?;
         let att = ParsedAttestation::parse(&att_bytes)?;
 
         // 3. rpIdHash check. Note: non-constant-time `!=` is fine here
         // because both sides are public (SHA-256 of the RP ID) and an
         // attacker who could probe timing learns only the RP ID, which
         // they already know from the same TLS handshake.
-        let want_rp_hash = sha256_32(self.rp_id.as_str().as_bytes());
-        if att.auth_data.rp_id_hash != want_rp_hash {
+        if att.auth_data.rp_id_hash != self.rp_id_hash {
             return Err(Error::RpIdHashMismatch);
         }
 
@@ -373,7 +463,11 @@ impl Webauthn {
 
         // 6. Parse the COSE public key and verify any attestation
         // statement signed by it.
-        let cose = CoseKey::parse(attested.public_key_cose.as_bytes())?;
+        let asserted_id = self.decode_b64(&response.id, 1023, "credential ID")?;
+        if asserted_id != attested.credential_id {
+            return Err(Error::CredentialIdMismatch);
+        }
+        let cose = &attested.key;
 
         // 6a. WebAuthn §7.1 step 19: the credential's alg MUST be one of
         // the algorithms the RP advertised in pubKeyCredParams. Without
@@ -386,15 +480,31 @@ impl Webauthn {
             return Err(Error::UnsupportedAlg(cose.alg()));
         }
 
-        att.verify_statement(&cose, &cdj_hash)?;
+        let attestation = att.verify_statement(cose, &cdj_hash)?;
+
+        // A duplicate is a distinct application conflict only after the
+        // statement is valid. Preserve invalid-attestation rejection/audit
+        // behavior even when the asserted credential is already excluded.
+        if state
+            .exclude_credentials
+            .iter()
+            .any(|id| id.as_bytes() == asserted_id)
+        {
+            return Err(Error::CredentialExcluded);
+        }
 
         // 7. Build the persisted credential.
         Ok(PasskeyCredential {
-            id: attested.credential_id.clone(),
-            public_key_cose: CosePublicKey(attested.public_key_cose.as_bytes().to_vec()),
+            id: CredentialId(asserted_id),
+            public_key_cose: CosePublicKey(attested.public_key_cose.to_vec()),
             counter: att.auth_data.sign_count,
             transports: response.transports.clone(),
             aaguid: attested.aaguid,
+            user_handle: Some(state.user_id.clone()),
+            uv_initialized: Some(att.auth_data.user_verified()),
+            backup_eligible: Some(att.auth_data.backup_eligible()),
+            backup_state: Some(att.auth_data.backup_state()),
+            attestation,
         })
     }
 
@@ -424,7 +534,7 @@ impl Webauthn {
                 transports: Vec::new(),
             })
             .collect();
-        self.build_auth_challenge(allow_credentials, descriptors)
+        self.build_auth_challenge(allow_credentials.to_vec(), descriptors)
     }
 
     /// Like [`Self::start_authentication`] but pulls the `transports`
@@ -445,14 +555,14 @@ impl Webauthn {
             })
             .collect();
         let ids: Vec<CredentialId> = allow_credentials.iter().map(|c| c.id.clone()).collect();
-        self.build_auth_challenge(&ids, descriptors)
+        self.build_auth_challenge(ids, descriptors)
     }
 
     /// Internal: assemble the challenge JSON + state from already-built
     /// descriptors. Shared by both `start_authentication*` entry points.
     fn build_auth_challenge(
         &self,
-        ids: &[CredentialId],
+        ids: Vec<CredentialId>,
         descriptors: Vec<CredentialDescriptor>,
     ) -> (AuthenticationChallenge, AuthenticationState) {
         let challenge = Challenge::random();
@@ -465,12 +575,13 @@ impl Webauthn {
         };
         let state = AuthenticationState {
             challenge,
-            allow_credentials: ids.to_vec(),
+            allow_credentials: ids,
             created_at: now_secs(),
-            // Set by start_authentication_for_user only; the simple
-            // entry points leave it None so finish_authentication
-            // skips the user_handle equality check.
+            // Account-aware start methods set this. Otherwise verification
+            // requires the stored handle or an explicit discoverable binding
+            // whenever the assertion supplies a handle.
             user_handle: None,
+            context_binding: Some(self.context_binding),
         };
         (chal, state)
     }
@@ -505,7 +616,7 @@ impl Webauthn {
                 transports: Vec::new(),
             })
             .collect();
-        let (chal, mut state) = self.build_auth_challenge(allow_credentials, descriptors);
+        let (chal, mut state) = self.build_auth_challenge(allow_credentials.to_vec(), descriptors);
         state.user_handle = Some(user_handle.to_vec());
         (chal, state)
     }
@@ -528,85 +639,84 @@ impl Webauthn {
             })
             .collect();
         let ids: Vec<CredentialId> = allow_credentials.iter().map(|c| c.id.clone()).collect();
-        let (chal, mut state) = self.build_auth_challenge(&ids, descriptors);
+        let (chal, mut state) = self.build_auth_challenge(ids, descriptors);
         state.user_handle = Some(user_handle.to_vec());
         (chal, state)
     }
 
-    /// Verify the assertion. `stored` is the credential the caller
-    /// looked up by `response.id`.
+    /// Verify an assertion against the credential selected by `response.id`.
     ///
-    /// # Caller contract (security-critical)
+    /// The caller must resolve the owning account within the current RP/tenant.
+    /// Username-first flows bind its handle with an account-aware start method.
+    /// Discoverable flows resolve `response.user_handle` to the owning account;
+    /// [`Self::finish_discoverable_authentication`] supplies that binding for
+    /// records whose stored user handle is absent.
     ///
-    /// **The caller MUST ensure that `stored` belongs to the user
-    /// being authenticated** — typically by looking it up via
-    /// `response.id` scoped to a known user record, NOT by globally
-    /// searching every credential in the database.
-    ///
-    /// In a multi-tenant deployment, a naive lookup like
-    /// `credentials.find(|c| c.id == response.id)` is wrong: two users
-    /// COULD (in pathological cases) end up with the same credential
-    /// id and the wrong user would be authenticated. Real WebAuthn
-    /// credential ids are large random byte strings so this is
-    /// vanishingly unlikely in practice — but the crate cannot enforce
-    /// the right scoping for you. For discoverable-credential
-    /// (passwordless) flows, look up by `response.user_handle` first,
-    /// then verify `response.id` matches the user's stored credentials.
-    /// See [`examples/axum_passwordless.rs`](https://github.com/marirs/passkey-auth/blob/main/examples/axum_passwordless.rs)
-    /// for the recommended pattern.
+    /// Consume the ceremony state once and atomically persist the returned
+    /// counter and backup metadata before granting authentication success.
     pub fn finish_authentication(
         &self,
         state: &AuthenticationState,
         response: &AuthenticationResponse,
         stored: &PasskeyCredential,
     ) -> Result<AuthSuccess> {
-        // 0. Reject stale ceremonies (see finish_registration).
-        check_not_expired(state.created_at)?;
+        self.verify_authentication(state, response, stored, None)
+    }
 
-        // 1. The asserted credential ID must be one of the ones we
-        // told the browser was acceptable (if we gave a non-empty
-        // allow list), and it must be the stored one.
-        let asserted_id = CredentialId(self.decode_b64(&response.id)?);
-        if !state.allow_credentials.is_empty()
-            && !state.allow_credentials.iter().any(|c| c == &asserted_id)
+    /// Bind a discoverable assertion to the account selected by the caller's
+    /// tenant-scoped credential lookup. Also supports legacy credentials whose
+    /// JSONB predates the stored user handle; no credential re-enrollment is needed.
+    pub fn finish_discoverable_authentication(
+        &self,
+        state: &AuthenticationState,
+        response: &AuthenticationResponse,
+        stored: &PasskeyCredential,
+        expected_user_handle: &[u8],
+    ) -> Result<AuthSuccess> {
+        self.verify_authentication(state, response, stored, Some(expected_user_handle))
+    }
+
+    fn verify_authentication(
+        &self,
+        state: &AuthenticationState,
+        response: &AuthenticationResponse,
+        stored: &PasskeyCredential,
+        account_handle: Option<&[u8]>,
+    ) -> Result<AuthSuccess> {
+        self.check_state(state.created_at, state.context_binding, &state.challenge)?;
+        let asserted_id = CredentialId(self.decode_b64(&response.id, 1023, "credential ID")?);
+        if asserted_id.as_bytes().is_empty()
+            || asserted_id != stored.id
+            || (!state.allow_credentials.is_empty()
+                && !state.allow_credentials.contains(&asserted_id))
         {
             return Err(Error::BadSignature);
         }
-        if asserted_id != stored.id {
-            return Err(Error::BadSignature);
+        let expected = account_handle
+            .or(state.user_handle.as_deref())
+            .or(stored.user_handle.as_deref());
+        if let Some(expected) = expected
+            && (!(1..=64).contains(&expected.len())
+                || state.user_handle.as_deref().is_some_and(|h| h != expected)
+                || stored.user_handle.as_deref().is_some_and(|h| h != expected))
+        {
+            return Err(Error::UserHandleMismatch);
         }
-
-        // 1b. WebAuthn-3 §7.2 step 6: if the ceremony was started via
-        // start_authentication_for_user, the response's userHandle
-        // MUST match the user handle the caller recorded. This is
-        // the defence-in-depth check against credential-id-collision
-        // attacks that the doc-comment on this function warns about.
-        //
-        // Behaviour matrix when state.user_handle = Some(expected):
-        //   response.user_handle = Some(got) → equality enforced
-        //   response.user_handle = None      → require_user_handle
-        //                                       gates accept vs reject
-        //                                       (spec default: accept)
-        //
-        // When state.user_handle = None (the ceremony was started via
-        // start_authentication{,_with_creds}) the check is skipped
-        // entirely — the caller has no expected value to compare.
-        if let Some(expected) = &state.user_handle {
-            match response.user_handle.as_deref() {
-                Some(got_b64) => {
-                    let got = self.decode_b64(got_b64)?;
-                    if &got != expected {
-                        return Err(Error::UserHandleMismatch);
-                    }
-                }
-                None if self.require_user_handle => {
+        let discoverable = state.user_handle.is_none() && state.allow_credentials.is_empty();
+        match response.user_handle.as_deref() {
+            Some(encoded) => {
+                let mut handle = [0; 64];
+                let length =
+                    decode_b64_into(encoded, self.strict_base64, &mut handle, "userHandle")?;
+                if expected != Some(&handle[..length]) || length == 0 {
                     return Err(Error::UserHandleMismatch);
                 }
-                None => { /* spec-default: skip when absent */ }
             }
+            None if discoverable || self.require_user_handle => {
+                return Err(Error::UserHandleMismatch);
+            }
+            None => {}
         }
-
-        // 2. Validate clientDataJSON.
         let cdj_raw = client_data::validate(
             &response.client_data_json,
             TYPE_AUTHENTICATE,
@@ -615,13 +725,15 @@ impl Webauthn {
             self.strict_base64,
         )?;
         let cdj_hash = sha256_32(&cdj_raw);
-
-        // 3. Parse + check authenticator data.
-        let ad_bytes = self.decode_b64(&response.authenticator_data)?;
+        let ad_bytes = self.decode_b64(&response.authenticator_data, 16384, "authenticatorData")?;
         let ad = AuthenticatorData::parse(&ad_bytes)?;
-        let want_rp_hash = sha256_32(self.rp_id.as_str().as_bytes());
-        if ad.rp_id_hash != want_rp_hash {
+        if ad.rp_id_hash != self.rp_id_hash {
             return Err(Error::RpIdHashMismatch);
+        }
+        if ad.attested.is_some() {
+            return Err(Error::AuthData(
+                "assertion must not contain attested credential data",
+            ));
         }
         if !ad.user_present() {
             return Err(Error::UserNotPresent);
@@ -629,32 +741,39 @@ impl Webauthn {
         if self.require_uv && !ad.user_verified() {
             return Err(Error::UserNotVerified);
         }
-
-        // 4. Verify the signature: signedMsg = authData || cdjHash.
+        let backup_eligible = ad.backup_eligible();
+        let backup_state = ad.backup_state();
+        if stored
+            .backup_eligible
+            .is_some_and(|known| known != backup_eligible)
+        {
+            return Err(Error::BackupEligibilityChanged);
+        }
+        let user_verified = ad.user_verified();
+        let new_counter = ad.sign_count;
         let key = CoseKey::parse(stored.public_key_cose.as_bytes())?;
-        let sig = self.decode_b64(&response.signature)?;
-        let mut msg = Vec::with_capacity(ad_bytes.len() + 32);
-        msg.extend_from_slice(&ad_bytes);
-        msg.extend_from_slice(&cdj_hash);
-        crypto::verify(&key, &msg, &sig)?;
-
-        // 5. Counter check. Per the spec: if BOTH signCount and the
-        // stored counter are 0, the credential never increments -
-        // accept. Otherwise the new count MUST be strictly greater
-        // than the stored value; anything else is a likely cloned
-        // credential.
-        let either_nonzero = ad.sign_count != 0 || stored.counter != 0;
-        if either_nonzero && ad.sign_count <= stored.counter {
+        let mut sig = [0; 80];
+        let sig_len = decode_b64_into(
+            &response.signature,
+            self.strict_base64,
+            &mut sig,
+            "signature",
+        )?;
+        crypto::verify_auth_data(&key, &ad_bytes, &cdj_hash, &sig[..sig_len])?;
+        // Reject non-increasing counters, including backups; 0/0 is supported.
+        if (new_counter != 0 || stored.counter != 0) && new_counter <= stored.counter {
             return Err(Error::CounterReplay {
                 stored: stored.counter,
-                new: ad.sign_count,
+                new: new_counter,
             });
         }
-
         Ok(AuthSuccess {
             credential_id: asserted_id,
-            new_counter: ad.sign_count,
-            user_verified: ad.user_verified(),
+            new_counter,
+            user_verified,
+            user_verification_eligible: user_verified && stored.uv_initialized == Some(true),
+            backup_eligible,
+            backup_state,
         })
     }
 }
@@ -670,17 +789,13 @@ fn sha256_32(data: &[u8]) -> [u8; 32] {
     a
 }
 
-/// Hard ceiling on ceremony age. `created_at` of 0 is treated as
-/// "unknown / pre-fix state" and skipped to keep the helper backwards
-/// compatible with persisted RegistrationState / AuthenticationState
-/// blobs that predate the field (serde `#[serde(default)]` gives them
-/// 0). Real ceremony states get a real timestamp.
+/// Old in-flight states restart, while persisted credentials remain compatible.
 fn check_not_expired(created_at: u64) -> Result<()> {
-    if created_at == 0 {
-        return Ok(());
-    }
     let now = now_secs();
-    let age = now.saturating_sub(created_at);
+    if created_at == 0 || created_at > now {
+        return Err(Error::InvalidState("missing or future creation timestamp"));
+    }
+    let age = now - created_at;
     if age > CEREMONY_MAX_AGE_SECS {
         return Err(Error::CeremonyExpired {
             age_secs: age,
@@ -693,6 +808,49 @@ fn check_not_expired(created_at: u64) -> Result<()> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn configuration_requires_an_exact_secure_related_origin() {
+        for (rp_id, origin) in [
+            ("example.com", "https://example.com"),
+            ("example.com", "https://login.example.com"),
+            ("localhost", "http://localhost:8080"),
+            ("127.0.0.1", "http://127.0.0.1"),
+        ] {
+            assert!(Webauthn::try_new(rp_id, "Example", origin).is_ok());
+        }
+        for (rp_id, origin) in [
+            ("example.com", "http://example.com"),
+            ("example.com", "https://example.com/"),
+            ("example.com", "https://example.com/path"),
+            ("example.com", "https://user@example.com"),
+            ("example.com", "https://evil-example.com"),
+            ("0.0.1", "http://127.0.0.1"),
+            ("", "https://example.com"),
+        ] {
+            assert!(matches!(
+                Webauthn::try_new(rp_id, "Example", origin),
+                Err(Error::Configuration(_))
+            ));
+        }
+    }
+
+    #[test]
+    fn registration_handle_length_boundaries_are_fallible() {
+        let wa = Webauthn::new("example.com", "Example", "https://example.com");
+        for length in [0, 65] {
+            assert!(
+                wa.try_start_registration(&vec![7; length], "user", "User", &[])
+                    .is_err()
+            );
+        }
+        for length in [1, 64] {
+            assert!(
+                wa.try_start_registration(&vec![7; length], "user", "User", &[])
+                    .is_ok()
+            );
+        }
+    }
 
     #[test]
     fn attachment_tokens() {

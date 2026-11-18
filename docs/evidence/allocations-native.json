@@ -1,0 +1,1391 @@
+{
+  "schema_version": 1,
+  "environment": {
+    "utc": "2026-11-17T12:09:11.498220+00:00",
+    "platform": "Linux-6.18.57-x86_64-with-glibc2.41",
+    "glibc": "glibc 2.41",
+    "profiler": {
+      "path": "/usr/lib/x86_64-linux-gnu/libc_malloc_debug.so.0",
+      "bytes": 53904,
+      "sha256": "c9cad01c6334afa750c0b81b5818e3a643ff41860a4a4c802aa7f203c2372953"
+    },
+    "artifacts": {
+      "baseline": {
+        "path": "/workspace/scratch/f7903e352d2d/perf-artifacts/baseline-native",
+        "bytes": 1012496,
+        "sha256": "ccc61f9592c9c77b328df28eea8cd27fab570ef5492a15f1ed8c1bf5c924ab88"
+      },
+      "rustcrypto": {
+        "path": "/workspace/scratch/f7903e352d2d/perf-artifacts/candidate-packed-native-rustcrypto",
+        "bytes": 1239496,
+        "sha256": "49e42c2edfa75fabb1a1c13b28a8ea4e7565f02eb95cb98d771f6978d9a1cd47"
+      },
+      "aws_lc": {
+        "path": "/workspace/scratch/f7903e352d2d/perf-artifacts/candidate-packed-native-aws-lc",
+        "bytes": 3835088,
+        "sha256": "ba36e79a1b2df825635fdd3f683945aaec06c58b4cdd44f005b4bc95147d6bc5"
+      }
+    },
+    "harness_source": {
+      "path": "/workspace/scratch/f7903e352d2d/passkey-auth-rs/benches/ceremony.rs",
+      "bytes": 9189,
+      "sha256": "7d5fa01b880c39b22f7f7d0bf7b439f47f09ffd9236aefd2a18d1cee5b8984a2"
+    },
+    "driver_source": {
+      "path": "/workspace/scratch/f7903e352d2d/passkey-auth-rs/perf/allocations.py",
+      "bytes": 11140,
+      "sha256": "d63b697e802af5d35d6e3e32a5d8f3742ea81d07766937a6af616536bb42b062"
+    },
+    "aws_lc_rs": "1.19.0",
+    "aws_lc_sys": "0.47.0",
+    "implementation_commit": "8260480634fac09e1151ca2b1a9eaa1c02af6f67",
+    "implementation_tree": "5a36536e1b0a67db1f90e6e870fcff7664a44095",
+    "baseline_implementation_commit": "d59b317998e56f4a16a69133d7a854c5c34f795b"
+  },
+  "method": {
+    "trace_window_operations": 100,
+    "warmup_operations_before_trace": 200,
+    "unreported_timing_iterations_before_trace": 10,
+    "concurrency": 1,
+    "counted_trace_events": [
+      "+",
+      ">"
+    ],
+    "definition": "Successful malloc/calloc/aligned-allocation and realloc requests intercepted by glibc mtrace. Realloc contributes its full requested new size, not the size delta.",
+    "scope": "Steady-state API calls and returned-value destruction. Fixture construction, warm-up, tracing startup/shutdown and JSON reporting are outside the traced window.",
+    "limits": "Requested bytes are cumulative and exclude allocator metadata; they are not peak memory, RSS or retained bytes. Direct mmap and allocations bypassing glibc malloc hooks are not counted. No traced latency is reported."
+  },
+  "cases": {
+    "baseline": {
+      "es256.registration_begin": {
+        "native_glibc": {
+          "allocation_plus_events": 900,
+          "reallocation_new_events": 0,
+          "reallocation_old_events": 0,
+          "deallocation_events": 900,
+          "failed_reallocation_events": 0,
+          "allocation_plus_requested_bytes": 18400,
+          "reallocation_new_requested_bytes": 0,
+          "requests_total": 900,
+          "requested_bytes_total": 18400,
+          "requests_per_operation": 9.0,
+          "requested_bytes_per_operation": 184.0
+        },
+        "rust_global": {
+          "requests_total": 900,
+          "requested_bytes_total": 18400,
+          "requests_per_operation": 9.0,
+          "requested_bytes_per_operation": 184.0
+        },
+        "native_minus_rust": {
+          "requests_total": 0,
+          "requested_bytes_total": 0,
+          "requests_per_operation": 0.0,
+          "requested_bytes_per_operation": 0.0
+        },
+        "native_matches_rust_global": true,
+        "trace": {
+          "path": "/workspace/scratch/f7903e352d2d/allocation-evidence-final-82604806/26670d22be6b4e6bbefbd04f74f73f44/baseline-es256.registration_begin.trace",
+          "bytes": 169614,
+          "sha256": "da9ebea3a581da4a26e88f2876bf649454f35084c5a999871dac69611ea7d4b0"
+        },
+        "benchmark_stdout": {
+          "path": "/workspace/scratch/f7903e352d2d/allocation-evidence-final-82604806/26670d22be6b4e6bbefbd04f74f73f44/baseline-es256.registration_begin.stdout",
+          "bytes": 203,
+          "sha256": "8041f1d8a19b178b2add35d8e0d370c349b1821a32b557a0ee497d71b1443657"
+        },
+        "benchmark_stderr": {
+          "path": "/workspace/scratch/f7903e352d2d/allocation-evidence-final-82604806/26670d22be6b4e6bbefbd04f74f73f44/baseline-es256.registration_begin.stderr",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      "es256.registration_finish": {
+        "native_glibc": {
+          "allocation_plus_events": 2600,
+          "reallocation_new_events": 200,
+          "reallocation_old_events": 200,
+          "deallocation_events": 2600,
+          "failed_reallocation_events": 0,
+          "allocation_plus_requested_bytes": 183600,
+          "reallocation_new_requested_bytes": 102400,
+          "requests_total": 2800,
+          "requested_bytes_total": 286000,
+          "requests_per_operation": 28.0,
+          "requested_bytes_per_operation": 2860.0
+        },
+        "rust_global": {
+          "requests_total": 2800,
+          "requested_bytes_total": 286000,
+          "requests_per_operation": 28.0,
+          "requested_bytes_per_operation": 2860.0
+        },
+        "native_minus_rust": {
+          "requests_total": 0,
+          "requested_bytes_total": 0,
+          "requests_per_operation": 0.0,
+          "requested_bytes_per_operation": 0.0
+        },
+        "native_matches_rust_global": true,
+        "trace": {
+          "path": "/workspace/scratch/f7903e352d2d/allocation-evidence-final-82604806/26670d22be6b4e6bbefbd04f74f73f44/baseline-es256.registration_finish.trace",
+          "bytes": 529114,
+          "sha256": "58e99ac3d732db9a953c3d05c5506ef87ff6e330fdbf0b36e221a8df014b7dcf"
+        },
+        "benchmark_stdout": {
+          "path": "/workspace/scratch/f7903e352d2d/allocation-evidence-final-82604806/26670d22be6b4e6bbefbd04f74f73f44/baseline-es256.registration_finish.stdout",
+          "bytes": 208,
+          "sha256": "8b0239ee25b3318c64229f77606a48bd5cdf2bfa27b6974980ace1db5a2b76f0"
+        },
+        "benchmark_stderr": {
+          "path": "/workspace/scratch/f7903e352d2d/allocation-evidence-final-82604806/26670d22be6b4e6bbefbd04f74f73f44/baseline-es256.registration_finish.stderr",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      "es256.authentication_begin": {
+        "native_glibc": {
+          "allocation_plus_events": 1200,
+          "reallocation_new_events": 0,
+          "reallocation_old_events": 0,
+          "deallocation_events": 1200,
+          "failed_reallocation_events": 0,
+          "allocation_plus_requested_bytes": 35100,
+          "reallocation_new_requested_bytes": 0,
+          "requests_total": 1200,
+          "requested_bytes_total": 35100,
+          "requests_per_operation": 12.0,
+          "requested_bytes_per_operation": 351.0
+        },
+        "rust_global": {
+          "requests_total": 1200,
+          "requested_bytes_total": 35100,
+          "requests_per_operation": 12.0,
+          "requested_bytes_per_operation": 351.0
+        },
+        "native_minus_rust": {
+          "requests_total": 0,
+          "requested_bytes_total": 0,
+          "requests_per_operation": 0.0,
+          "requested_bytes_per_operation": 0.0
+        },
+        "native_matches_rust_global": true,
+        "trace": {
+          "path": "/workspace/scratch/f7903e352d2d/allocation-evidence-final-82604806/26670d22be6b4e6bbefbd04f74f73f44/baseline-es256.authentication_begin.trace",
+          "bytes": 226514,
+          "sha256": "783be984a90eda409fe0bdd87f72c81b0c8bc3f2c54c795d7e93e7c934d0ce31"
+        },
+        "benchmark_stdout": {
+          "path": "/workspace/scratch/f7903e352d2d/allocation-evidence-final-82604806/26670d22be6b4e6bbefbd04f74f73f44/baseline-es256.authentication_begin.stdout",
+          "bytes": 206,
+          "sha256": "c1abdd1159528f05b8c6d526d6cb40d0ad1fa3eeb0156be03b2c3c4437162342"
+        },
+        "benchmark_stderr": {
+          "path": "/workspace/scratch/f7903e352d2d/allocation-evidence-final-82604806/26670d22be6b4e6bbefbd04f74f73f44/baseline-es256.authentication_begin.stderr",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      "es256.authentication_finish": {
+        "native_glibc": {
+          "allocation_plus_events": 1500,
+          "reallocation_new_events": 100,
+          "reallocation_old_events": 100,
+          "deallocation_events": 1500,
+          "failed_reallocation_events": 0,
+          "allocation_plus_requested_bytes": 85100,
+          "reallocation_new_requested_bytes": 51200,
+          "requests_total": 1600,
+          "requested_bytes_total": 136300,
+          "requests_per_operation": 16.0,
+          "requested_bytes_per_operation": 1363.0
+        },
+        "rust_global": {
+          "requests_total": 1600,
+          "requested_bytes_total": 136300,
+          "requests_per_operation": 16.0,
+          "requested_bytes_per_operation": 1363.0
+        },
+        "native_minus_rust": {
+          "requests_total": 0,
+          "requested_bytes_total": 0,
+          "requests_per_operation": 0.0,
+          "requested_bytes_per_operation": 0.0
+        },
+        "native_matches_rust_global": true,
+        "trace": {
+          "path": "/workspace/scratch/f7903e352d2d/allocation-evidence-final-82604806/26670d22be6b4e6bbefbd04f74f73f44/baseline-es256.authentication_finish.trace",
+          "bytes": 302414,
+          "sha256": "be269a5609f0e9d31433326e65cc56baacc9e7e8c77bf72632065ead9c6fa545"
+        },
+        "benchmark_stdout": {
+          "path": "/workspace/scratch/f7903e352d2d/allocation-evidence-final-82604806/26670d22be6b4e6bbefbd04f74f73f44/baseline-es256.authentication_finish.stdout",
+          "bytes": 216,
+          "sha256": "b5234a68931aa75fc15ccb33fc621ab72353f1622f0cb537b1d499d9230a2170"
+        },
+        "benchmark_stderr": {
+          "path": "/workspace/scratch/f7903e352d2d/allocation-evidence-final-82604806/26670d22be6b4e6bbefbd04f74f73f44/baseline-es256.authentication_finish.stderr",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      "ed25519.registration_begin": {
+        "native_glibc": {
+          "allocation_plus_events": 900,
+          "reallocation_new_events": 0,
+          "reallocation_old_events": 0,
+          "deallocation_events": 900,
+          "failed_reallocation_events": 0,
+          "allocation_plus_requested_bytes": 18400,
+          "reallocation_new_requested_bytes": 0,
+          "requests_total": 900,
+          "requested_bytes_total": 18400,
+          "requests_per_operation": 9.0,
+          "requested_bytes_per_operation": 184.0
+        },
+        "rust_global": {
+          "requests_total": 900,
+          "requested_bytes_total": 18400,
+          "requests_per_operation": 9.0,
+          "requested_bytes_per_operation": 184.0
+        },
+        "native_minus_rust": {
+          "requests_total": 0,
+          "requested_bytes_total": 0,
+          "requests_per_operation": 0.0,
+          "requested_bytes_per_operation": 0.0
+        },
+        "native_matches_rust_global": true,
+        "trace": {
+          "path": "/workspace/scratch/f7903e352d2d/allocation-evidence-final-82604806/26670d22be6b4e6bbefbd04f74f73f44/baseline-ed25519.registration_begin.trace",
+          "bytes": 169614,
+          "sha256": "9c397e8f1165bf66796f55821a9788bf2861ac650c22e98ff5f31c25047c225b"
+        },
+        "benchmark_stdout": {
+          "path": "/workspace/scratch/f7903e352d2d/allocation-evidence-final-82604806/26670d22be6b4e6bbefbd04f74f73f44/baseline-ed25519.registration_begin.stdout",
+          "bytes": 204,
+          "sha256": "59f8e77c6e5c1718bb18ab4deacaaff01e957420c2d367386efd840397255420"
+        },
+        "benchmark_stderr": {
+          "path": "/workspace/scratch/f7903e352d2d/allocation-evidence-final-82604806/26670d22be6b4e6bbefbd04f74f73f44/baseline-ed25519.registration_begin.stderr",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      "ed25519.registration_finish": {
+        "native_glibc": {
+          "allocation_plus_events": 2300,
+          "reallocation_new_events": 0,
+          "reallocation_old_events": 0,
+          "deallocation_events": 2300,
+          "failed_reallocation_events": 0,
+          "allocation_plus_requested_bytes": 159900,
+          "reallocation_new_requested_bytes": 0,
+          "requests_total": 2300,
+          "requested_bytes_total": 159900,
+          "requests_per_operation": 23.0,
+          "requested_bytes_per_operation": 1599.0
+        },
+        "rust_global": {
+          "requests_total": 2300,
+          "requested_bytes_total": 159900,
+          "requests_per_operation": 23.0,
+          "requested_bytes_per_operation": 1599.0
+        },
+        "native_minus_rust": {
+          "requests_total": 0,
+          "requested_bytes_total": 0,
+          "requests_per_operation": 0.0,
+          "requested_bytes_per_operation": 0.0
+        },
+        "native_matches_rust_global": true,
+        "trace": {
+          "path": "/workspace/scratch/f7903e352d2d/allocation-evidence-final-82604806/26670d22be6b4e6bbefbd04f74f73f44/baseline-ed25519.registration_finish.trace",
+          "bytes": 434414,
+          "sha256": "142dd4b5dcead03adfe0be10c4e95ea851caa24617c96cd0af1f36c1d0187516"
+        },
+        "benchmark_stdout": {
+          "path": "/workspace/scratch/f7903e352d2d/allocation-evidence-final-82604806/26670d22be6b4e6bbefbd04f74f73f44/baseline-ed25519.registration_finish.stdout",
+          "bytes": 211,
+          "sha256": "75e2122c1b4544d8275ad94e368a4404cf504a8f431bbc29fab9cf94ac80f3e0"
+        },
+        "benchmark_stderr": {
+          "path": "/workspace/scratch/f7903e352d2d/allocation-evidence-final-82604806/26670d22be6b4e6bbefbd04f74f73f44/baseline-ed25519.registration_finish.stderr",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      "ed25519.authentication_begin": {
+        "native_glibc": {
+          "allocation_plus_events": 1200,
+          "reallocation_new_events": 0,
+          "reallocation_old_events": 0,
+          "deallocation_events": 1200,
+          "failed_reallocation_events": 0,
+          "allocation_plus_requested_bytes": 35100,
+          "reallocation_new_requested_bytes": 0,
+          "requests_total": 1200,
+          "requested_bytes_total": 35100,
+          "requests_per_operation": 12.0,
+          "requested_bytes_per_operation": 351.0
+        },
+        "rust_global": {
+          "requests_total": 1200,
+          "requested_bytes_total": 35100,
+          "requests_per_operation": 12.0,
+          "requested_bytes_per_operation": 351.0
+        },
+        "native_minus_rust": {
+          "requests_total": 0,
+          "requested_bytes_total": 0,
+          "requests_per_operation": 0.0,
+          "requested_bytes_per_operation": 0.0
+        },
+        "native_matches_rust_global": true,
+        "trace": {
+          "path": "/workspace/scratch/f7903e352d2d/allocation-evidence-final-82604806/26670d22be6b4e6bbefbd04f74f73f44/baseline-ed25519.authentication_begin.trace",
+          "bytes": 226514,
+          "sha256": "1fe1ffb59f063eef65c8fa83fb08be29b13cee79554ce9b8a28afdf76bd09860"
+        },
+        "benchmark_stdout": {
+          "path": "/workspace/scratch/f7903e352d2d/allocation-evidence-final-82604806/26670d22be6b4e6bbefbd04f74f73f44/baseline-ed25519.authentication_begin.stdout",
+          "bytes": 207,
+          "sha256": "57aed584849bcb5b5bff5f7158a2316142eba26a15fba9f9dad929e21a500da4"
+        },
+        "benchmark_stderr": {
+          "path": "/workspace/scratch/f7903e352d2d/allocation-evidence-final-82604806/26670d22be6b4e6bbefbd04f74f73f44/baseline-ed25519.authentication_begin.stderr",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      "ed25519.authentication_finish": {
+        "native_glibc": {
+          "allocation_plus_events": 1300,
+          "reallocation_new_events": 0,
+          "reallocation_old_events": 0,
+          "deallocation_events": 1300,
+          "failed_reallocation_events": 0,
+          "allocation_plus_requested_bytes": 78100,
+          "reallocation_new_requested_bytes": 0,
+          "requests_total": 1300,
+          "requested_bytes_total": 78100,
+          "requests_per_operation": 13.0,
+          "requested_bytes_per_operation": 781.0
+        },
+        "rust_global": {
+          "requests_total": 1300,
+          "requested_bytes_total": 78100,
+          "requests_per_operation": 13.0,
+          "requested_bytes_per_operation": 781.0
+        },
+        "native_minus_rust": {
+          "requests_total": 0,
+          "requested_bytes_total": 0,
+          "requests_per_operation": 0.0,
+          "requested_bytes_per_operation": 0.0
+        },
+        "native_matches_rust_global": true,
+        "trace": {
+          "path": "/workspace/scratch/f7903e352d2d/allocation-evidence-final-82604806/26670d22be6b4e6bbefbd04f74f73f44/baseline-ed25519.authentication_finish.trace",
+          "bytes": 245614,
+          "sha256": "e7addf5050e72ba1b83e6bb2672f8ab3fa26c040aa68edd3f04f292428eb5eff"
+        },
+        "benchmark_stdout": {
+          "path": "/workspace/scratch/f7903e352d2d/allocation-evidence-final-82604806/26670d22be6b4e6bbefbd04f74f73f44/baseline-ed25519.authentication_finish.stdout",
+          "bytes": 215,
+          "sha256": "511e8e9073e0bcdf972c60c5aec254af547d124e4291fb66e0ccbc617520a6de"
+        },
+        "benchmark_stderr": {
+          "path": "/workspace/scratch/f7903e352d2d/allocation-evidence-final-82604806/26670d22be6b4e6bbefbd04f74f73f44/baseline-ed25519.authentication_finish.stderr",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      "primitive.es256.rustcrypto": {
+        "native_glibc": {
+          "allocation_plus_events": 0,
+          "reallocation_new_events": 0,
+          "reallocation_old_events": 0,
+          "deallocation_events": 0,
+          "failed_reallocation_events": 0,
+          "allocation_plus_requested_bytes": 0,
+          "reallocation_new_requested_bytes": 0,
+          "requests_total": 0,
+          "requested_bytes_total": 0,
+          "requests_per_operation": 0.0,
+          "requested_bytes_per_operation": 0.0
+        },
+        "rust_global": {
+          "requests_total": 0,
+          "requested_bytes_total": 0,
+          "requests_per_operation": 0.0,
+          "requested_bytes_per_operation": 0.0
+        },
+        "native_minus_rust": {
+          "requests_total": 0,
+          "requested_bytes_total": 0,
+          "requests_per_operation": 0.0,
+          "requested_bytes_per_operation": 0.0
+        },
+        "native_matches_rust_global": true,
+        "trace": {
+          "path": "/workspace/scratch/f7903e352d2d/allocation-evidence-final-82604806/26670d22be6b4e6bbefbd04f74f73f44/baseline-primitive.es256.rustcrypto.trace",
+          "bytes": 14,
+          "sha256": "fbe1dbe3939a166e9af459e15ff139b07e87b31d980140c7362c891f0625868d"
+        },
+        "benchmark_stdout": {
+          "path": "/workspace/scratch/f7903e352d2d/allocation-evidence-final-82604806/26670d22be6b4e6bbefbd04f74f73f44/baseline-primitive.es256.rustcrypto.stdout",
+          "bytes": 211,
+          "sha256": "3af0be3ee9110611e57d29f2c5e007a3d0a73a36bd938b4ca1743e99826cde5c"
+        },
+        "benchmark_stderr": {
+          "path": "/workspace/scratch/f7903e352d2d/allocation-evidence-final-82604806/26670d22be6b4e6bbefbd04f74f73f44/baseline-primitive.es256.rustcrypto.stderr",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      "primitive.ed25519_strict.rustcrypto": {
+        "native_glibc": {
+          "allocation_plus_events": 0,
+          "reallocation_new_events": 0,
+          "reallocation_old_events": 0,
+          "deallocation_events": 0,
+          "failed_reallocation_events": 0,
+          "allocation_plus_requested_bytes": 0,
+          "reallocation_new_requested_bytes": 0,
+          "requests_total": 0,
+          "requested_bytes_total": 0,
+          "requests_per_operation": 0.0,
+          "requested_bytes_per_operation": 0.0
+        },
+        "rust_global": {
+          "requests_total": 0,
+          "requested_bytes_total": 0,
+          "requests_per_operation": 0.0,
+          "requested_bytes_per_operation": 0.0
+        },
+        "native_minus_rust": {
+          "requests_total": 0,
+          "requested_bytes_total": 0,
+          "requests_per_operation": 0.0,
+          "requested_bytes_per_operation": 0.0
+        },
+        "native_matches_rust_global": true,
+        "trace": {
+          "path": "/workspace/scratch/f7903e352d2d/allocation-evidence-final-82604806/26670d22be6b4e6bbefbd04f74f73f44/baseline-primitive.ed25519_strict.rustcrypto.trace",
+          "bytes": 14,
+          "sha256": "fbe1dbe3939a166e9af459e15ff139b07e87b31d980140c7362c891f0625868d"
+        },
+        "benchmark_stdout": {
+          "path": "/workspace/scratch/f7903e352d2d/allocation-evidence-final-82604806/26670d22be6b4e6bbefbd04f74f73f44/baseline-primitive.ed25519_strict.rustcrypto.stdout",
+          "bytes": 220,
+          "sha256": "936ee4f86f597f6a55bacd3c0f809bcc9d5cca8f167c47aa4916efa05eb87205"
+        },
+        "benchmark_stderr": {
+          "path": "/workspace/scratch/f7903e352d2d/allocation-evidence-final-82604806/26670d22be6b4e6bbefbd04f74f73f44/baseline-primitive.ed25519_strict.rustcrypto.stderr",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    "rustcrypto": {
+      "es256.registration_begin": {
+        "native_glibc": {
+          "allocation_plus_events": 900,
+          "reallocation_new_events": 0,
+          "reallocation_old_events": 0,
+          "deallocation_events": 900,
+          "failed_reallocation_events": 0,
+          "allocation_plus_requested_bytes": 18400,
+          "reallocation_new_requested_bytes": 0,
+          "requests_total": 900,
+          "requested_bytes_total": 18400,
+          "requests_per_operation": 9.0,
+          "requested_bytes_per_operation": 184.0
+        },
+        "rust_global": {
+          "requests_total": 900,
+          "requested_bytes_total": 18400,
+          "requests_per_operation": 9.0,
+          "requested_bytes_per_operation": 184.0
+        },
+        "native_minus_rust": {
+          "requests_total": 0,
+          "requested_bytes_total": 0,
+          "requests_per_operation": 0.0,
+          "requested_bytes_per_operation": 0.0
+        },
+        "native_matches_rust_global": true,
+        "trace": {
+          "path": "/workspace/scratch/f7903e352d2d/allocation-evidence-final-82604806/26670d22be6b4e6bbefbd04f74f73f44/rustcrypto-es256.registration_begin.trace",
+          "bytes": 203814,
+          "sha256": "cfad990af376cc338db9db15c73ede71f1def060aaf2fcc3993190e330685edc"
+        },
+        "benchmark_stdout": {
+          "path": "/workspace/scratch/f7903e352d2d/allocation-evidence-final-82604806/26670d22be6b4e6bbefbd04f74f73f44/rustcrypto-es256.registration_begin.stdout",
+          "bytes": 203,
+          "sha256": "377718baa42f15326d3b8f8327b61cd8fbda5c4a474cb4a243e9960550476c22"
+        },
+        "benchmark_stderr": {
+          "path": "/workspace/scratch/f7903e352d2d/allocation-evidence-final-82604806/26670d22be6b4e6bbefbd04f74f73f44/rustcrypto-es256.registration_begin.stderr",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      "es256.registration_finish": {
+        "native_glibc": {
+          "allocation_plus_events": 800,
+          "reallocation_new_events": 0,
+          "reallocation_old_events": 0,
+          "deallocation_events": 800,
+          "failed_reallocation_events": 0,
+          "allocation_plus_requested_bytes": 51900,
+          "reallocation_new_requested_bytes": 0,
+          "requests_total": 800,
+          "requested_bytes_total": 51900,
+          "requests_per_operation": 8.0,
+          "requested_bytes_per_operation": 519.0
+        },
+        "rust_global": {
+          "requests_total": 800,
+          "requested_bytes_total": 51900,
+          "requests_per_operation": 8.0,
+          "requested_bytes_per_operation": 519.0
+        },
+        "native_minus_rust": {
+          "requests_total": 0,
+          "requested_bytes_total": 0,
+          "requests_per_operation": 0.0,
+          "requested_bytes_per_operation": 0.0
+        },
+        "native_matches_rust_global": true,
+        "trace": {
+          "path": "/workspace/scratch/f7903e352d2d/allocation-evidence-final-82604806/26670d22be6b4e6bbefbd04f74f73f44/rustcrypto-es256.registration_finish.trace",
+          "bytes": 181414,
+          "sha256": "59d922141f4901be57593e72919467bda2464649c5e25abe421a5d607985aa86"
+        },
+        "benchmark_stdout": {
+          "path": "/workspace/scratch/f7903e352d2d/allocation-evidence-final-82604806/26670d22be6b4e6bbefbd04f74f73f44/rustcrypto-es256.registration_finish.stdout",
+          "bytes": 206,
+          "sha256": "56c191af1c93b2e11f0180277cab7f3bad0766879ba48de4d582801ab77d1f57"
+        },
+        "benchmark_stderr": {
+          "path": "/workspace/scratch/f7903e352d2d/allocation-evidence-final-82604806/26670d22be6b4e6bbefbd04f74f73f44/rustcrypto-es256.registration_finish.stderr",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      "es256.authentication_begin": {
+        "native_glibc": {
+          "allocation_plus_events": 1000,
+          "reallocation_new_events": 0,
+          "reallocation_old_events": 0,
+          "deallocation_events": 1000,
+          "failed_reallocation_events": 0,
+          "allocation_plus_requested_bytes": 29500,
+          "reallocation_new_requested_bytes": 0,
+          "requests_total": 1000,
+          "requested_bytes_total": 29500,
+          "requests_per_operation": 10.0,
+          "requested_bytes_per_operation": 295.0
+        },
+        "rust_global": {
+          "requests_total": 1000,
+          "requested_bytes_total": 29500,
+          "requests_per_operation": 10.0,
+          "requested_bytes_per_operation": 295.0
+        },
+        "native_minus_rust": {
+          "requests_total": 0,
+          "requested_bytes_total": 0,
+          "requests_per_operation": 0.0,
+          "requested_bytes_per_operation": 0.0
+        },
+        "native_matches_rust_global": true,
+        "trace": {
+          "path": "/workspace/scratch/f7903e352d2d/allocation-evidence-final-82604806/26670d22be6b4e6bbefbd04f74f73f44/rustcrypto-es256.authentication_begin.trace",
+          "bytes": 226714,
+          "sha256": "43e40ac091898af9e0735fd478560fec76376c6cf14f9d70a874dcead0bdaff0"
+        },
+        "benchmark_stdout": {
+          "path": "/workspace/scratch/f7903e352d2d/allocation-evidence-final-82604806/26670d22be6b4e6bbefbd04f74f73f44/rustcrypto-es256.authentication_begin.stdout",
+          "bytes": 206,
+          "sha256": "d78f71f9a03c4bc2c9dc999de53ea495ae08dcbb5a7fcb6cbf7cc52f662ba98e"
+        },
+        "benchmark_stderr": {
+          "path": "/workspace/scratch/f7903e352d2d/allocation-evidence-final-82604806/26670d22be6b4e6bbefbd04f74f73f44/rustcrypto-es256.authentication_begin.stderr",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      "es256.authentication_finish": {
+        "native_glibc": {
+          "allocation_plus_events": 600,
+          "reallocation_new_events": 0,
+          "reallocation_old_events": 0,
+          "deallocation_events": 600,
+          "failed_reallocation_events": 0,
+          "allocation_plus_requested_bytes": 32400,
+          "reallocation_new_requested_bytes": 0,
+          "requests_total": 600,
+          "requested_bytes_total": 32400,
+          "requests_per_operation": 6.0,
+          "requested_bytes_per_operation": 324.0
+        },
+        "rust_global": {
+          "requests_total": 600,
+          "requested_bytes_total": 32400,
+          "requests_per_operation": 6.0,
+          "requested_bytes_per_operation": 324.0
+        },
+        "native_minus_rust": {
+          "requests_total": 0,
+          "requested_bytes_total": 0,
+          "requests_per_operation": 0.0,
+          "requested_bytes_per_operation": 0.0
+        },
+        "native_matches_rust_global": true,
+        "trace": {
+          "path": "/workspace/scratch/f7903e352d2d/allocation-evidence-final-82604806/26670d22be6b4e6bbefbd04f74f73f44/rustcrypto-es256.authentication_finish.trace",
+          "bytes": 136114,
+          "sha256": "a8302c377f15ba773f7c10de197273417f3ef03a0572e493d27554747d378ecd"
+        },
+        "benchmark_stdout": {
+          "path": "/workspace/scratch/f7903e352d2d/allocation-evidence-final-82604806/26670d22be6b4e6bbefbd04f74f73f44/rustcrypto-es256.authentication_finish.stdout",
+          "bytes": 215,
+          "sha256": "8a2215e3b48eb4ca0a26efda96f48fb27c66259a7a418a4721134343532d7e18"
+        },
+        "benchmark_stderr": {
+          "path": "/workspace/scratch/f7903e352d2d/allocation-evidence-final-82604806/26670d22be6b4e6bbefbd04f74f73f44/rustcrypto-es256.authentication_finish.stderr",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      "ed25519.registration_begin": {
+        "native_glibc": {
+          "allocation_plus_events": 900,
+          "reallocation_new_events": 0,
+          "reallocation_old_events": 0,
+          "deallocation_events": 900,
+          "failed_reallocation_events": 0,
+          "allocation_plus_requested_bytes": 18400,
+          "reallocation_new_requested_bytes": 0,
+          "requests_total": 900,
+          "requested_bytes_total": 18400,
+          "requests_per_operation": 9.0,
+          "requested_bytes_per_operation": 184.0
+        },
+        "rust_global": {
+          "requests_total": 900,
+          "requested_bytes_total": 18400,
+          "requests_per_operation": 9.0,
+          "requested_bytes_per_operation": 184.0
+        },
+        "native_minus_rust": {
+          "requests_total": 0,
+          "requested_bytes_total": 0,
+          "requests_per_operation": 0.0,
+          "requested_bytes_per_operation": 0.0
+        },
+        "native_matches_rust_global": true,
+        "trace": {
+          "path": "/workspace/scratch/f7903e352d2d/allocation-evidence-final-82604806/26670d22be6b4e6bbefbd04f74f73f44/rustcrypto-ed25519.registration_begin.trace",
+          "bytes": 203814,
+          "sha256": "11b31a40a99701cb1837afcd292814afc351fd5181e033c70844afaa3dc14058"
+        },
+        "benchmark_stdout": {
+          "path": "/workspace/scratch/f7903e352d2d/allocation-evidence-final-82604806/26670d22be6b4e6bbefbd04f74f73f44/rustcrypto-ed25519.registration_begin.stdout",
+          "bytes": 205,
+          "sha256": "5b06ceddca8de1645471f7af7732518aee84b0daea8470589279da946e303444"
+        },
+        "benchmark_stderr": {
+          "path": "/workspace/scratch/f7903e352d2d/allocation-evidence-final-82604806/26670d22be6b4e6bbefbd04f74f73f44/rustcrypto-ed25519.registration_begin.stderr",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      "ed25519.registration_finish": {
+        "native_glibc": {
+          "allocation_plus_events": 800,
+          "reallocation_new_events": 0,
+          "reallocation_old_events": 0,
+          "deallocation_events": 800,
+          "failed_reallocation_events": 0,
+          "allocation_plus_requested_bytes": 44800,
+          "reallocation_new_requested_bytes": 0,
+          "requests_total": 800,
+          "requested_bytes_total": 44800,
+          "requests_per_operation": 8.0,
+          "requested_bytes_per_operation": 448.0
+        },
+        "rust_global": {
+          "requests_total": 800,
+          "requested_bytes_total": 44800,
+          "requests_per_operation": 8.0,
+          "requested_bytes_per_operation": 448.0
+        },
+        "native_minus_rust": {
+          "requests_total": 0,
+          "requested_bytes_total": 0,
+          "requests_per_operation": 0.0,
+          "requested_bytes_per_operation": 0.0
+        },
+        "native_matches_rust_global": true,
+        "trace": {
+          "path": "/workspace/scratch/f7903e352d2d/allocation-evidence-final-82604806/26670d22be6b4e6bbefbd04f74f73f44/rustcrypto-ed25519.registration_finish.trace",
+          "bytes": 181414,
+          "sha256": "612fbf0c40e09ad0aea7fe1de2870e1a00ed0a5eae65b107dbeb1b5886b14feb"
+        },
+        "benchmark_stdout": {
+          "path": "/workspace/scratch/f7903e352d2d/allocation-evidence-final-82604806/26670d22be6b4e6bbefbd04f74f73f44/rustcrypto-ed25519.registration_finish.stdout",
+          "bytes": 209,
+          "sha256": "e92d2cf39694033871d02aa3e15cfd62c551a905e8bac47c78206f6aceea8d76"
+        },
+        "benchmark_stderr": {
+          "path": "/workspace/scratch/f7903e352d2d/allocation-evidence-final-82604806/26670d22be6b4e6bbefbd04f74f73f44/rustcrypto-ed25519.registration_finish.stderr",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      "ed25519.authentication_begin": {
+        "native_glibc": {
+          "allocation_plus_events": 1000,
+          "reallocation_new_events": 0,
+          "reallocation_old_events": 0,
+          "deallocation_events": 1000,
+          "failed_reallocation_events": 0,
+          "allocation_plus_requested_bytes": 29500,
+          "reallocation_new_requested_bytes": 0,
+          "requests_total": 1000,
+          "requested_bytes_total": 29500,
+          "requests_per_operation": 10.0,
+          "requested_bytes_per_operation": 295.0
+        },
+        "rust_global": {
+          "requests_total": 1000,
+          "requested_bytes_total": 29500,
+          "requests_per_operation": 10.0,
+          "requested_bytes_per_operation": 295.0
+        },
+        "native_minus_rust": {
+          "requests_total": 0,
+          "requested_bytes_total": 0,
+          "requests_per_operation": 0.0,
+          "requested_bytes_per_operation": 0.0
+        },
+        "native_matches_rust_global": true,
+        "trace": {
+          "path": "/workspace/scratch/f7903e352d2d/allocation-evidence-final-82604806/26670d22be6b4e6bbefbd04f74f73f44/rustcrypto-ed25519.authentication_begin.trace",
+          "bytes": 226714,
+          "sha256": "8daaad1088d1306f625f59f56c0cd37456f49edac0de10fe5ad78ac98a8a8ec7"
+        },
+        "benchmark_stdout": {
+          "path": "/workspace/scratch/f7903e352d2d/allocation-evidence-final-82604806/26670d22be6b4e6bbefbd04f74f73f44/rustcrypto-ed25519.authentication_begin.stdout",
+          "bytes": 208,
+          "sha256": "0be8c7280240fe66194f02888897fcfea8abf001636f4d1f1cef6060c162b061"
+        },
+        "benchmark_stderr": {
+          "path": "/workspace/scratch/f7903e352d2d/allocation-evidence-final-82604806/26670d22be6b4e6bbefbd04f74f73f44/rustcrypto-ed25519.authentication_begin.stderr",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      "ed25519.authentication_finish": {
+        "native_glibc": {
+          "allocation_plus_events": 600,
+          "reallocation_new_events": 100,
+          "reallocation_old_events": 100,
+          "deallocation_events": 600,
+          "failed_reallocation_events": 0,
+          "allocation_plus_requested_bytes": 31800,
+          "reallocation_new_requested_bytes": 7800,
+          "requests_total": 700,
+          "requested_bytes_total": 39600,
+          "requests_per_operation": 7.0,
+          "requested_bytes_per_operation": 396.0
+        },
+        "rust_global": {
+          "requests_total": 700,
+          "requested_bytes_total": 39600,
+          "requests_per_operation": 7.0,
+          "requested_bytes_per_operation": 396.0
+        },
+        "native_minus_rust": {
+          "requests_total": 0,
+          "requested_bytes_total": 0,
+          "requests_per_operation": 0.0,
+          "requested_bytes_per_operation": 0.0
+        },
+        "native_matches_rust_global": true,
+        "trace": {
+          "path": "/workspace/scratch/f7903e352d2d/allocation-evidence-final-82604806/26670d22be6b4e6bbefbd04f74f73f44/rustcrypto-ed25519.authentication_finish.trace",
+          "bytes": 158814,
+          "sha256": "09b71620545a1bf741f20f36c05550304722ee7dd3cb82054197e7bb4176a864"
+        },
+        "benchmark_stdout": {
+          "path": "/workspace/scratch/f7903e352d2d/allocation-evidence-final-82604806/26670d22be6b4e6bbefbd04f74f73f44/rustcrypto-ed25519.authentication_finish.stdout",
+          "bytes": 216,
+          "sha256": "66d9b87a6f17a3aa62929eefd0f4ef453065c5ddcef9274987aa8d00c4463f89"
+        },
+        "benchmark_stderr": {
+          "path": "/workspace/scratch/f7903e352d2d/allocation-evidence-final-82604806/26670d22be6b4e6bbefbd04f74f73f44/rustcrypto-ed25519.authentication_finish.stderr",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      "primitive.es256.rustcrypto": {
+        "native_glibc": {
+          "allocation_plus_events": 0,
+          "reallocation_new_events": 0,
+          "reallocation_old_events": 0,
+          "deallocation_events": 0,
+          "failed_reallocation_events": 0,
+          "allocation_plus_requested_bytes": 0,
+          "reallocation_new_requested_bytes": 0,
+          "requests_total": 0,
+          "requested_bytes_total": 0,
+          "requests_per_operation": 0.0,
+          "requested_bytes_per_operation": 0.0
+        },
+        "rust_global": {
+          "requests_total": 0,
+          "requested_bytes_total": 0,
+          "requests_per_operation": 0.0,
+          "requested_bytes_per_operation": 0.0
+        },
+        "native_minus_rust": {
+          "requests_total": 0,
+          "requested_bytes_total": 0,
+          "requests_per_operation": 0.0,
+          "requested_bytes_per_operation": 0.0
+        },
+        "native_matches_rust_global": true,
+        "trace": {
+          "path": "/workspace/scratch/f7903e352d2d/allocation-evidence-final-82604806/26670d22be6b4e6bbefbd04f74f73f44/rustcrypto-primitive.es256.rustcrypto.trace",
+          "bytes": 14,
+          "sha256": "fbe1dbe3939a166e9af459e15ff139b07e87b31d980140c7362c891f0625868d"
+        },
+        "benchmark_stdout": {
+          "path": "/workspace/scratch/f7903e352d2d/allocation-evidence-final-82604806/26670d22be6b4e6bbefbd04f74f73f44/rustcrypto-primitive.es256.rustcrypto.stdout",
+          "bytes": 212,
+          "sha256": "aaf89f962303411f0cec0fe8b92e1c7ee052ad7ec1ed4cb388b3098d4b35f000"
+        },
+        "benchmark_stderr": {
+          "path": "/workspace/scratch/f7903e352d2d/allocation-evidence-final-82604806/26670d22be6b4e6bbefbd04f74f73f44/rustcrypto-primitive.es256.rustcrypto.stderr",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      "primitive.ed25519_strict.rustcrypto": {
+        "native_glibc": {
+          "allocation_plus_events": 0,
+          "reallocation_new_events": 0,
+          "reallocation_old_events": 0,
+          "deallocation_events": 0,
+          "failed_reallocation_events": 0,
+          "allocation_plus_requested_bytes": 0,
+          "reallocation_new_requested_bytes": 0,
+          "requests_total": 0,
+          "requested_bytes_total": 0,
+          "requests_per_operation": 0.0,
+          "requested_bytes_per_operation": 0.0
+        },
+        "rust_global": {
+          "requests_total": 0,
+          "requested_bytes_total": 0,
+          "requests_per_operation": 0.0,
+          "requested_bytes_per_operation": 0.0
+        },
+        "native_minus_rust": {
+          "requests_total": 0,
+          "requested_bytes_total": 0,
+          "requests_per_operation": 0.0,
+          "requested_bytes_per_operation": 0.0
+        },
+        "native_matches_rust_global": true,
+        "trace": {
+          "path": "/workspace/scratch/f7903e352d2d/allocation-evidence-final-82604806/26670d22be6b4e6bbefbd04f74f73f44/rustcrypto-primitive.ed25519_strict.rustcrypto.trace",
+          "bytes": 14,
+          "sha256": "fbe1dbe3939a166e9af459e15ff139b07e87b31d980140c7362c891f0625868d"
+        },
+        "benchmark_stdout": {
+          "path": "/workspace/scratch/f7903e352d2d/allocation-evidence-final-82604806/26670d22be6b4e6bbefbd04f74f73f44/rustcrypto-primitive.ed25519_strict.rustcrypto.stdout",
+          "bytes": 217,
+          "sha256": "509566f4235e5d5618f23439b96563da53db1ad74ea501aa68502a3a9fca89e9"
+        },
+        "benchmark_stderr": {
+          "path": "/workspace/scratch/f7903e352d2d/allocation-evidence-final-82604806/26670d22be6b4e6bbefbd04f74f73f44/rustcrypto-primitive.ed25519_strict.rustcrypto.stderr",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    "aws_lc": {
+      "es256.registration_begin": {
+        "native_glibc": {
+          "allocation_plus_events": 900,
+          "reallocation_new_events": 0,
+          "reallocation_old_events": 0,
+          "deallocation_events": 900,
+          "failed_reallocation_events": 0,
+          "allocation_plus_requested_bytes": 18400,
+          "reallocation_new_requested_bytes": 0,
+          "requests_total": 900,
+          "requested_bytes_total": 18400,
+          "requests_per_operation": 9.0,
+          "requested_bytes_per_operation": 184.0
+        },
+        "rust_global": {
+          "requests_total": 900,
+          "requested_bytes_total": 18400,
+          "requests_per_operation": 9.0,
+          "requested_bytes_per_operation": 184.0
+        },
+        "native_minus_rust": {
+          "requests_total": 0,
+          "requested_bytes_total": 0,
+          "requests_per_operation": 0.0,
+          "requested_bytes_per_operation": 0.0
+        },
+        "native_matches_rust_global": true,
+        "trace": {
+          "path": "/workspace/scratch/f7903e352d2d/allocation-evidence-final-82604806/26670d22be6b4e6bbefbd04f74f73f44/aws_lc-es256.registration_begin.trace",
+          "bytes": 198414,
+          "sha256": "2a9aa00edee4f212a32fc2157cefae3c4df2df3c68784e64f19cb6ba51f93b4e"
+        },
+        "benchmark_stdout": {
+          "path": "/workspace/scratch/f7903e352d2d/allocation-evidence-final-82604806/26670d22be6b4e6bbefbd04f74f73f44/aws_lc-es256.registration_begin.stdout",
+          "bytes": 203,
+          "sha256": "107020181b0b9ef262a335628f227fd5f4c87c91f3d2026522eddbc14164d354"
+        },
+        "benchmark_stderr": {
+          "path": "/workspace/scratch/f7903e352d2d/allocation-evidence-final-82604806/26670d22be6b4e6bbefbd04f74f73f44/aws_lc-es256.registration_begin.stderr",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      "es256.registration_finish": {
+        "native_glibc": {
+          "allocation_plus_events": 800,
+          "reallocation_new_events": 0,
+          "reallocation_old_events": 0,
+          "deallocation_events": 800,
+          "failed_reallocation_events": 0,
+          "allocation_plus_requested_bytes": 51900,
+          "reallocation_new_requested_bytes": 0,
+          "requests_total": 800,
+          "requested_bytes_total": 51900,
+          "requests_per_operation": 8.0,
+          "requested_bytes_per_operation": 519.0
+        },
+        "rust_global": {
+          "requests_total": 800,
+          "requested_bytes_total": 51900,
+          "requests_per_operation": 8.0,
+          "requested_bytes_per_operation": 519.0
+        },
+        "native_minus_rust": {
+          "requests_total": 0,
+          "requested_bytes_total": 0,
+          "requests_per_operation": 0.0,
+          "requested_bytes_per_operation": 0.0
+        },
+        "native_matches_rust_global": true,
+        "trace": {
+          "path": "/workspace/scratch/f7903e352d2d/allocation-evidence-final-82604806/26670d22be6b4e6bbefbd04f74f73f44/aws_lc-es256.registration_finish.trace",
+          "bytes": 176614,
+          "sha256": "5f5cb439aa66ddc8ddd9ca554c8e47099f8f19d237b31e0b5fd6b1a794c677f2"
+        },
+        "benchmark_stdout": {
+          "path": "/workspace/scratch/f7903e352d2d/allocation-evidence-final-82604806/26670d22be6b4e6bbefbd04f74f73f44/aws_lc-es256.registration_finish.stdout",
+          "bytes": 206,
+          "sha256": "1ea9e19538c4bd3a5a79e24869b3d492cbfc0051a690d4a2c83f714fa7aa651d"
+        },
+        "benchmark_stderr": {
+          "path": "/workspace/scratch/f7903e352d2d/allocation-evidence-final-82604806/26670d22be6b4e6bbefbd04f74f73f44/aws_lc-es256.registration_finish.stderr",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      "es256.authentication_begin": {
+        "native_glibc": {
+          "allocation_plus_events": 1000,
+          "reallocation_new_events": 0,
+          "reallocation_old_events": 0,
+          "deallocation_events": 1000,
+          "failed_reallocation_events": 0,
+          "allocation_plus_requested_bytes": 29500,
+          "reallocation_new_requested_bytes": 0,
+          "requests_total": 1000,
+          "requested_bytes_total": 29500,
+          "requests_per_operation": 10.0,
+          "requested_bytes_per_operation": 295.0
+        },
+        "rust_global": {
+          "requests_total": 1000,
+          "requested_bytes_total": 29500,
+          "requests_per_operation": 10.0,
+          "requested_bytes_per_operation": 295.0
+        },
+        "native_minus_rust": {
+          "requests_total": 0,
+          "requested_bytes_total": 0,
+          "requests_per_operation": 0.0,
+          "requested_bytes_per_operation": 0.0
+        },
+        "native_matches_rust_global": true,
+        "trace": {
+          "path": "/workspace/scratch/f7903e352d2d/allocation-evidence-final-82604806/26670d22be6b4e6bbefbd04f74f73f44/aws_lc-es256.authentication_begin.trace",
+          "bytes": 220714,
+          "sha256": "9a67f0f69014f8e53b36873c0bb60c96156a0588cc659580d9500c5691abee81"
+        },
+        "benchmark_stdout": {
+          "path": "/workspace/scratch/f7903e352d2d/allocation-evidence-final-82604806/26670d22be6b4e6bbefbd04f74f73f44/aws_lc-es256.authentication_begin.stdout",
+          "bytes": 205,
+          "sha256": "10ecdb03df6528a93787d8f73d5c9fdd58da716ed5b34fead2b1d54f4f53f9de"
+        },
+        "benchmark_stderr": {
+          "path": "/workspace/scratch/f7903e352d2d/allocation-evidence-final-82604806/26670d22be6b4e6bbefbd04f74f73f44/aws_lc-es256.authentication_begin.stderr",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      "es256.authentication_finish": {
+        "native_glibc": {
+          "allocation_plus_events": 2300,
+          "reallocation_new_events": 0,
+          "reallocation_old_events": 0,
+          "deallocation_events": 2300,
+          "failed_reallocation_events": 0,
+          "allocation_plus_requested_bytes": 132700,
+          "reallocation_new_requested_bytes": 0,
+          "requests_total": 2300,
+          "requested_bytes_total": 132700,
+          "requests_per_operation": 23.0,
+          "requested_bytes_per_operation": 1327.0
+        },
+        "rust_global": {
+          "requests_total": 600,
+          "requested_bytes_total": 32400,
+          "requests_per_operation": 6.0,
+          "requested_bytes_per_operation": 324.0
+        },
+        "native_minus_rust": {
+          "requests_total": 1700,
+          "requested_bytes_total": 100300,
+          "requests_per_operation": 17.0,
+          "requested_bytes_per_operation": 1003.0
+        },
+        "native_matches_rust_global": false,
+        "trace": {
+          "path": "/workspace/scratch/f7903e352d2d/allocation-evidence-final-82604806/26670d22be6b4e6bbefbd04f74f73f44/aws_lc-es256.authentication_finish.trace",
+          "bytes": 507814,
+          "sha256": "d7954a2d665439d757aaa0b7bf1b94315357f8e438680aa80331897ee97b8322"
+        },
+        "benchmark_stdout": {
+          "path": "/workspace/scratch/f7903e352d2d/allocation-evidence-final-82604806/26670d22be6b4e6bbefbd04f74f73f44/aws_lc-es256.authentication_finish.stdout",
+          "bytes": 213,
+          "sha256": "80237ea38b7d29295437ec881d7da8722543cf599296dc2c44bc4bfe930de0a1"
+        },
+        "benchmark_stderr": {
+          "path": "/workspace/scratch/f7903e352d2d/allocation-evidence-final-82604806/26670d22be6b4e6bbefbd04f74f73f44/aws_lc-es256.authentication_finish.stderr",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      "ed25519.registration_begin": {
+        "native_glibc": {
+          "allocation_plus_events": 900,
+          "reallocation_new_events": 0,
+          "reallocation_old_events": 0,
+          "deallocation_events": 900,
+          "failed_reallocation_events": 0,
+          "allocation_plus_requested_bytes": 18400,
+          "reallocation_new_requested_bytes": 0,
+          "requests_total": 900,
+          "requested_bytes_total": 18400,
+          "requests_per_operation": 9.0,
+          "requested_bytes_per_operation": 184.0
+        },
+        "rust_global": {
+          "requests_total": 900,
+          "requested_bytes_total": 18400,
+          "requests_per_operation": 9.0,
+          "requested_bytes_per_operation": 184.0
+        },
+        "native_minus_rust": {
+          "requests_total": 0,
+          "requested_bytes_total": 0,
+          "requests_per_operation": 0.0,
+          "requested_bytes_per_operation": 0.0
+        },
+        "native_matches_rust_global": true,
+        "trace": {
+          "path": "/workspace/scratch/f7903e352d2d/allocation-evidence-final-82604806/26670d22be6b4e6bbefbd04f74f73f44/aws_lc-ed25519.registration_begin.trace",
+          "bytes": 198414,
+          "sha256": "879ae103ea590e64cb7e246626dc66ca5b82a9d52151310185016c09f3bfefd4"
+        },
+        "benchmark_stdout": {
+          "path": "/workspace/scratch/f7903e352d2d/allocation-evidence-final-82604806/26670d22be6b4e6bbefbd04f74f73f44/aws_lc-ed25519.registration_begin.stdout",
+          "bytes": 204,
+          "sha256": "0a8cdd76761b542d7ddbeb0b3f4e0cf60018ec437eb4cbe5a33d55232d415a28"
+        },
+        "benchmark_stderr": {
+          "path": "/workspace/scratch/f7903e352d2d/allocation-evidence-final-82604806/26670d22be6b4e6bbefbd04f74f73f44/aws_lc-ed25519.registration_begin.stderr",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      "ed25519.registration_finish": {
+        "native_glibc": {
+          "allocation_plus_events": 800,
+          "reallocation_new_events": 0,
+          "reallocation_old_events": 0,
+          "deallocation_events": 800,
+          "failed_reallocation_events": 0,
+          "allocation_plus_requested_bytes": 44800,
+          "reallocation_new_requested_bytes": 0,
+          "requests_total": 800,
+          "requested_bytes_total": 44800,
+          "requests_per_operation": 8.0,
+          "requested_bytes_per_operation": 448.0
+        },
+        "rust_global": {
+          "requests_total": 800,
+          "requested_bytes_total": 44800,
+          "requests_per_operation": 8.0,
+          "requested_bytes_per_operation": 448.0
+        },
+        "native_minus_rust": {
+          "requests_total": 0,
+          "requested_bytes_total": 0,
+          "requests_per_operation": 0.0,
+          "requested_bytes_per_operation": 0.0
+        },
+        "native_matches_rust_global": true,
+        "trace": {
+          "path": "/workspace/scratch/f7903e352d2d/allocation-evidence-final-82604806/26670d22be6b4e6bbefbd04f74f73f44/aws_lc-ed25519.registration_finish.trace",
+          "bytes": 176614,
+          "sha256": "f31d4118756aabc08f542be605c2bc133b6b24045c2743e70e434b3be3552401"
+        },
+        "benchmark_stdout": {
+          "path": "/workspace/scratch/f7903e352d2d/allocation-evidence-final-82604806/26670d22be6b4e6bbefbd04f74f73f44/aws_lc-ed25519.registration_finish.stdout",
+          "bytes": 209,
+          "sha256": "8c49ada0092b99f289de4775e2d224c3a7df05c4adcbdfed15f5f91dcc361284"
+        },
+        "benchmark_stderr": {
+          "path": "/workspace/scratch/f7903e352d2d/allocation-evidence-final-82604806/26670d22be6b4e6bbefbd04f74f73f44/aws_lc-ed25519.registration_finish.stderr",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      "ed25519.authentication_begin": {
+        "native_glibc": {
+          "allocation_plus_events": 1000,
+          "reallocation_new_events": 0,
+          "reallocation_old_events": 0,
+          "deallocation_events": 1000,
+          "failed_reallocation_events": 0,
+          "allocation_plus_requested_bytes": 29500,
+          "reallocation_new_requested_bytes": 0,
+          "requests_total": 1000,
+          "requested_bytes_total": 29500,
+          "requests_per_operation": 10.0,
+          "requested_bytes_per_operation": 295.0
+        },
+        "rust_global": {
+          "requests_total": 1000,
+          "requested_bytes_total": 29500,
+          "requests_per_operation": 10.0,
+          "requested_bytes_per_operation": 295.0
+        },
+        "native_minus_rust": {
+          "requests_total": 0,
+          "requested_bytes_total": 0,
+          "requests_per_operation": 0.0,
+          "requested_bytes_per_operation": 0.0
+        },
+        "native_matches_rust_global": true,
+        "trace": {
+          "path": "/workspace/scratch/f7903e352d2d/allocation-evidence-final-82604806/26670d22be6b4e6bbefbd04f74f73f44/aws_lc-ed25519.authentication_begin.trace",
+          "bytes": 220714,
+          "sha256": "3f960bb136c1e9f79553d3cd46dd58f971aad863c157cdb1570ad3d62296b705"
+        },
+        "benchmark_stdout": {
+          "path": "/workspace/scratch/f7903e352d2d/allocation-evidence-final-82604806/26670d22be6b4e6bbefbd04f74f73f44/aws_lc-ed25519.authentication_begin.stdout",
+          "bytes": 208,
+          "sha256": "639d173c7b9573f7f8461baf83cb86374fada58a0fd7878e383a5b3eeee57cd6"
+        },
+        "benchmark_stderr": {
+          "path": "/workspace/scratch/f7903e352d2d/allocation-evidence-final-82604806/26670d22be6b4e6bbefbd04f74f73f44/aws_lc-ed25519.authentication_begin.stderr",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      "ed25519.authentication_finish": {
+        "native_glibc": {
+          "allocation_plus_events": 600,
+          "reallocation_new_events": 100,
+          "reallocation_old_events": 100,
+          "deallocation_events": 600,
+          "failed_reallocation_events": 0,
+          "allocation_plus_requested_bytes": 31800,
+          "reallocation_new_requested_bytes": 7800,
+          "requests_total": 700,
+          "requested_bytes_total": 39600,
+          "requests_per_operation": 7.0,
+          "requested_bytes_per_operation": 396.0
+        },
+        "rust_global": {
+          "requests_total": 700,
+          "requested_bytes_total": 39600,
+          "requests_per_operation": 7.0,
+          "requested_bytes_per_operation": 396.0
+        },
+        "native_minus_rust": {
+          "requests_total": 0,
+          "requested_bytes_total": 0,
+          "requests_per_operation": 0.0,
+          "requested_bytes_per_operation": 0.0
+        },
+        "native_matches_rust_global": true,
+        "trace": {
+          "path": "/workspace/scratch/f7903e352d2d/allocation-evidence-final-82604806/26670d22be6b4e6bbefbd04f74f73f44/aws_lc-ed25519.authentication_finish.trace",
+          "bytes": 154614,
+          "sha256": "ba33f8be1fdc4903bf002252782a770be3ebf48bc3acbd4831754e16c4fa48c2"
+        },
+        "benchmark_stdout": {
+          "path": "/workspace/scratch/f7903e352d2d/allocation-evidence-final-82604806/26670d22be6b4e6bbefbd04f74f73f44/aws_lc-ed25519.authentication_finish.stdout",
+          "bytes": 214,
+          "sha256": "3a2a2ee78433e426f4f344b5a4cb69c931795ebe38f356528757776e20e0fa69"
+        },
+        "benchmark_stderr": {
+          "path": "/workspace/scratch/f7903e352d2d/allocation-evidence-final-82604806/26670d22be6b4e6bbefbd04f74f73f44/aws_lc-ed25519.authentication_finish.stderr",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      "primitive.es256.rustcrypto": {
+        "native_glibc": {
+          "allocation_plus_events": 0,
+          "reallocation_new_events": 0,
+          "reallocation_old_events": 0,
+          "deallocation_events": 0,
+          "failed_reallocation_events": 0,
+          "allocation_plus_requested_bytes": 0,
+          "reallocation_new_requested_bytes": 0,
+          "requests_total": 0,
+          "requested_bytes_total": 0,
+          "requests_per_operation": 0.0,
+          "requested_bytes_per_operation": 0.0
+        },
+        "rust_global": {
+          "requests_total": 0,
+          "requested_bytes_total": 0,
+          "requests_per_operation": 0.0,
+          "requested_bytes_per_operation": 0.0
+        },
+        "native_minus_rust": {
+          "requests_total": 0,
+          "requested_bytes_total": 0,
+          "requests_per_operation": 0.0,
+          "requested_bytes_per_operation": 0.0
+        },
+        "native_matches_rust_global": true,
+        "trace": {
+          "path": "/workspace/scratch/f7903e352d2d/allocation-evidence-final-82604806/26670d22be6b4e6bbefbd04f74f73f44/aws_lc-primitive.es256.rustcrypto.trace",
+          "bytes": 14,
+          "sha256": "fbe1dbe3939a166e9af459e15ff139b07e87b31d980140c7362c891f0625868d"
+        },
+        "benchmark_stdout": {
+          "path": "/workspace/scratch/f7903e352d2d/allocation-evidence-final-82604806/26670d22be6b4e6bbefbd04f74f73f44/aws_lc-primitive.es256.rustcrypto.stdout",
+          "bytes": 212,
+          "sha256": "ab8b590f8cf8fd1cb5e19da4ee3dc9fd9f2bda2db7fa475f4a1adfb8ee37f23d"
+        },
+        "benchmark_stderr": {
+          "path": "/workspace/scratch/f7903e352d2d/allocation-evidence-final-82604806/26670d22be6b4e6bbefbd04f74f73f44/aws_lc-primitive.es256.rustcrypto.stderr",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      "primitive.ed25519_strict.rustcrypto": {
+        "native_glibc": {
+          "allocation_plus_events": 0,
+          "reallocation_new_events": 0,
+          "reallocation_old_events": 0,
+          "deallocation_events": 0,
+          "failed_reallocation_events": 0,
+          "allocation_plus_requested_bytes": 0,
+          "reallocation_new_requested_bytes": 0,
+          "requests_total": 0,
+          "requested_bytes_total": 0,
+          "requests_per_operation": 0.0,
+          "requested_bytes_per_operation": 0.0
+        },
+        "rust_global": {
+          "requests_total": 0,
+          "requested_bytes_total": 0,
+          "requests_per_operation": 0.0,
+          "requested_bytes_per_operation": 0.0
+        },
+        "native_minus_rust": {
+          "requests_total": 0,
+          "requested_bytes_total": 0,
+          "requests_per_operation": 0.0,
+          "requested_bytes_per_operation": 0.0
+        },
+        "native_matches_rust_global": true,
+        "trace": {
+          "path": "/workspace/scratch/f7903e352d2d/allocation-evidence-final-82604806/26670d22be6b4e6bbefbd04f74f73f44/aws_lc-primitive.ed25519_strict.rustcrypto.trace",
+          "bytes": 14,
+          "sha256": "fbe1dbe3939a166e9af459e15ff139b07e87b31d980140c7362c891f0625868d"
+        },
+        "benchmark_stdout": {
+          "path": "/workspace/scratch/f7903e352d2d/allocation-evidence-final-82604806/26670d22be6b4e6bbefbd04f74f73f44/aws_lc-primitive.ed25519_strict.rustcrypto.stdout",
+          "bytes": 218,
+          "sha256": "75c98e9585c98e0605aae09d7c40ce2aa8881860502ac8e91af8f0245561e65a"
+        },
+        "benchmark_stderr": {
+          "path": "/workspace/scratch/f7903e352d2d/allocation-evidence-final-82604806/26670d22be6b4e6bbefbd04f74f73f44/aws_lc-primitive.ed25519_strict.rustcrypto.stderr",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    }
+  },
+  "native_trace_archive": {
+    "relative_path": "native-allocation-traces.tar.gz",
+    "bytes": 53498,
+    "sha256": "1ee14f269801bc0651b7f11759d3ece1959d8121a8a8b4673214bca556c246b1",
+    "contents": "All 30 original .trace files; member names match each trace path basename. Timestamps and ownership are normalized in the archive, not the trace bytes."
+  },
+  "verification": {
+    "independent_raw_trace_counts": 30,
+    "trace_stdout_stderr_hashes_verified": 90,
+    "archive_members_and_trace_hashes_verified": 30,
+    "final_build_binary_metadata_matches": true,
+    "final_timing_binary_metadata_matches": true,
+    "timing_validation_note": "Final 826 full-API records independently match the measured native binary paths, sizes, SHA-256 values and implementation/tree identities; all three candidate artifacts also match artifact-builds-final.json. No traced latency is used.",
+    "portable_native_and_rust_counters_agree": true,
+    "native_counter_excess_cases": [
+      "aws_lc/es256.authentication_finish"
+    ],
+    "historical_checkpoint": "performance-checkpoint-b3ecfa4-allocations-native.json",
+    "all_30_allocation_results_unchanged_from_checkpoint": true,
+    "note": "Counts were independently recomputed from raw mtrace tokens without reusing the driver parser.",
+    "timing_records": {
+      "native-rustcrypto": {
+        "relative_path": "performance-final-native-rustcrypto.json",
+        "sha256": "f4abdaf0246f369c5c3d8e7b5e37c849372ce1e6c11f6f05d0839607eac112a5"
+      },
+      "native-aws-lc": {
+        "relative_path": "performance-final-native-aws-lc.json",
+        "sha256": "b30a4590b53c48dadb2d9ec567d309d9063c23c641711f449daf6eab38a34026"
+      },
+      "wasi": {
+        "relative_path": "performance-final-wasi.json",
+        "sha256": "2020598852f0ffb5331efa9d3a6badd019b8d24f1bf4e3aa4d1e5e7cab645196"
+      }
+    }
+  }
+}

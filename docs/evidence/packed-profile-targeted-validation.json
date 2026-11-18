@@ -1,0 +1,72 @@
+{
+  "scope": "Packed leaf firmware-version and ordinary enterprise-serial extension validation only. Country diagnostics reflect syntax-only validation.",
+  "cargo_fmt_check_exit_code": 0,
+  "new_test_functions": 4,
+  "new_signed_registration_cases": 22,
+  "results": [
+    {
+      "backend": "rustcrypto",
+      "command": "cargo test --locked --test attestation_e2e --test official_vectors",
+      "exit_code": 0,
+      "attestation_e2e_tests": 19,
+      "official_vector_driver_tests": 1,
+      "counts": [
+        {
+          "passed": 19,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered_out": 0
+        },
+        {
+          "passed": 1,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered_out": 0
+        }
+      ],
+      "log": {
+        "path": "/workspace/scratch/f7903e352d2d/evidence/packed-profile-default.log",
+        "bytes": 1901,
+        "sha256": "c2044cebe1ee51539b6de62395bdfe51460875548b8eefbcc8660deddf5496ce"
+      }
+    },
+    {
+      "backend": "aws-lc",
+      "command": "cargo test --locked --features aws-lc --test attestation_e2e --test official_vectors",
+      "exit_code": 0,
+      "attestation_e2e_tests": 19,
+      "official_vector_driver_tests": 1,
+      "counts": [
+        {
+          "passed": 19,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered_out": 0
+        },
+        {
+          "passed": 1,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered_out": 0
+        }
+      ],
+      "log": {
+        "path": "/workspace/scratch/f7903e352d2d/evidence/packed-profile-aws-lc.log",
+        "bytes": 1901,
+        "sha256": "1b162876fbe79dac7cb7f208173f5edffd6b6278c929b9b86743020c60120089"
+      }
+    }
+  ],
+  "changed_files": [
+    "src/x509.rs",
+    "tests/attestation_e2e.rs"
+  ],
+  "source_sha256": {
+    "src/x509.rs": "cade5240ff7396f0c66781a5a3c1b66dcb791dbb2602a8d51ed02bc62dae80e9",
+    "tests/attestation_e2e.rs": "cd8a2dae620546af2b9e673e37c8c6803175e80a7508b99f488686c36331e154"
+  }
+}

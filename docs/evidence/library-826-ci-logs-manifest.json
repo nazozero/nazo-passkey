@@ -1,0 +1,77 @@
+{
+  "archive": "library-826-ci-logs.tar.gz",
+  "archive_bytes": 536821,
+  "archive_sha256": "d757238c8d4b80cf3f06aa410af7195493d95ad0f7f0015b023099584127a614",
+  "files": [
+    {
+      "file": "library826-ci-audit-134027408160.log",
+      "bytes": 41743,
+      "sha256": "f05ed19405c06a66210986280826be3cb9c81f2af2ef3c11984fe57de770cc37"
+    },
+    {
+      "file": "library826-ci-fuzz-134030178943.log",
+      "bytes": 2919881,
+      "sha256": "30acbb124c0a202d86faada0bfa6b47ad210404b935a48df332b6cf1c20fe7d7"
+    },
+    {
+      "file": "library826-ci-linux-arm-aws-134027408700.log",
+      "bytes": 62178,
+      "sha256": "a5b354e3be7b18c04833dd48709e50c46ff00a1621b67532ab6b12af17bfb03a"
+    },
+    {
+      "file": "library826-ci-linux-arm-rust-134027408733.log",
+      "bytes": 59243,
+      "sha256": "75461bda9a75a8ac432dcd03f1da3117dd0ed0b28de344f13ebe5fc09a766c3b"
+    },
+    {
+      "file": "library826-ci-linux-x86-aws-134027408937.log",
+      "bytes": 62800,
+      "sha256": "344a9d19a1f0dcc2c803dcbdb7eaf2e5c3d6f43e4539772aa22d8d4bbc0e524a"
+    },
+    {
+      "file": "library826-ci-linux-x86-rust-134027408549.log",
+      "bytes": 59110,
+      "sha256": "3cb710df42e51860ee1aa4b21cb5bfeedc73294c2cf0aec121bcf6afffa15a18"
+    },
+    {
+      "file": "library826-ci-macos-aws-lc-134030092889.log",
+      "bytes": 64345,
+      "sha256": "e46f3009a3d1cc1f1a8d0a0de430402794af5f14c18ec690a2d3353d82470675"
+    },
+    {
+      "file": "library826-ci-macos-rustcrypto-134030093293.log",
+      "bytes": 61245,
+      "sha256": "b19ced00ac6c4a27f2f73a7a74538418cdce0f132a91f4faa1c43d404fe7fcee"
+    },
+    {
+      "file": "library826-ci-quality-134027408824.log",
+      "bytes": 43946,
+      "sha256": "47e05c30aefea3fcf71d3aa741c7a411143923af50078255bd397c11eb9ba6b5"
+    },
+    {
+      "file": "library826-ci-wasm-134027408809.log",
+      "bytes": 54681,
+      "sha256": "8c6d03a0940af9c079bc7dd77e5e73f1dc86b9fa298019502cfa13c32ec6e90b"
+    },
+    {
+      "file": "library826-ci-windows-aws-lc-134027409154.log",
+      "bytes": 43312,
+      "sha256": "436e11a32f3c8b3d8d0f0990663dc4a6131660889cbca3acabb77e142d10769a"
+    },
+    {
+      "file": "library826-ci-windows-aws-lc-134030090837.log",
+      "bytes": 68936,
+      "sha256": "f22a4a37386e7e5e842e2e5549358a4e4afa22f36d2619dfe90e71b3ac55af2c"
+    },
+    {
+      "file": "library826-ci-windows-rustcrypto-134030093344.log",
+      "bytes": 67686,
+      "sha256": "49f2962cbb985546e351c679497931afd8292f6ac9b39f009ff8fd0b70952a0f"
+    }
+  ],
+  "total_files": 13,
+  "total_uncompressed_bytes": 3609106,
+  "members_verified_against_digests": 13,
+  "scope": "Exact bytes of the retained GitHub job logs. The corresponding CI JSON identifies source/merge commits, attempts, original collection normalization, failures and skipped jobs. An archive does not turn a failed or skipped command into a successful one.",
+  "sensitivity_scan": "No provider token, AWS access ID or private-key PEM patterns found. CI redactions remain unchanged."
+}

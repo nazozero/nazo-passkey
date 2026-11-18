@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>passkey-auth demo</title>
+  <title>nazo-passkey demo</title>
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <style>
     body { font-family: ui-sans-serif, system-ui, sans-serif; max-width: 36rem; margin: 2rem auto; padding: 0 1rem; line-height: 1.5; }
@@ -14,7 +14,7 @@
   </style>
 </head>
 <body>
-  <h1>passkey-auth demo</h1>
+  <h1>nazo-passkey demo</h1>
   <p>
     Single hard-coded user (<code>alice@example.com</code>). Click
     <b>Register</b> first to create a passkey, then <b>Authenticate</b>
@@ -75,9 +75,8 @@
       log("→ navigator.credentials.create(...)");
       const cred = await navigator.credentials.create({ publicKey: opts });
 
-      // Re-encode for the wire. The server accepts either url-safe or
-      // standard base64 (passkey-auth is permissive), but url-safe is
-      // the spec-correct form.
+      // Re-encode binary fields as strict base64url without padding,
+      // matching the server verifier policy.
       const body = {
         id: cred.id,
         attestationObject: b64urlEncode(cred.response.attestationObject),

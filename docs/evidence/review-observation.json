@@ -1,0 +1,19 @@
+{
+  "observed_at": "2026-11-17 12:27:52 UTC",
+  "library": {
+    "pull_request": "https://github.com/nazozero/passkey-auth-rs/pull/1",
+    "production_source": "8260480634fac09e1151ca2b1a9eaa1c02af6f67",
+    "review_submissions": 0,
+    "review_threads": 0,
+    "discussion_comments": 1,
+    "observation": "The only comment is an automated review-status summary for historical source 787a717ce7e3daeeb578a69a4b5c3dd8f9236024. Its finding fields are null. It is not presented as a final-source security approval, zero-findings report or human review."
+  },
+  "nazoauth": {
+    "pull_request": "https://github.com/nazozero/NazoAuth/pull/287",
+    "source": "2d5c335fc6563e874d8626a5067b4fa8df89bacc",
+    "review_submissions": 0,
+    "review_threads": 0,
+    "discussion_comments": 0
+  },
+  "scope": "This records the observed comments and reviews at the stated time. It does not promise monitoring of future comments or imply either pull request was merged."
+}

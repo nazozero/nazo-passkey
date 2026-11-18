@@ -1,0 +1,102 @@
+{
+  "archive": "nazo-2d5-ci-logs.tar.gz",
+  "archive_bytes": 663606,
+  "archive_sha256": "84edbe5510cb2dcd38724cc7548859604cac8c1a36983b14d9a5a7d416ffc987",
+  "files": [
+    {
+      "file": "nazo826-ci-build-archive-134032749250.log",
+      "bytes": 74208,
+      "sha256": "cdd0a396c59621282b664211b3c872d454203b2ec84f663cc17f7c172eea3e5c"
+    },
+    {
+      "file": "nazo826-ci-clippy-134032749364.log",
+      "bytes": 53862,
+      "sha256": "d39e4d9c7a06a2565971efd4566cc15e5892847a2a4f0a36a425c7322c96e196"
+    },
+    {
+      "file": "nazo826-ci-codeql-134032713513.log",
+      "bytes": 157321,
+      "sha256": "e7ecfa53ea80b34f103e399be51f94059b0bdda9bc40a53781139264d65c650e"
+    },
+    {
+      "file": "nazo826-ci-dependency-review-134032618546.log",
+      "bytes": 15905,
+      "sha256": "586f2d2d78dc6a71f7beb3a40b738fad989343c45b18d749169d3e806c5c3149"
+    },
+    {
+      "file": "nazo826-ci-operator-fuzz-134032702679.log",
+      "bytes": 144748,
+      "sha256": "c20aa6e6719ffd5457e0c504ac009ec76f9b73f17bd64c9c2992f098cf531f77"
+    },
+    {
+      "file": "nazo826-ci-performance-inputs-134032617326.log",
+      "bytes": 26732,
+      "sha256": "a0409ac5fdc773d71ad45b338533b0c28e1f21a7345a99ea9d9df71be6f161c0"
+    },
+    {
+      "file": "nazo826-ci-python-quality-134032616215.log",
+      "bytes": 54173,
+      "sha256": "0152c0b6c1fe8f7d8f9d52be0656521145cbc2b7fcf5b965b14e41cc3fade725"
+    },
+    {
+      "file": "nazo826-ci-quality-gate-134037450918.log",
+      "bytes": 2934,
+      "sha256": "710d357403320d22d406ed4ba20b0e1a81824c58e460e3151f938f256918feba"
+    },
+    {
+      "file": "nazo826-ci-shard-1-134034677648.log",
+      "bytes": 291605,
+      "sha256": "cdb8eb207660c6ed80f0a37989ad4ee54c4d207a2503a3334f1d6bc4388612e7"
+    },
+    {
+      "file": "nazo826-ci-shard-2-134034677763.log",
+      "bytes": 894720,
+      "sha256": "74480c32b23f8bc39f4b7fe930c12b523005e3645c846f2f2fe0be843f211ad9"
+    },
+    {
+      "file": "nazo826-ci-shard-3-134034677715.log",
+      "bytes": 264221,
+      "sha256": "456fbb292f124244e05b407d62370841fc79ff0da0fd4a794bb596332062831c"
+    },
+    {
+      "file": "nazo826-ci-shard-4-134034677741.log",
+      "bytes": 312468,
+      "sha256": "323abb256602859d190176fbb23edfd1f11c09cec2b4b402ba7d7a52fee2d2ed"
+    },
+    {
+      "file": "nazo826-ci-shard-5-134034677956.log",
+      "bytes": 293538,
+      "sha256": "b22fefde1938afec9a33e5f223da7f13dfc561ca639cc4ceb040ba42c0bf0b54"
+    },
+    {
+      "file": "nazo826-ci-shard-6-134034677635.log",
+      "bytes": 271284,
+      "sha256": "eeb875a899bac2e1a3eeb0f9e16ffca20e35b471fdfa79470d4b0864042c6e64"
+    },
+    {
+      "file": "nazo826-ci-source-policy-134032722939.log",
+      "bytes": 19195,
+      "sha256": "c2e631ec3afa2893d0b823f5776b822d0b7bc1ad8670504b9698d3f8729d0fa1"
+    },
+    {
+      "file": "nazo826-ci-spec-inventory-134032615990.log",
+      "bytes": 21424,
+      "sha256": "4223bfa8054aa3af0559f3e5dbcd213dccc1306cda9941fa314b03edea6dcaa4"
+    },
+    {
+      "file": "nazo826-ci-supply-chain-134032722935.log",
+      "bytes": 976113,
+      "sha256": "52298d5398602c17ab99ade4dbdc6ab6b3e402f0d8c7c7bbd83f0944d464c1ab"
+    },
+    {
+      "file": "nazo826-ci-wasm-134032615940.log",
+      "bytes": 104038,
+      "sha256": "8ba48c337c48de565ccc5e5fbfc8d103f6c7ba15f5ab6b8dae7b28ee54233b75"
+    }
+  ],
+  "total_files": 18,
+  "total_uncompressed_bytes": 3978489,
+  "members_verified_against_digests": 18,
+  "scope": "Exact bytes of the retained GitHub job logs. The corresponding CI JSON identifies source/merge commits, attempts, original collection normalization, failures and skipped jobs. An archive does not turn a failed or skipped command into a successful one.",
+  "sensitivity_scan": "No provider token, AWS access ID or private-key PEM patterns found. CI redactions remain unchanged."
+}

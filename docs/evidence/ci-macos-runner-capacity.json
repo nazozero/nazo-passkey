@@ -1,0 +1,14 @@
+{
+  "run_url": "https://github.com/nazozero/passkey-auth-rs/actions/runs/44067111623",
+  "job_id": 133983529253,
+  "prior_runner": "macos-15 (arm64)",
+  "status": "cancelled before any build or test",
+  "observation_source": "Read-only signed-in GitHub Actions job Annotations panel through Browser; log API returned BlobNotFound.",
+  "annotations": [
+    "Internal server error. Correlation ID: 61725557-be7d-4218-bd08-e1768ec5149d",
+    "The job was not acquired by Runner of type hosted even after multiple attempts",
+    "Due to capacity constraints, jobs targeting macOS arm64 runners may experience longer queue times."
+  ],
+  "remediation": "Run the same two backend all-targets and doc test jobs on macos-15-intel; retain Linux ARM64 tests. macOS ARM64 itself remains unverified.",
+  "official_runner_reference": "https://github.com/actions/runner-images/blob/main/README.md"
+}

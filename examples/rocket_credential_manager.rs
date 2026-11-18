@@ -15,7 +15,7 @@
 //! - Adding a new credential uses `excludeCredentials` so the user
 //!   cannot accidentally register the same authenticator twice.
 //! - Listing shows AAGUID + transports + counter for each credential.
-//! - Removing a credential is a DELETE request.
+//! - Removing a credential is an authenticated POST request.
 //!
 //! NOT FOR PRODUCTION: in-memory state, single hard-coded user.
 
@@ -28,7 +28,7 @@ use rocket::serde::json::Json;
 use rocket::{Build, Rocket, State, fs::FileServer, get, launch, post, routes};
 use serde::Serialize;
 
-use passkey_auth::{
+use nazo_passkey::{
     Attachment, AuthenticationChallenge, AuthenticationResponse, AuthenticationState,
     PasskeyCredential, RegistrationChallenge, RegistrationResponse, RegistrationState, Webauthn,
 };
@@ -66,18 +66,20 @@ fn register_start(
     state: &State<AppState>,
     cookies: &CookieJar<'_>,
 ) -> Result<Json<RegistrationChallenge>, Custom<String>> {
-    let user = state.user.lock().unwrap();
+    let mut user = state.user.lock().unwrap();
     if !user.credentials.is_empty() {
         return Err(Custom(
             Status::BadRequest,
             "already registered - use /credentials/add to add another device".into(),
         ));
     }
+    if user.handle.is_empty() {
+        user.handle = rand_bytes(16);
+    }
+    let user_handle = user.handle.clone();
     drop(user);
 
     let sid = sid_or_new(cookies);
-    let user_handle = rand_bytes(16);
-    state.user.lock().unwrap().handle = user_handle.clone();
 
     let (challenge, reg_state) = state
         .wa
@@ -113,7 +115,14 @@ fn register_finish(
             )
         })?;
     let id_b64 = credential.id.to_b64url();
-    state.user.lock().unwrap().credentials.push(credential);
+    let mut user = state.user.lock().unwrap();
+    if !user.credentials.is_empty() || user.handle != reg_state.user_id {
+        return Err(Custom(
+            Status::BadRequest,
+            "account already registered or changed".into(),
+        ));
+    }
+    user.credentials.push(credential);
     Ok(Json(RegisterFinishReply {
         ok: true,
         credential_id: id_b64,
@@ -178,7 +187,7 @@ fn authenticate_finish(
     let sid = sid_from_cookies(cookies)?;
     let auth_state = take_auth_state(state, &sid)?;
 
-    let asserted_id = passkey_auth::CredentialId::from_b64url(&body.id)
+    let asserted_id = nazo_passkey::CredentialId::from_b64url(&body.id)
         .map_err(|_| Custom(Status::BadRequest, "bad credential id".into()))?;
     let mut user = state.user.lock().unwrap();
     let stored = user
@@ -191,6 +200,8 @@ fn authenticate_finish(
         .finish_authentication(&auth_state, &body, stored)
         .map_err(|e| Custom(Status::Unauthorized, format!("auth verify failed: {e}")))?;
     stored.counter = outcome.new_counter;
+    stored.backup_eligible = Some(outcome.backup_eligible);
+    stored.backup_state = Some(outcome.backup_state);
     drop(user);
 
     // Rotate: drop the old session entry, create a new signed-in
@@ -278,19 +289,39 @@ fn add_credential_finish(
             )
         })?;
     let id_b64 = credential.id.to_b64url();
-    state.user.lock().unwrap().credentials.push(credential);
+    let mut user = state.user.lock().unwrap();
+    if user.handle != reg_state.user_id {
+        return Err(Custom(
+            Status::BadRequest,
+            "registration account changed".into(),
+        ));
+    }
+    if user
+        .credentials
+        .iter()
+        .any(|existing| existing.id == credential.id)
+    {
+        return Err(Custom(
+            Status::BadRequest,
+            "credential already registered".into(),
+        ));
+    }
+    user.credentials.push(credential);
     Ok(Json(RegisterFinishReply {
         ok: true,
         credential_id: id_b64,
     }))
 }
 
-/// GET /credentials - list the user's registered credentials.
-/// Anyone can read this; in a real app you would gate on signed-in.
+/// Only reveal credential identifiers and device metadata after sign-in.
 #[get("/credentials")]
-fn list_credentials(state: &State<AppState>) -> Json<Vec<CredentialView>> {
+fn list_credentials(
+    state: &State<AppState>,
+    cookies: &CookieJar<'_>,
+) -> Result<Json<Vec<CredentialView>>, Custom<String>> {
+    require_signed_in(state, cookies)?;
     let user = state.user.lock().unwrap();
-    Json(
+    Ok(Json(
         user.credentials
             .iter()
             .map(|c| CredentialView {
@@ -300,7 +331,13 @@ fn list_credentials(state: &State<AppState>) -> Json<Vec<CredentialView>> {
                 counter: c.counter,
             })
             .collect(),
-    )
+    ))
+}
+
+/// The signed-out UI needs only this boolean, not the credential list.
+#[get("/registration/status")]
+fn registration_status(state: &State<AppState>) -> Json<bool> {
+    Json(!state.user.lock().unwrap().credentials.is_empty())
 }
 
 #[derive(Serialize)]
@@ -324,7 +361,7 @@ fn delete_credential(
     id_b64: &str,
 ) -> Result<Json<DeleteReply>, Custom<String>> {
     require_signed_in(state, cookies)?;
-    let target = passkey_auth::CredentialId::from_b64url(id_b64)
+    let target = nazo_passkey::CredentialId::from_b64url(id_b64)
         .map_err(|_| Custom(Status::BadRequest, "bad credential id".into()))?;
     let mut user = state.user.lock().unwrap();
     if user.credentials.len() <= 1 {
@@ -435,9 +472,8 @@ fn take_auth_state(
 }
 
 fn rand_bytes(n: usize) -> Vec<u8> {
-    use rand::RngCore;
     let mut buf = vec![0u8; n];
-    rand::thread_rng().fill_bytes(&mut buf);
+    rand::fill(&mut buf);
     buf
 }
 
@@ -455,7 +491,8 @@ fn rocket() -> Rocket<Build> {
         "http://localhost:3000",
     )
     .authenticator_attachment(Attachment::Any)
-    .require_user_verification(false);
+    .require_user_verification(false)
+    .strict_base64(true);
 
     let state = AppState {
         user: Mutex::new(User::default()),
@@ -479,6 +516,7 @@ fn rocket() -> Rocket<Build> {
                 add_credential_start,
                 add_credential_finish,
                 list_credentials,
+                registration_status,
                 delete_credential,
                 whoami,
             ],

@@ -1,201 +1,163 @@
-# passkey-auth
+# nazo-passkey
 
-[![CI](https://github.com/marirs/passkey-auth/actions/workflows/ci.yml/badge.svg)](https://github.com/marirs/passkey-auth/actions/workflows/ci.yml)
-[![Crates.io](https://img.shields.io/crates/v/passkey-auth.svg)](https://crates.io/crates/passkey-auth)
-[![docs.rs](https://img.shields.io/docsrs/passkey-auth)](https://docs.rs/passkey-auth)
-[![License](https://img.shields.io/crates/l/passkey-auth.svg)](#license)
-[![MSRV](https://img.shields.io/badge/MSRV-1.85-blue.svg)](https://blog.rust-lang.org/)
-[![Dependencies](https://deps.rs/repo/github/marirs/passkey-auth/status.svg)](https://deps.rs/repo/github/marirs/passkey-auth)
+[![CI](https://github.com/nazozero/nazo-passkey/actions/workflows/ci.yml/badge.svg)](https://github.com/nazozero/nazo-passkey/actions/workflows/ci.yml)
+[![License](https://img.shields.io/badge/license-MIT%20OR%20Apache--2.0-blue.svg)](#license-and-origin)
 
-Pure-Rust WebAuthn server library focused on the passkey ceremony.
-Verifies registration + authentication responses from browsers/OS
-authenticators (Touch ID, Windows Hello, Android, iCloud Keychain,
-hardware keys).
+A synchronous Rust library for WebAuthn registration and authentication. It
+creates ceremony options, verifies responses, and returns credential records
+and authenticated state updates. Applications supply account storage, sessions,
+and transaction policy.
 
-## Installation
+The protocol baseline is [WebAuthn Level 3](https://www.w3.org/TR/2026/REC-webauthn-3-20260825/).
+The implementation supports ES256 and Ed25519, preserves compatible Level 1/2
+credentials, and runs on native and WebAssembly targets. RustCrypto is the
+default; the `aws-lc` feature accelerates native ES256 verification. The library
+uses Rust 1.100 and edition 2024, has no database or HTTP dependencies, and
+forbids unsafe Rust in its own source.
+
+## Install
+
+The independent package is named `nazo-passkey`, with Rust imports under
+`nazo_passkey`. Until its first registry release, use the repository:
 
 ```toml
 [dependencies]
-passkey-auth = "0.1"
+nazo-passkey = { git = "https://github.com/nazozero/nazo-passkey", branch = "main" }
 ```
 
-MSRV: **Rust 1.85** (edition 2024).
+Use an immutable `rev` and commit `Cargo.lock` for a reproducible deployment.
+Add `features = ["aws-lc"]` to select native AWS-LC ES256 verification.
 
-## Why this exists
+## Supported operations
 
-The reference Rust server library, `webauthn-rs`, hard-depends on
-`openssl`. This crate is the alternative for projects that ship
-rustcrypto end-to-end:
+| Area | Behavior |
+| --- | --- |
+| Keys | ES256 / P-256 (`alg=-7`) and Ed25519 (`alg=-8`), with matching COSE key type, curve, and coordinates |
+| Registration | Challenge, origin, RP ID, UP/UV, backup flags, credential key, exclusion list, and attestation verification |
+| Authentication | Account and credential binding, signed flags, signature, backup eligibility, and signature counter policy |
+| Login | Username-first and discoverable credentials |
+| Attestation | `none`, ES256/Ed25519 `packed` self-attestation, and ES256 certificate attestation for `packed` and `fido-u2f` |
+| Origins | Exact configured web origin; same-origin ceremonies |
+| Extensions | Bounded structural parsing; extension values do not influence authentication decisions |
+| Persistence | Serde credential records, including UV history, backup state, and attestation evidence |
 
-| Concern                | This crate                                                     | webauthn-rs              |
-|------------------------|----------------------------------------------------------------|--------------------------|
-| ECDSA P-256 verify     | [`p256`](https://crates.io/crates/p256)                        | openssl                  |
-| Ed25519 verify         | [`ed25519-dalek`](https://crates.io/crates/ed25519-dalek)      | openssl                  |
-| SHA-256                | [`sha2`](https://crates.io/crates/sha2)                        | openssl                  |
-| CBOR                   | [`ciborium`](https://crates.io/crates/ciborium)                | serde_cbor (deprecated)  |
-| Attestation chain      | x5c sig verified, root NOT validated                           | full X.509 + FIDO MDS    |
+Certificate attestation returns `UntrustedCertificate`: the signature and
+applicable leaf profile have been checked. An application that requires trusted
+device provenance supplies its certificate-chain, validity, revocation, and
+metadata policy. The complete feature and responsibility matrix is in
+[protocol compliance](docs/protocol-compliance.md).
 
-## Scope
+## Integrate a ceremony
 
-- Registration ceremony (parse `AuthenticatorAttestationResponse`, verify origin/challenge, extract public key)
-- Authentication ceremony (parse `AuthenticatorAssertionResponse`, verify signature)
-- Algorithms: **ES256** (COSE alg -7, P-256 ECDSA) and **EdDSA** (-8, Ed25519); the credential's alg is enforced at registration against the advertised `pubKeyCredParams` (WebAuthn-3 §7.1 step 19)
-- Attestation formats:
-  - `none` (fully)
-  - `packed` self-attestation (no cert chain)
-  - `packed` with `x5c` cert chain (cert sig verified; chain NOT validated to a root)
-  - `fido-u2f` (legacy Yubikeys; cert sig verified, chain NOT validated)
-- Replay protection via the authenticator counter
-- Opt-in **user-verification enforcement** for production passkey deployments (`.require_user_verification(true)`)
-- Opt-in **user-handle enforcement** for username-first flows (`start_authentication_for_user` + `.require_user_handle(true)`) — verifies the assertion's `userHandle` matches the expected user (WebAuthn-3 §7.2 step 6)
-- Configurable **authenticator attachment** (platform / cross-platform / any) — see [`Attachment`](https://docs.rs/passkey-auth/latest/passkey_auth/enum.Attachment.html)
-- Base64 decoding: lenient by default (accepts url-safe / standard / padded / unpadded inputs); flip `.strict_base64(true)` to require spec-compliant url-safe-no-pad
+```rust
+use nazo_passkey::Webauthn;
 
-Not in scope:
-
-- **Cert chain validation against a trusted root.** Without the FIDO
-  Metadata Service we cannot tell whether an `x5c` cert really came
-  from Yubico / Feitian / etc.; we only confirm the attestation `sig`
-  was produced by whoever owns the leaf cert's private key. For "only
-  these specific authenticator models" enterprise policy, you need
-  full MDS — this crate is not the right pick.
-- Conditional UI / discoverable credentials beyond what the server needs to know
-- RSA / RS256 (rare for passkeys; reject with a clear error)
-- TPM / Android-Key / Android-SafetyNet / Apple attestation formats
-
-## Usage
-
-```rust,ignore
-use passkey_auth::{
-    AuthenticationResponse, PasskeyCredential, RegistrationResponse, Webauthn,
-};
-
-// Construct once at boot. Cheap to clone. Production-tightening
-// builders:
-//   .require_user_verification(true)  reject UV-less assertions
-//   .require_user_handle(true)        reject assertions missing the
-//                                     userHandle in for_user flows
-//   .strict_base64(true)              reject non-spec base64 on wire
-let wa = Webauthn::new("example.com", "Example", "https://example.com")
+let webauthn = Webauthn::try_new("example.com", "Example", "https://example.com")?
+    .strict_base64(true)
     .require_user_verification(true);
 
-// ── 1. Registration ───────────────────────────────────────────────
-let user_id: &[u8] = b"user-handle-bytes"; // stable opaque user id
-let (challenge, state) = wa.start_registration(
-    user_id,
-    "alice@example.com",   // user.name  (RP-facing)
-    "Alice",               // user.displayName
-    &[],                   // credentials already registered (for excludeCredentials)
-);
-// → serialise `challenge` to JSON, send to the browser
-// ← browser POSTs back a RegistrationResponse JSON
-let response: RegistrationResponse = todo!();
-
-let credential: PasskeyCredential = wa.finish_registration(&state, &response)?;
-// Persist: credential.id, credential.public_key_cose,
-//          credential.counter, credential.transports, credential.aaguid
-
-// ── 2. Authentication (username-first flow) ───────────────────────
-// `_for_user` records the user_handle on the state so
-// finish_authentication can verify the assertion is FOR this user
-// (WebAuthn-3 §7.2 step 6) — defence in depth against credential-id
-// collisions in a multi-user store.
-//
-// Use plain `start_authentication_with_creds(&creds)` for
-// discoverable / passwordless flows where the user is unknown
-// until the response arrives — see examples/axum_passwordless.rs.
-let (challenge, state) = wa.start_authentication_with_creds_for_user(
-    user_id,
-    &[credential.clone()],
-);
-let response: AuthenticationResponse = todo!();
-
-let outcome = wa.finish_authentication(&state, &response, &credential)?;
-// Update stored counter: credential.counter = outcome.new_counter
+let (options, state) = webauthn.try_start_registration(
+    b"opaque-account-handle",
+    "alice",
+    "Alice",
+    &[],
+)?;
 ```
 
-### RP ID parsing from URLs
+Use a stable, opaque account handle of 1–64 bytes. Send `options` to the browser
+and retain `state` on the server with the account and session. The examples
+show conversion between the browser's nested `PublicKeyCredential` and the
+library's flat response structs.
 
-`Webauthn::new` takes the bare domain (no scheme, no port). If the
-value might be a full URL (config file, env var pasted by an operator),
-validate it first:
+| Operation | Application responsibility |
+| --- | --- |
+| `try_start_registration` | Authorize enrollment and supply existing credential IDs |
+| `finish_registration` | Consume ceremony state once; insert the complete record under a credential-ID uniqueness constraint within the RP |
+| `start_authentication_with_creds_for_user` | Load the intended account's credentials and bind its handle |
+| `finish_authentication` | Select the stored credential within that account; commit the verified update before creating a session |
+| `finish_discoverable_authentication` | Resolve the returned handle within the RP and supply its expected account binding |
 
-```rust,ignore
-use passkey_auth::RpId;
+Each challenge contains 32 random bytes. Pending states bind the RP, origin,
+and validation policy and expire after at most 300 seconds. A shorter server
+TTL can further restrict their lifetime. Consume state atomically, for example
+with a transactional delete or `GETDEL`.
 
-let rp = RpId::try_from_url("https://example.com:8443/auth")?;
-assert_eq!(rp.as_str(), "example.com");
-```
+Authentication returns the new signature counter and signed backup flags. Save
+these with an account-scoped compare-and-swap before issuing a session. The
+counter policy accepts zero-only counters and rejects other non-increasing
+values; concurrent assertions can therefore require a retry.
 
-`RpId::new` itself stores its input verbatim — pass a bare hostname
-or call `try_from_url` first.
+### User verification
 
-### Client-side encoding
+`AuthSuccess::user_verified` reports the signed UV flag.
+`user_verification_eligible` also requires established UV history in the stored
+credential. Use the latter when counting user verification as an additional
+factor. Registration records its observed UV value; older records retain
+unknown history until the application establishes it through an independently
+authorized flow.
 
-The browser's `AuthenticatorResponse` fields (`attestationObject`,
-`authenticatorData`, `clientDataJSON`, `signature`) are
-`ArrayBuffer`s; the JS layer must base64-encode them before posting.
+Username-first authentication accepts an absent `userHandle` for older
+non-discoverable credentials. A supplied handle must match the expected account.
+Discoverable authentication requires a handle and account binding.
 
-By default this crate is **lenient**: it accepts url-safe-base64
-**or** standard-base64, **with or without** padding — so the obvious
-`btoa(...)` pattern works without a separate url-safe-conversion
-step. Convenient for getting started.
+### Parsing and borrowing
 
-Production deployments that control their own client JS should flip
-the strict toggle:
+CBOR fields and valid UTF-8 client data borrow the decoded response buffers.
+Fixed-size signatures, keys, and hashes use bounded storage. Ed25519 hashes the
+two transcript parts directly through dalek's multipart verification API.
+Base64 decoding, owned credential records, and ceremony state allocate storage.
+The [performance record](docs/performance.md) retains measurements for its
+recorded revisions.
 
-```rust,ignore
-let wa = Webauthn::new("example.com", "Example", "https://example.com")
-    .strict_base64(true);
-```
+`strict_base64(true)` requires canonical base64url in the outer response adapter.
+The signed client-data challenge always requires canonical, unpadded base64url.
+Client-data decoding follows WebAuthn's UTF-8 rules; signature verification
+hashes the original bytes, including a leading BOM when present.
 
-Strict mode accepts only the spec-compliant url-safe-no-pad
-encoding (WebAuthn §6.1). Any other variant returns
-`Error::Base64`, surfacing client-side encoding bugs instead of
-papering over them.
+| Decoded input | Bound |
+| --- | ---: |
+| Client data | 8 KiB |
+| Attestation object | 64 KiB |
+| Authenticator data | 16 KiB |
+| Credential ID / account handle | 1–1,023 / 1–64 bytes |
+| Signature | 80 bytes |
+| CBOR container / depth / item budget | 64 / 12 / 2,048 |
+| Certificate chain | 8 certificates, 16 KiB per certificate, within the attestation-object bound |
 
-## Working examples
+The application limits HTTP bodies before deserialization and sets account
+quotas, enrollment authorization, CSRF protection, and request throttling.
 
-Five runnable HTTP-server examples live under [`examples/`](examples/),
-covering the most common passkey-app patterns. All bind to
-<http://localhost:3000> — run **one at a time** in a passkey-capable
-browser (Touch ID, Windows Hello, iCloud Keychain, Yubikey, etc.).
+## Examples and development
 
-| Example | Framework | What it shows |
-|---|---|---|
-| [`axum_server`](examples/axum_server.rs) | Axum 0.7 | Minimal single-user register + authenticate |
-| [`rocket_server`](examples/rocket_server.rs) | Rocket 0.5 | Same as above, Rocket variant |
-| [`axum_passwordless`](examples/axum_passwordless.rs) | Axum 0.7 | **Multi-user** with **usernameless** sign-in (Gmail-style "tap to sign in", discoverable credentials, browser shows account picker) |
-| [`rocket_credential_manager`](examples/rocket_credential_manager.rs) | Rocket 0.5 | **Multiple devices per user**: register additional passkeys while signed in, list them, remove individual ones (refuses to remove the last) |
-| [`axum_sqlite`](examples/axum_sqlite.rs) | Axum 0.7 + rusqlite | **Persistent storage**: same as `axum_server` but credentials survive process restart in `passkeys.db` |
+| Example | Purpose |
+| --- | --- |
+| `axum_server`, `rocket_server` | Registration and username-first login |
+| `axum_passwordless` | Discoverable login |
+| `rocket_credential_manager` | Session-authorized credential management |
+| `axum_sqlite` | Credential persistence, migration, and atomic updates |
 
-```bash
-cargo run --example axum_server                # start here
-cargo run --example axum_passwordless          # then try the Gmail flow
-cargo run --example rocket_credential_manager  # then try multi-device
-cargo run --example axum_sqlite                # then try persistence
-```
-
-All five are explicitly **not for production** (in-memory sessions
-where applicable, single hard-coded user in the manager variant, no
-CSRF protection on the start endpoints) — read them as references for
-wiring the crate into your own server, not as copy-paste starters.
-
-## Testing
-
-```bash
-cargo test            # unit + integration + doc-tests
-cargo clippy --all-targets -- -D warnings
+```sh
+cargo run --example axum_server
 cargo fmt --all -- --check
+cargo clippy --locked --all-targets --all-features -- -D warnings
+cargo test --locked --all-targets
+cargo test --locked --all-targets --features aws-lc
+cargo test --locked --doc
+cargo package --locked
 ```
 
-CI exercises Linux x86_64 + aarch64, macOS Apple Silicon, and
-Windows x86_64 on every push.
+Native AWS-LC builds require its [C/C++ build toolchain](https://aws.github.io/aws-lc-rs/requirements/).
+WebAssembly uses RustCrypto under both feature settings; browser targets obtain
+randomness through Web Crypto. The examples run locally at `http://localhost:3000`.
 
-## License
+See [migration](docs/migration.md), [protocol compliance](docs/protocol-compliance.md),
+[security review](docs/security-review.md), and [validation](docs/validation.md).
 
-Licensed under either of
+## License and origin
 
-- Apache License, Version 2.0 ([LICENSE-APACHE](APACHE-LICENSE) or
-  <http://www.apache.org/licenses/LICENSE-2.0>)
-- MIT License ([LICENSE](LICENSE) or <https://opensource.org/licenses/MIT>)
+Maintained by [bymoye](https://github.com/bymoye), `s3moye@gmail.com`, in NazoZero.
+This independently maintained rewrite is based on Sriram's
+[`marirs/passkey-auth-rs`](https://github.com/marirs/passkey-auth-rs).
+[Upstream provenance](UPSTREAM_PROVENANCE.md) records the retained history.
+
+Licensed under [MIT](LICENSE) or [Apache-2.0](APACHE-LICENSE), at your option.

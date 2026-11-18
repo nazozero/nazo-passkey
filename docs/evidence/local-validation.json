@@ -1,0 +1,194 @@
+{
+  "checkpoint": "final implementation; optional backend initially aws-lc-rs 1.18.2",
+  "records": [
+    {
+      "gate": "fmt",
+      "command": [
+        "cargo",
+        "fmt",
+        "--all",
+        "--",
+        "--check"
+      ],
+      "exit_code": 0,
+      "log": "/workspace/scratch/f7903e352d2d/evidence/final-fmt.log",
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "test_summaries": []
+    },
+    {
+      "gate": "check-rustcrypto",
+      "command": [
+        "cargo",
+        "check",
+        "--locked",
+        "--all-targets",
+        "--no-default-features"
+      ],
+      "exit_code": 0,
+      "log": "/workspace/scratch/f7903e352d2d/evidence/final-check-rustcrypto.log",
+      "log_sha256": "eed68f6221eae4c4d6f847baee6a72af8cd6576c8e47b6bea8adbfc95c9cc444",
+      "test_summaries": []
+    },
+    {
+      "gate": "check-aws",
+      "command": [
+        "cargo",
+        "check",
+        "--locked",
+        "--all-targets",
+        "--all-features"
+      ],
+      "exit_code": 0,
+      "log": "/workspace/scratch/f7903e352d2d/evidence/final-check-aws.log",
+      "log_sha256": "a318f1e79821fb95fbf5fcf16caaf8201474c93fc29941ffa50ce6671285c01f",
+      "test_summaries": []
+    },
+    {
+      "gate": "clippy",
+      "command": [
+        "cargo",
+        "clippy",
+        "--locked",
+        "--all-targets",
+        "--all-features",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "exit_code": 0,
+      "log": "/workspace/scratch/f7903e352d2d/evidence/final-clippy.log",
+      "log_sha256": "51105e341a6d0b8506db528d15fd3753cf703c11607ab9f3f0238c7699886b74",
+      "test_summaries": []
+    },
+    {
+      "gate": "tests-rustcrypto",
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--all-targets",
+        "--no-default-features"
+      ],
+      "exit_code": 0,
+      "log": "/workspace/scratch/f7903e352d2d/evidence/final-tests-rustcrypto.log",
+      "log_sha256": "febfac1be307b065496c8e20bf323eca262779ff62a08f0701f8bf96d0749352",
+      "test_summaries": [
+        "test result: ok. 56 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 10.95s",
+        "test result: ok. 15 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.15s",
+        "test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s",
+        "test result: ok. 20 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.10s",
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.17s",
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s",
+        "test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s",
+        "test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s",
+        "test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s",
+        "test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s"
+      ]
+    },
+    {
+      "gate": "tests-aws",
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--all-targets",
+        "--features",
+        "aws-lc"
+      ],
+      "exit_code": 0,
+      "log": "/workspace/scratch/f7903e352d2d/evidence/final-tests-aws.log",
+      "log_sha256": "5a4dcb11dadfbda0859628f29bf8957389f78b4d112446b8b4bb3cc751b00e32",
+      "test_summaries": [
+        "test result: ok. 57 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 10.08s",
+        "test result: ok. 15 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.09s",
+        "test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s",
+        "test result: ok. 20 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.09s",
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.08s",
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s",
+        "test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s",
+        "test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s",
+        "test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s",
+        "test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s"
+      ]
+    },
+    {
+      "gate": "doctests",
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--doc",
+        "--all-features"
+      ],
+      "exit_code": 0,
+      "log": "/workspace/scratch/f7903e352d2d/evidence/final-doctests.log",
+      "log_sha256": "d0b68da3653534ee5954361209390e0cbec45335e19482798f21706a3c3153d9",
+      "test_summaries": [
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s"
+      ]
+    },
+    {
+      "gate": "docs",
+      "command": [
+        "cargo",
+        "doc",
+        "--locked",
+        "--no-deps",
+        "--all-features"
+      ],
+      "exit_code": 0,
+      "log": "/workspace/scratch/f7903e352d2d/evidence/final-docs.log",
+      "log_sha256": "b5098e1c8670b43a89a1c00db4dd28ac548c6d738e1b64cff8cd4ebf3de33706",
+      "test_summaries": []
+    },
+    {
+      "gate": "wasm-default",
+      "command": [
+        "cargo",
+        "check",
+        "--locked",
+        "--lib",
+        "--target",
+        "wasm32-unknown-unknown",
+        "--no-default-features"
+      ],
+      "exit_code": 0,
+      "log": "/workspace/scratch/f7903e352d2d/evidence/final-wasm-default.log",
+      "log_sha256": "0a642d80abca8011ed9c9295b897553f81691b1e70b8724488c399c3bed6665f",
+      "test_summaries": []
+    },
+    {
+      "gate": "wasm-all",
+      "command": [
+        "cargo",
+        "check",
+        "--locked",
+        "--lib",
+        "--target",
+        "wasm32-unknown-unknown",
+        "--all-features"
+      ],
+      "exit_code": 0,
+      "log": "/workspace/scratch/f7903e352d2d/evidence/final-wasm-all.log",
+      "log_sha256": "bd95028167848d723f4be2fb3813f9eed8f1f16881ec33db27e6977e2d3079fd",
+      "test_summaries": []
+    }
+  ],
+  "aws_lc_119_recheck": {
+    "command": "cargo test --locked --all-targets --features aws-lc",
+    "exit_code": 0,
+    "log_sha256": "76d9e3756621b9ceaa496a332073c0330453e5f6e3211a2abecbd8a001588f97",
+    "test_summaries": [
+      "test result: ok. 57 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 14.91s",
+      "test result: ok. 15 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.25s",
+      "test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s",
+      "test result: ok. 20 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.28s",
+      "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.22s",
+      "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s",
+      "test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s",
+      "test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s",
+      "test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s",
+      "test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s"
+    ]
+  }
+}

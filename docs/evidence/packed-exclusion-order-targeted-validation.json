@@ -1,0 +1,87 @@
+{
+  "scope": "After supported statement validation, classify a matching excluded ID as CredentialExcluded; preserve BadSignature and certificate-profile errors for invalid statements.",
+  "cargo_fmt_check_exit_code": 0,
+  "new_test": "excluded_registration_still_verifies_packed_signature_and_certificate",
+  "new_test_cases": 3,
+  "results": [
+    {
+      "backend": "rustcrypto",
+      "command": "cargo test --locked --test attestation_e2e --test ceremony_e2e --test official_vectors",
+      "exit_code": 0,
+      "results": [
+        {
+          "suite": "attestation_e2e",
+          "passed": 20,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered_out": 0
+        },
+        {
+          "suite": "ceremony_e2e",
+          "passed": 20,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered_out": 0
+        },
+        {
+          "suite": "official_vectors",
+          "passed": 1,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered_out": 0
+        }
+      ],
+      "log": {
+        "path": "/workspace/scratch/f7903e352d2d/evidence/packed-exclusion-order-default.log",
+        "bytes": 3331,
+        "sha256": "7223d694523af67872567f7b4bd65dab42c51ff1e67213b7494ea3460c8f434f"
+      }
+    },
+    {
+      "backend": "aws-lc",
+      "command": "cargo test --locked --features aws-lc --test attestation_e2e --test ceremony_e2e --test official_vectors",
+      "exit_code": 0,
+      "results": [
+        {
+          "suite": "attestation_e2e",
+          "passed": 20,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered_out": 0
+        },
+        {
+          "suite": "ceremony_e2e",
+          "passed": 20,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered_out": 0
+        },
+        {
+          "suite": "official_vectors",
+          "passed": 1,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered_out": 0
+        }
+      ],
+      "log": {
+        "path": "/workspace/scratch/f7903e352d2d/evidence/packed-exclusion-order-aws-lc.log",
+        "bytes": 3331,
+        "sha256": "e3d27cf27b0cad3eb1e7ddfec6f56b582c5feaa6f33d085b09964fe6dbb744be"
+      }
+    }
+  ],
+  "prior_profile_gate": "packed-profile-targeted-validation.json is an earlier 19-attestation-test checkpoint before this additional regression and exclusion-order move.",
+  "source_sha256": {
+    "src/x509.rs": "cade5240ff7396f0c66781a5a3c1b66dcb791dbb2602a8d51ed02bc62dae80e9",
+    "src/ceremony.rs": "a49cf333774c49ade1dee0b07eea7efc81199bdcc49a57717db1e4a284d87700",
+    "src/error.rs": "15758d3d5758fe10201cc7e4fb26f8fc3096aa415f07c9f6acb435ef394f0ac7",
+    "tests/attestation_e2e.rs": "c8fbe51b4607fa96498b91b242af2af87a0a5d641013444ecf495ac989f8fb67"
+  }
+}

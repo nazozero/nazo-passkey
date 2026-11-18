@@ -2,7 +2,11 @@
 !.gitignore
 !.github
 target/
-Cargo.lock
+# Lockfiles are retained for reproducible security checks and benchmarks.
+fuzz/artifacts/
+fuzz/coverage/
+fuzz/target/
+perf/target/
 
 .DS_Store
 
@@ -11,3 +15,14 @@ passkeys.db
 passkeys.db-journal
 passkeys.db-wal
 passkeys.db-shm
+fuzz/corpus/ceremonies/*
+!fuzz/corpus/ceremonies/none-*
+!fuzz/corpus/ceremonies/packed-*
+!fuzz/corpus/ceremonies/fido-*
+!fuzz/corpus/ceremonies/nested
+!fuzz/corpus/ceremonies/overflow
+!fuzz/corpus/ceremonies/regression-*
+
+!/.gitattributes
+!/.mailmap
+__pycache__/

@@ -1,0 +1,72 @@
+{
+  "status": "PASS",
+  "implementation_commit": "8260480634fac09e1151ca2b1a9eaa1c02af6f67",
+  "source_tree": "5a36536e1b0a67db1f90e6e870fcff7664a44095",
+  "independent_assertions": 1225,
+  "scope": "Raw medians, all 30 full API/control table rows, backend table, six process CPU/size rows, native and WASI allocation tables, narrative changes/control noise, hashes, current implementation identity, two historical checkpoint families. No new benchmark or build.",
+  "p50_change_percent": {
+    "native-rustcrypto": {
+      "es256.authentication_finish": 2.0550375146822564,
+      "ed25519.authentication_finish": 12.360311547578728,
+      "ed25519.registration_finish": 104.68018720748829,
+      "primitive.es256.rustcrypto": -1.2848897164836393
+    },
+    "native-aws-lc": {
+      "es256.authentication_finish": -80.97234792320579,
+      "ed25519.authentication_finish": 25.86944288126056,
+      "ed25519.registration_finish": 121.18334550766986,
+      "primitive.es256.rustcrypto": 1.2561085423475005
+    },
+    "wasi": {
+      "es256.authentication_finish": 0.15978469659909678,
+      "ed25519.authentication_finish": 11.291448909713452,
+      "ed25519.registration_finish": 143.25241451318195,
+      "primitive.es256.rustcrypto": 0.5623984090919132
+    }
+  },
+  "paired_p50_change_ranges": {
+    "native-rustcrypto": {
+      "es256.authentication_finish": [
+        -1.1951738400982403,
+        2.2145448346894137
+      ],
+      "primitive.es256.rustcrypto": [
+        -3.287126816538577,
+        3.839082168698593
+      ]
+    },
+    "native-aws-lc": {
+      "es256.authentication_finish": [
+        -84.93385539593537,
+        -79.47294029861455
+      ],
+      "primitive.es256.rustcrypto": [
+        -6.661648836590528,
+        2.447600767754321
+      ]
+    },
+    "wasi": {
+      "es256.authentication_finish": [
+        -2.3058792686217466,
+        2.46526194325829
+      ],
+      "primitive.es256.rustcrypto": [
+        -0.482423011024935,
+        3.6000581951725064
+      ]
+    }
+  },
+  "input_sha256": {
+    "README.md": "61f49385f09187839e648ac1c4a0877fbaee57613459ccffb7cc8ce4d2533133",
+    "performance.md": "6d05b042886e0db2184ff1072937319466670a4f8af2938ab27fa393b2befd9e",
+    "artifact-builds-final.json": "ae25b58925d829c5fd86dca6d981a26eb7bbac8abb323372d92399b3b882843f",
+    "allocations-native.json": "1d121c46e123881015a397568a7419e620ba379d56ee3d0c2b4da54262da222c",
+    "performance-final-native-rustcrypto.json": "f4abdaf0246f369c5c3d8e7b5e37c849372ce1e6c11f6f05d0839607eac112a5",
+    "performance-final-native-aws-lc.json": "b30a4590b53c48dadb2d9ec567d309d9063c23c641711f449daf6eab38a34026",
+    "performance-final-wasi.json": "2020598852f0ffb5331efa9d3a6badd019b8d24f1bf4e3aa4d1e5e7cab645196"
+  },
+  "documentation_errors": [],
+  "modified_repository_files": [
+    "docs/evidence/allocations-native.json"
+  ]
+}

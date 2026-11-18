@@ -1,17 +1,16 @@
 //! Wire types shared by registration + authentication ceremonies.
 //!
-//! All byte-array fields on the wire are base64url-encoded with no
-//! padding (per the WebAuthn spec). The browser's `PublicKeyCredential`
-//! is normally surfaced as JSON; we mirror that JSON shape in
-//! [`RegistrationResponse`] / [`AuthenticationResponse`] so a Rocket
-//! handler can deserialize directly off the request body.
+//! Wire byte arrays use unpadded base64url. [`RegistrationResponse`] and
+//! [`AuthenticationResponse`] preserve this library's flat JSON adapter:
+//! callers extract fields from the browser's nested `PublicKeyCredential`.
+//! They are not the browser's native `toJSON()` response shape. Stored
+//! credential byte arrays retain their historical Serde array representation.
 
 use base64::Engine;
 use base64::engine::general_purpose::{
     STANDARD as B64STD, STANDARD_NO_PAD as B64STD_NO_PAD, URL_SAFE as B64URL_PAD,
     URL_SAFE_NO_PAD as B64URL,
 };
-use rand::RngCore;
 use serde::{Deserialize, Serialize};
 
 use crate::error::{Error, Result};
@@ -24,11 +23,16 @@ use crate::error::{Error, Result};
 pub struct Challenge(pub Vec<u8>);
 
 impl Challenge {
-    /// Cryptographic random; uses `rand::thread_rng()` (OS CSPRNG).
+    /// Obtain 32 bytes directly from the operating system's CSPRNG, or Web
+    /// Crypto on browser/worker WASM targets. No application PRNG state is kept.
+    ///
+    /// # Panics
+    /// Panics if the platform cannot supply secure randomness. Never falls
+    /// back to timestamps, counters, deterministic output, or weaker entropy.
     #[must_use]
     pub fn random() -> Self {
         let mut buf = [0u8; 32];
-        rand::thread_rng().fill_bytes(&mut buf);
+        getrandom::fill(&mut buf).expect("secure challenge randomness unavailable");
         Self(buf.to_vec())
     }
 
@@ -62,7 +66,7 @@ impl CredentialId {
         B64URL.encode(&self.0)
     }
     pub fn from_b64url(s: &str) -> Result<Self> {
-        b64url_decode(s).map(Self)
+        decode_b64_bounded(s, false, 1023, "credential ID").map(Self)
     }
 }
 
@@ -70,8 +74,8 @@ impl CredentialId {
 
 /// COSE_Key-encoded public key (CBOR), exactly as carried in
 /// `attestedCredentialData.credentialPublicKey`. Stored as-is so we can
-/// re-verify signatures without re-parsing the COSE structure beyond
-/// the alg + key params already extracted.
+/// verify signatures from the original public key encoding. Authentication
+/// validates the stored COSE parameters without constructing an intermediate AST.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(transparent)]
 pub struct CosePublicKey(pub Vec<u8>);
@@ -195,12 +199,61 @@ pub(crate) fn b64url_decode_strict(s: &str) -> Result<Vec<u8>> {
     B64URL.decode(s).map_err(|e| Error::Base64(e.to_string()))
 }
 
+/// Bound attacker-controlled input before allocating the decoded buffer.
+pub(crate) fn decode_b64_bounded(
+    input: &str,
+    strict: bool,
+    limit: usize,
+    field: &'static str,
+) -> Result<Vec<u8>> {
+    if input.len() > limit.div_ceil(3) * 4 {
+        return Err(Error::InputTooLarge { field, limit });
+    }
+    let bytes = if strict {
+        b64url_decode_strict(input)
+    } else {
+        b64url_decode(input)
+    }?;
+    if bytes.len() > limit {
+        return Err(Error::InputTooLarge { field, limit });
+    }
+    Ok(bytes)
+}
+
+/// Decode a short wire field directly into caller-owned storage. The same
+/// encodings and size policy as `decode_b64_bounded` apply; successful decoding
+/// performs no allocation and never exposes bytes beyond the returned length.
+pub(crate) fn decode_b64_into(
+    input: &str,
+    strict: bool,
+    output: &mut [u8],
+    field: &'static str,
+) -> Result<usize> {
+    let limit = output.len();
+    if input.len() > limit.div_ceil(3) * 4 {
+        return Err(Error::InputTooLarge { field, limit });
+    }
+    let mut result = B64URL.decode_slice(input, &mut *output);
+    if !strict && result.is_err() {
+        for engine in [&B64URL_PAD, &B64STD_NO_PAD, &B64STD] {
+            result = engine.decode_slice(input, &mut *output);
+            if result.is_ok() {
+                break;
+            }
+        }
+    }
+    result.map_err(|error| match error {
+        base64::DecodeSliceError::OutputSliceTooSmall => Error::InputTooLarge { field, limit },
+        base64::DecodeSliceError::DecodeError(error) => Error::Base64(error.to_string()),
+    })
+}
+
 // ---------- Wire structs (request bodies) -------------------------------
 
 /// JSON body posted by the client to finish a registration ceremony.
-/// Mirrors the browser's `PublicKeyCredential` (registration variant)
-/// after the standard "base64url every binary field" transformation
-/// callers do in JS before posting.
+/// Flat adapter for a browser registration response. Callers copy `id` and
+/// extract the attestation and client-data bytes from `credential.response`,
+/// encoding the bytes as unpadded base64url before posting.
 #[derive(Debug, Deserialize)]
 pub struct RegistrationResponse {
     /// The base64url-encoded raw credential ID.
@@ -230,7 +283,7 @@ pub struct AuthenticationResponse {
     #[serde(rename = "clientDataJSON")]
     pub client_data_json: String,
     /// User handle (the opaque user id we registered with). Optional;
-    /// only present for discoverable credentials. Currently informational.
+    /// Required for discoverable credentials; checked against the account binding.
     #[serde(rename = "userHandle", default)]
     pub user_handle: Option<String>,
 }
@@ -289,10 +342,8 @@ pub struct CredentialDescriptor {
 
 #[derive(Debug, Serialize, Clone)]
 pub struct AuthenticatorSelection {
-    /// Pins the ceremony to a particular authenticator class. We set
-    /// this to `"platform"` so the browser only offers built-in
-    /// authenticators (Touch ID, Windows Hello, Android biometrics) -
-    /// roaming/USB hardware keys aren't part of the supported flow.
+    /// Browser selection hint. It does not prove that a key is hardware
+    /// protected, or authorize an authenticator-vendor policy.
     #[serde(
         rename = "authenticatorAttachment",
         skip_serializing_if = "Option::is_none"
@@ -337,6 +388,12 @@ pub struct RegistrationState {
     /// called. Stable serialization-friendly form.
     #[serde(default)]
     pub created_at: u64,
+    /// Binds this state to the RP, origin and validation policy that issued it.
+    /// Old in-flight states without a binding must restart their ceremony.
+    #[serde(default)]
+    pub context_binding: Option<[u8; 32]>,
+    #[serde(default)]
+    pub exclude_credentials: Vec<CredentialId>,
 }
 
 impl RegistrationState {
@@ -346,7 +403,8 @@ impl RegistrationState {
     /// `finish_registration` ALSO enforces its own ceiling.
     #[must_use]
     pub fn is_expired(&self, max_age_secs: u64) -> bool {
-        now_secs().saturating_sub(self.created_at) > max_age_secs
+        let now = now_secs();
+        self.created_at == 0 || self.created_at > now || now - self.created_at > max_age_secs
     }
 }
 
@@ -372,13 +430,16 @@ pub struct AuthenticationState {
     /// versions of the crate deserialize cleanly with `None`.
     #[serde(default)]
     pub user_handle: Option<Vec<u8>>,
+    #[serde(default)]
+    pub context_binding: Option<[u8; 32]>,
 }
 
 impl AuthenticationState {
     /// See [`RegistrationState::is_expired`].
     #[must_use]
     pub fn is_expired(&self, max_age_secs: u64) -> bool {
-        now_secs().saturating_sub(self.created_at) > max_age_secs
+        let now = now_secs();
+        self.created_at == 0 || self.created_at > now || now - self.created_at > max_age_secs
     }
 }
 
@@ -386,13 +447,29 @@ impl AuthenticationState {
 /// Saturates to 0 if the system clock is before the Unix epoch (which
 /// will never happen on a sane host) so the helpers never panic.
 pub(crate) fn now_secs() -> u64 {
-    std::time::SystemTime::now()
-        .duration_since(std::time::UNIX_EPOCH)
+    web_time::SystemTime::now()
+        .duration_since(web_time::UNIX_EPOCH)
         .map(|d| d.as_secs())
         .unwrap_or(0)
 }
 
 // ---------- Outcomes ----------------------------------------------------
+
+/// What registration actually established. No variant asserts a trusted vendor.
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum AttestationEvidence {
+    /// Older records did not retain attestation evidence.
+    #[default]
+    Unknown,
+    /// No attestation signature or authenticator provenance was verified.
+    None,
+    /// The credential key verified its own attestation signature.
+    SelfAttestation,
+    /// Certificate profile and statement signature verified; chain trust,
+    /// certificate validity and manufacturer identity remain unverified.
+    UntrustedCertificate,
+}
 
 /// Stored after a successful registration. The caller persists this
 /// (one row per credential per user) and looks it up at auth time.
@@ -400,9 +477,9 @@ pub(crate) fn now_secs() -> u64 {
 /// `Serialize + Deserialize` are derived so callers can stash the
 /// whole credential in a single column (e.g. a JSONB blob or a
 /// `SecretString`-wrapped JSON string) without writing a wrapper struct.
-/// The wire shape is the natural serde-of-struct mapping; field-level
-/// derives on `CredentialId` and `CosePublicKey` produce base64-ish
-/// transparent byte vecs.
+/// The legacy wire shape is preserved: `CredentialId` and `CosePublicKey`
+/// serialize as JSON arrays of byte integers. New security metadata is optional
+/// on old records; absence is represented explicitly as unknown.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct PasskeyCredential {
     pub id: CredentialId,
@@ -415,10 +492,24 @@ pub struct PasskeyCredential {
     /// the FIDO Metadata Service or any allow/deny list. Callers who
     /// want authenticator-attestation policy (e.g. "reject Yubikeys
     /// older than firmware 5.2") must implement that check themselves
-    /// using this field. With attestation "none" (our default), the
-    /// AAGUID is all zeros anyway; meaningful values only appear when
-    /// the client opts into a non-"none" attestation format.
+    /// using a separately validated trust path. With attestation "none", a
+    /// nonzero AAGUID is still possible and provides no manufacturer proof.
     pub aaguid: [u8; 16],
+    /// Account handle captured during registration. Missing on legacy records.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_handle: Option<Vec<u8>>,
+    /// Whether UV was established at registration or subsequently authorized
+    /// using an independent factor. `None` means unknown, never implicitly true.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub uv_initialized: Option<bool>,
+    /// Immutable backup eligibility; absent on records from older versions.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub backup_eligible: Option<bool>,
+    /// Last authenticated backup state, persisted together with the counter.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub backup_state: Option<bool>,
+    #[serde(default)]
+    pub attestation: AttestationEvidence,
 }
 
 /// Successful authentication outcome. Caller updates the stored
@@ -432,6 +523,14 @@ pub struct AuthSuccess {
     pub credential_id: CredentialId,
     pub new_counter: u32,
     pub user_verified: bool,
+    /// The signed UV flag may count as a factor only when this is true.
+    /// A false/unknown `uv_initialized` cannot be upgraded by this assertion alone.
+    #[serde(default)]
+    pub user_verification_eligible: bool,
+    // Unlike persisted credentials, outcomes are transient. Missing fields
+    // must not become false and overwrite known credential metadata.
+    pub backup_eligible: bool,
+    pub backup_state: bool,
 }
 
 #[cfg(test)]
@@ -477,6 +576,36 @@ mod tests {
     #[test]
     fn rejects_garbage() {
         assert!(b64url_decode("!!!not-base64!!!").is_err());
+    }
+
+    #[test]
+    fn stack_base64_decoding_preserves_all_wire_encodings_and_bounds() {
+        for limit in [0, 1, 2, 3, 32, 64, 80] {
+            for length in 0..=limit + 3 {
+                let bytes: Vec<_> = (0..length).map(|i| (i as u8).wrapping_mul(127)).collect();
+                for engine in [&B64URL, &B64URL_PAD, &B64STD_NO_PAD, &B64STD] {
+                    let encoded = engine.encode(&bytes);
+                    for strict in [false, true] {
+                        let expected = decode_b64_bounded(&encoded, strict, limit, "test");
+                        let mut output = vec![0xa5; limit];
+                        let actual = decode_b64_into(&encoded, strict, &mut output, "test");
+                        assert_eq!(actual.is_ok(), expected.is_ok());
+                        if let (Ok(written), Ok(expected)) = (actual, expected) {
+                            assert_eq!(&output[..written], expected);
+                        }
+                    }
+                }
+            }
+        }
+        for invalid in ["!", "A", "Zh", "Zg=", "Zg===", "Zg==\n", "++++____"] {
+            let mut output = [0; 80];
+            for strict in [false, true] {
+                assert_eq!(
+                    decode_b64_into(invalid, strict, &mut output, "test").is_ok(),
+                    decode_b64_bounded(invalid, strict, 80, "test").is_ok()
+                );
+            }
+        }
     }
 
     // ---- RpId ----------------------------------------------------------
@@ -540,6 +669,11 @@ mod tests {
             counter: 7,
             transports: vec!["usb".into(), "nfc".into()],
             aaguid: [0xFE; 16],
+            user_handle: None,
+            uv_initialized: None,
+            backup_eligible: None,
+            backup_state: None,
+            attestation: AttestationEvidence::Unknown,
         }
     }
 
@@ -561,6 +695,9 @@ mod tests {
             credential_id: CredentialId(vec![0xDE, 0xAD, 0xBE, 0xEF]),
             new_counter: 42,
             user_verified: true,
+            user_verification_eligible: true,
+            backup_eligible: false,
+            backup_state: false,
         };
         let wire = serde_json::to_string(&original).expect("serialise");
         let back: AuthSuccess = serde_json::from_str(&wire).expect("deserialise");

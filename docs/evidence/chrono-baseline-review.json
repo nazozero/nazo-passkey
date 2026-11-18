@@ -1,0 +1,337 @@
+{
+  "baseline_commit": "9560ea04bbc01a2da7b002eeeeb0ebe2e7dffbe9",
+  "current_commit": "5031e9b99e2de5f57b12cf04e1cf0919a8ff8312",
+  "chrono_baseline": [
+    {
+      "name": "chrono",
+      "version": "0.4.45",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "checksum": "1aa79e62e7697b8e29b513a68abacf485adcd1fe8284a4316c5ae868e6633327",
+      "dependencies": [
+        "iana-time-zone",
+        "js-sys",
+        "num-traits",
+        "serde",
+        "wasm-bindgen",
+        "windows-link"
+      ]
+    }
+  ],
+  "chrono_current": [
+    {
+      "name": "chrono",
+      "version": "0.4.45",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "checksum": "1aa79e62e7697b8e29b513a68abacf485adcd1fe8284a4316c5ae868e6633327",
+      "dependencies": [
+        "iana-time-zone",
+        "js-sys",
+        "num-traits",
+        "serde",
+        "wasm-bindgen",
+        "windows-link"
+      ]
+    }
+  ],
+  "chrono_packages_equal": true,
+  "direct_reverse_dependencies_baseline": [
+    {
+      "name": "diesel",
+      "version": "2.3.14",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "checksum": "ebe9f7eaef33febd60290c5a9f3b0571d03c4c04a24739cd64808ce30e65a5d3"
+    },
+    {
+      "name": "mdoc-rs",
+      "version": "0.2.0",
+      "source": "git+https://github.com/nazozero/mdoc-rs?rev=9dd3ef60fb98b427065d7ad940cfbdd9a400b2bc#9dd3ef60fb98b427065d7ad940cfbdd9a400b2bc",
+      "checksum": null
+    },
+    {
+      "name": "nazo-auth",
+      "version": "0.3.9",
+      "source": null,
+      "checksum": null
+    },
+    {
+      "name": "nazo-digital-credentials",
+      "version": "0.3.9",
+      "source": null,
+      "checksum": null
+    },
+    {
+      "name": "nazo-identity",
+      "version": "0.3.9",
+      "source": null,
+      "checksum": null
+    },
+    {
+      "name": "nazo-key-management",
+      "version": "0.3.9",
+      "source": null,
+      "checksum": null
+    },
+    {
+      "name": "nazo-oauth-server",
+      "version": "0.3.9",
+      "source": null,
+      "checksum": null
+    },
+    {
+      "name": "nazo-oauth-server-object-store",
+      "version": "0.3.9",
+      "source": null,
+      "checksum": null
+    },
+    {
+      "name": "nazo-openid4vci",
+      "version": "0.3.9",
+      "source": null,
+      "checksum": null
+    },
+    {
+      "name": "nazo-openid4vp",
+      "version": "0.3.9",
+      "source": null,
+      "checksum": null
+    },
+    {
+      "name": "nazo-persistence",
+      "version": "0.3.9",
+      "source": null,
+      "checksum": null
+    },
+    {
+      "name": "nazo-postgres",
+      "version": "0.3.9",
+      "source": null,
+      "checksum": null
+    },
+    {
+      "name": "nazo-resource-server",
+      "version": "0.3.9",
+      "source": null,
+      "checksum": null
+    },
+    {
+      "name": "nazo-scim-events",
+      "version": "0.3.9",
+      "source": null,
+      "checksum": null
+    },
+    {
+      "name": "nazo-server",
+      "version": "0.3.9",
+      "source": null,
+      "checksum": null
+    },
+    {
+      "name": "nazo-valkey",
+      "version": "0.3.9",
+      "source": null,
+      "checksum": null
+    },
+    {
+      "name": "nazoauth",
+      "version": "0.3.9",
+      "source": null,
+      "checksum": null
+    }
+  ],
+  "direct_reverse_dependencies_current": [
+    {
+      "name": "diesel",
+      "version": "2.3.14",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "checksum": "ebe9f7eaef33febd60290c5a9f3b0571d03c4c04a24739cd64808ce30e65a5d3"
+    },
+    {
+      "name": "mdoc-rs",
+      "version": "0.2.0",
+      "source": "git+https://github.com/nazozero/mdoc-rs?rev=9dd3ef60fb98b427065d7ad940cfbdd9a400b2bc#9dd3ef60fb98b427065d7ad940cfbdd9a400b2bc",
+      "checksum": null
+    },
+    {
+      "name": "nazo-auth",
+      "version": "0.3.9",
+      "source": null,
+      "checksum": null
+    },
+    {
+      "name": "nazo-digital-credentials",
+      "version": "0.3.9",
+      "source": null,
+      "checksum": null
+    },
+    {
+      "name": "nazo-identity",
+      "version": "0.3.9",
+      "source": null,
+      "checksum": null
+    },
+    {
+      "name": "nazo-key-management",
+      "version": "0.3.9",
+      "source": null,
+      "checksum": null
+    },
+    {
+      "name": "nazo-oauth-server",
+      "version": "0.3.9",
+      "source": null,
+      "checksum": null
+    },
+    {
+      "name": "nazo-oauth-server-object-store",
+      "version": "0.3.9",
+      "source": null,
+      "checksum": null
+    },
+    {
+      "name": "nazo-openid4vci",
+      "version": "0.3.9",
+      "source": null,
+      "checksum": null
+    },
+    {
+      "name": "nazo-openid4vp",
+      "version": "0.3.9",
+      "source": null,
+      "checksum": null
+    },
+    {
+      "name": "nazo-persistence",
+      "version": "0.3.9",
+      "source": null,
+      "checksum": null
+    },
+    {
+      "name": "nazo-postgres",
+      "version": "0.3.9",
+      "source": null,
+      "checksum": null
+    },
+    {
+      "name": "nazo-resource-server",
+      "version": "0.3.9",
+      "source": null,
+      "checksum": null
+    },
+    {
+      "name": "nazo-scim-events",
+      "version": "0.3.9",
+      "source": null,
+      "checksum": null
+    },
+    {
+      "name": "nazo-server",
+      "version": "0.3.9",
+      "source": null,
+      "checksum": null
+    },
+    {
+      "name": "nazo-valkey",
+      "version": "0.3.9",
+      "source": null,
+      "checksum": null
+    },
+    {
+      "name": "nazoauth",
+      "version": "0.3.9",
+      "source": null,
+      "checksum": null
+    }
+  ],
+  "direct_reverse_dependencies_equal": true,
+  "transitive_reverse_dependency_names_baseline": [
+    "diesel",
+    "diesel-async",
+    "diesel_migrations",
+    "mdoc-rs",
+    "nazo-auth",
+    "nazo-digital-credentials",
+    "nazo-http-actix",
+    "nazo-identity",
+    "nazo-key-management",
+    "nazo-oauth-server",
+    "nazo-oauth-server-object-store",
+    "nazo-oauth-server-postgres",
+    "nazo-oauth-server-valkey",
+    "nazo-openid4vci",
+    "nazo-openid4vp",
+    "nazo-persistence",
+    "nazo-postgres",
+    "nazo-resource-server",
+    "nazo-scim-events",
+    "nazo-server",
+    "nazo-valkey",
+    "nazoauth"
+  ],
+  "transitive_reverse_dependency_names_current": [
+    "diesel",
+    "diesel-async",
+    "diesel_migrations",
+    "mdoc-rs",
+    "nazo-auth",
+    "nazo-digital-credentials",
+    "nazo-http-actix",
+    "nazo-identity",
+    "nazo-key-management",
+    "nazo-oauth-server",
+    "nazo-oauth-server-object-store",
+    "nazo-oauth-server-postgres",
+    "nazo-oauth-server-valkey",
+    "nazo-openid4vci",
+    "nazo-openid4vp",
+    "nazo-persistence",
+    "nazo-postgres",
+    "nazo-resource-server",
+    "nazo-scim-events",
+    "nazo-server",
+    "nazo-valkey",
+    "nazoauth"
+  ],
+  "source_lexical_counts": {
+    "tests": {
+      "files": 224,
+      "matching_lines": 1648
+    },
+    "src": {
+      "files": 183,
+      "matching_lines": 961
+    }
+  },
+  "policy_comparison": {
+    "deny.toml": {
+      "baseline_sha256": "53cd71ae69d08162556d304153885a3884a188b10026c8e943429198267a00e4",
+      "current_sha256": "53cd71ae69d08162556d304153885a3884a188b10026c8e943429198267a00e4",
+      "identical": true
+    },
+    ".github/workflows/conformance-security.yml": {
+      "baseline_sha256": "6d7bd1e01e515173d5c037136e30ab334ed841cd482cfba4cb1d12548b4c8fcc",
+      "current_sha256": "6d7bd1e01e515173d5c037136e30ab334ed841cd482cfba4cb1d12548b4c8fcc",
+      "identical": true
+    }
+  },
+  "advisory": {
+    "id": "RUSTSEC-2026-0543",
+    "advisory_date": "2026-09-14",
+    "informational": "unmaintained",
+    "patched_versions": [],
+    "official_maintainer_url": "https://github.com/chronotope/chrono/issues/1768",
+    "local_primary_record": "/home/agent/.cargo/advisory-db/crates/chrono/RUSTSEC-2026-0543.md",
+    "record_sha256": "18424c6a155f754151a55ce9fb73376bf66f3709d81750d921f5293da91ccc59",
+    "id_assignment_commit": "233155b4025b854c68a4b199c0e32d7fd53291a2",
+    "id_assignment_timestamp_utc": "2026-11-17T10:08:07Z"
+  },
+  "review_scope": "Read-only static source and lockfile comparison. No compilation, advisory-gate rerun, policy change, dependency change or data migration.",
+  "reverse_graph_note": "Reverse closure uses locked dependency package names. All relevant names have one locked version; direct parents include both production and any target/dev dependencies present in Cargo.lock.",
+  "transitive_reverse_dependency_names_equal": true,
+  "lexical_scan": {
+    "file_source": "rg --files crates -g *.rs",
+    "pattern": "\\bchrono\\b|\\bDateTime\\b|\\bNaiveDate(?:Time)?\\b|\\bNaiveTime\\b|\\bUtc\\b",
+    "count_unit": "Matching files and matching lines, not individual regex occurrences",
+    "src_category": "File has src as a path component; can include inline tests",
+    "tests_category": "Other Rust files, principally tests"
+  }
+}

@@ -1,0 +1,74 @@
+[
+  {
+    "label": "rustcrypto",
+    "command": [
+      "cargo",
+      "build",
+      "--locked",
+      "--release",
+      "--manifest-path",
+      "perf/Cargo.toml",
+      "--no-default-features"
+    ],
+    "exit_code": 0,
+    "seconds": 21.785818197999106,
+    "implementation_commit": "8260480634fac09e1151ca2b1a9eaa1c02af6f67",
+    "source_tree": "5a36536e1b0a67db1f90e6e870fcff7664a44095",
+    "artifact": {
+      "path": "/workspace/scratch/f7903e352d2d/perf-artifacts/candidate-packed-native-rustcrypto",
+      "bytes": 1239496,
+      "sha256": "49e42c2edfa75fabb1a1c13b28a8ea4e7565f02eb95cb98d771f6978d9a1cd47"
+    },
+    "build_log_sha256": "2376ae111ae514d0f7a4ffca4341113f601f7c9589de5c36453260d348319ede",
+    "harness_sha256": "7d5fa01b880c39b22f7f7d0bf7b439f47f09ffd9236aefd2a18d1cee5b8984a2"
+  },
+  {
+    "label": "aws-lc",
+    "command": [
+      "cargo",
+      "build",
+      "--locked",
+      "--release",
+      "--manifest-path",
+      "perf/Cargo.toml",
+      "--features",
+      "aws-lc"
+    ],
+    "exit_code": 0,
+    "seconds": 17.69435636200069,
+    "implementation_commit": "8260480634fac09e1151ca2b1a9eaa1c02af6f67",
+    "source_tree": "5a36536e1b0a67db1f90e6e870fcff7664a44095",
+    "artifact": {
+      "path": "/workspace/scratch/f7903e352d2d/perf-artifacts/candidate-packed-native-aws-lc",
+      "bytes": 3835088,
+      "sha256": "ba36e79a1b2df825635fdd3f683945aaec06c58b4cdd44f005b4bc95147d6bc5"
+    },
+    "build_log_sha256": "e11c16a4b7b2ad2d288fa444e56857b47c300338705402017e19d295a30fc564",
+    "harness_sha256": "7d5fa01b880c39b22f7f7d0bf7b439f47f09ffd9236aefd2a18d1cee5b8984a2"
+  },
+  {
+    "label": "wasi",
+    "command": [
+      "cargo",
+      "build",
+      "--locked",
+      "--release",
+      "--manifest-path",
+      "perf/Cargo.toml",
+      "--all-features",
+      "--target",
+      "wasm32-wasip1"
+    ],
+    "exit_code": 0,
+    "seconds": 21.366790907000905,
+    "implementation_commit": "8260480634fac09e1151ca2b1a9eaa1c02af6f67",
+    "source_tree": "5a36536e1b0a67db1f90e6e870fcff7664a44095",
+    "artifact": {
+      "path": "/workspace/scratch/f7903e352d2d/perf-artifacts/candidate-packed-wasi.wasm",
+      "bytes": 954507,
+      "sha256": "ce66e71baad47b15482a8bef8edd0d84f1641be293f06c01e0a3f27d922ca717"
+    },
+    "build_log_sha256": "b010d53bf78ca3a3d7cacdeb913af776082672dcfded4c557591d22f687db0b1",
+    "harness_sha256": "7d5fa01b880c39b22f7f7d0bf7b439f47f09ffd9236aefd2a18d1cee5b8984a2"
+  }
+]

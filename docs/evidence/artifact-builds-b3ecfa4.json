@@ -1,0 +1,71 @@
+[
+  {
+    "label": "rustcrypto",
+    "command": [
+      "cargo",
+      "build",
+      "--locked",
+      "--release",
+      "--manifest-path",
+      "perf/Cargo.toml",
+      "--no-default-features"
+    ],
+    "exit_code": 0,
+    "seconds": 32.01928782463074,
+    "implementation_commit": "b3ecfa40c8f626903f36d6065640236ac87fe472",
+    "artifact": {
+      "path": "/workspace/scratch/f7903e352d2d/perf-artifacts/candidate-final-native-rustcrypto",
+      "bytes": 1237976,
+      "sha256": "04847bc9d1f1e9615e7b3dce395e4362a5550e4eb369977c57035096b97d173d"
+    },
+    "build_log_sha256": "fb645d24ff1ebce482bdd7146cd195b6c3308db04ce874e9a87ee980818f6ecf",
+    "harness_sha256": "7d5fa01b880c39b22f7f7d0bf7b439f47f09ffd9236aefd2a18d1cee5b8984a2"
+  },
+  {
+    "label": "aws-lc",
+    "command": [
+      "cargo",
+      "build",
+      "--locked",
+      "--release",
+      "--manifest-path",
+      "perf/Cargo.toml",
+      "--features",
+      "aws-lc"
+    ],
+    "exit_code": 0,
+    "seconds": 21.954612731933594,
+    "implementation_commit": "b3ecfa40c8f626903f36d6065640236ac87fe472",
+    "artifact": {
+      "path": "/workspace/scratch/f7903e352d2d/perf-artifacts/candidate-final-native-aws-lc",
+      "bytes": 3833808,
+      "sha256": "eff68731bffb30d1b596c305ce4ce37c4684f780a2010f8147d7aaa25d2ad473"
+    },
+    "build_log_sha256": "b79bcc611e2b579e3d51e55f5b9865d742733e51a3c61e58084515d4190f4f2e",
+    "harness_sha256": "7d5fa01b880c39b22f7f7d0bf7b439f47f09ffd9236aefd2a18d1cee5b8984a2"
+  },
+  {
+    "label": "wasi",
+    "command": [
+      "cargo",
+      "build",
+      "--locked",
+      "--release",
+      "--manifest-path",
+      "perf/Cargo.toml",
+      "--all-features",
+      "--target",
+      "wasm32-wasip1"
+    ],
+    "exit_code": 0,
+    "seconds": 20.222694873809814,
+    "implementation_commit": "b3ecfa40c8f626903f36d6065640236ac87fe472",
+    "artifact": {
+      "path": "/workspace/scratch/f7903e352d2d/perf-artifacts/candidate-final-wasi.wasm",
+      "bytes": 952662,
+      "sha256": "af042f30b359158443df7b83798713292f01c660f7db0035d92a9a83449ed006"
+    },
+    "build_log_sha256": "d9bdb83d68cb85ea79d8d765de6fa52398ac695310b4f0848092acb7bc9584c6",
+    "harness_sha256": "7d5fa01b880c39b22f7f7d0bf7b439f47f09ffd9236aefd2a18d1cee5b8984a2"
+  }
+]

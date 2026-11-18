@@ -1,0 +1,3060 @@
+{
+  "schema_version": 1,
+  "evidence_kind": "Final production integration CI record; overall dependency policy remains blocked",
+  "repository": "nazozero/NazoAuth",
+  "pull_request": 287,
+  "pull_request_url": "https://github.com/nazozero/NazoAuth/pull/287",
+  "source_head": "2d5c335fc6563e874d8626a5067b4fa8df89bacc",
+  "source_tree": "f01983bb64f094ec7c88ccda0de7551297be6127",
+  "base_head": "9560ea04bbc01a2da7b002eeeeb0ebe2e7dffbe9",
+  "tested_pull_request_merge": "ea551e890c6cc74f029a776c1b05cf33082eb6ac",
+  "passkey_auth_revision": "8260480634fac09e1151ca2b1a9eaa1c02af6f67",
+  "identity_evidence": {
+    "head_tree_source": "https://api.github.com/repos/nazozero/NazoAuth/commits/2d5c335fc6563e874d8626a5067b4fa8df89bacc",
+    "checkout_log_job": 134032749250,
+    "checkout_excerpts": [
+      "2026-11-17T12:15:37.7556326Z HEAD is now at ea551e8 Merge 2d5c335fc6563e874d8626a5067b4fa8df89bacc into 9560ea04bbc01a2da7b002eeeeb0ebe2e7dffbe9",
+      "2026-11-17T12:15:37.7652159Z ea551e890c6cc74f029a776c1b05cf33082eb6ac",
+      "2026-11-17T12:16:09.1281353Z    Compiling passkey-auth v0.2.0 (https://github.com/nazozero/passkey-auth-rs?rev=8260480634fac09e1151ca2b1a9eaa1c02af6f67#82604806)"
+    ],
+    "tested_merge_tree": "f01983bb64f094ec7c88ccda0de7551297be6127"
+  },
+  "overall_conclusion": "NOT GREEN: conformance-security failed its existing Chrono unmaintained dependency policy; the dependent real HTTP security matrix was not executed.",
+  "workflow_runs": [
+    {
+      "label": "codeql",
+      "id": 44081397736,
+      "name": "codeql",
+      "path": ".github/workflows/codeql.yml",
+      "run_number": 2280,
+      "attempt": 1,
+      "event": "pull_request",
+      "source_head": "2d5c335fc6563e874d8626a5067b4fa8df89bacc",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-11-17T12:15:15Z",
+      "updated_at": "2026-11-17T12:25:03Z",
+      "url": "https://github.com/nazozero/NazoAuth/actions/runs/44081397736",
+      "pull_request_heads": [
+        {
+          "number": 287,
+          "head": "2d5c335fc6563e874d8626a5067b4fa8df89bacc",
+          "base": "9560ea04bbc01a2da7b002eeeeb0ebe2e7dffbe9"
+        }
+      ],
+      "jobs": [
+        {
+          "id": 134032616895,
+          "name": "inputs / inputs",
+          "url": "https://github.com/nazozero/NazoAuth/actions/runs/44081397736/job/134032616895",
+          "status": "completed",
+          "conclusion": "success",
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1
+            },
+            {
+              "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2
+            },
+            {
+              "name": "Run python3 scripts/ci_inputs.py \"$INPUT_SCOPE\"",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3
+            },
+            {
+              "name": "Run actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4
+            },
+            {
+              "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 8
+            },
+            {
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 9
+            }
+          ]
+        },
+        {
+          "id": 134032713513,
+          "name": "CodeQL Rust analysis",
+          "url": "https://github.com/nazozero/NazoAuth/actions/runs/44081397736/job/134032713513",
+          "status": "completed",
+          "conclusion": "success",
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1
+            },
+            {
+              "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2
+            },
+            {
+              "name": "Run dtolnay/rust-toolchain@9522411a9bce8484da960823fc2f46e52f981f71",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3
+            },
+            {
+              "name": "Install native dependencies",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4
+            },
+            {
+              "name": "Run github/codeql-action/init@6f2ac81f5cd81fe351a197ba0b00d91d03cd2aee",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 5
+            },
+            {
+              "name": "Run github/codeql-action/analyze@48870fdd6b42ee6474ec4207209ff87609271a5e",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 6
+            },
+            {
+              "name": "Post Run github/codeql-action/analyze@48870fdd6b42ee6474ec4207209ff87609271a5e",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 10
+            },
+            {
+              "name": "Post Run github/codeql-action/init@6f2ac81f5cd81fe351a197ba0b00d91d03cd2aee",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 11
+            },
+            {
+              "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 12
+            },
+            {
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 13
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "label": "security",
+      "id": 44081397523,
+      "name": "conformance-security",
+      "path": ".github/workflows/conformance-security.yml",
+      "run_number": 2497,
+      "attempt": 1,
+      "event": "pull_request",
+      "source_head": "2d5c335fc6563e874d8626a5067b4fa8df89bacc",
+      "status": "completed",
+      "conclusion": "failure",
+      "created_at": "2026-11-17T12:15:15Z",
+      "updated_at": "2026-11-17T12:15:54Z",
+      "url": "https://github.com/nazozero/NazoAuth/actions/runs/44081397523",
+      "pull_request_heads": [
+        {
+          "number": 287,
+          "head": "2d5c335fc6563e874d8626a5067b4fa8df89bacc",
+          "base": "9560ea04bbc01a2da7b002eeeeb0ebe2e7dffbe9"
+        }
+      ],
+      "jobs": [
+        {
+          "id": 134032616489,
+          "name": "inputs / inputs",
+          "url": "https://github.com/nazozero/NazoAuth/actions/runs/44081397523/job/134032616489",
+          "status": "completed",
+          "conclusion": "success",
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1
+            },
+            {
+              "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2
+            },
+            {
+              "name": "Run python3 scripts/ci_inputs.py \"$INPUT_SCOPE\"",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3
+            },
+            {
+              "name": "Run actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4
+            },
+            {
+              "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 8
+            },
+            {
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 9
+            }
+          ]
+        },
+        {
+          "id": 134032722935,
+          "name": "supply-chain-gate",
+          "url": "https://github.com/nazozero/NazoAuth/actions/runs/44081397523/job/134032722935",
+          "status": "completed",
+          "conclusion": "failure",
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1
+            },
+            {
+              "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2
+            },
+            {
+              "name": "Run dtolnay/rust-toolchain@9522411a9bce8484da960823fc2f46e52f981f71",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3
+            },
+            {
+              "name": "Install native dependencies",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4
+            },
+            {
+              "name": "Install pinned Rust supply-chain tools",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 5
+            },
+            {
+              "name": "Check dependency policy",
+              "status": "completed",
+              "conclusion": "failure",
+              "number": 6
+            },
+            {
+              "name": "Generate Rust SBOM",
+              "status": "completed",
+              "conclusion": "skipped",
+              "number": 7
+            },
+            {
+              "name": "Run docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069",
+              "status": "completed",
+              "conclusion": "skipped",
+              "number": 8
+            },
+            {
+              "name": "Build service image",
+              "status": "completed",
+              "conclusion": "skipped",
+              "number": 9
+            },
+            {
+              "name": "Scan service image",
+              "status": "completed",
+              "conclusion": "skipped",
+              "number": 10
+            },
+            {
+              "name": "Upload scanned service image",
+              "status": "completed",
+              "conclusion": "skipped",
+              "number": 11
+            },
+            {
+              "name": "Upload SBOM",
+              "status": "completed",
+              "conclusion": "skipped",
+              "number": 12
+            },
+            {
+              "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 24
+            },
+            {
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 25
+            }
+          ]
+        },
+        {
+          "id": 134032722939,
+          "name": "source-policy-gate",
+          "url": "https://github.com/nazozero/NazoAuth/actions/runs/44081397523/job/134032722939",
+          "status": "completed",
+          "conclusion": "success",
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1
+            },
+            {
+              "name": "Run actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2
+            },
+            {
+              "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3
+            },
+            {
+              "name": "Check real HTTP source policy",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4
+            },
+            {
+              "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 7
+            },
+            {
+              "name": "Post Run actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 8
+            },
+            {
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 9
+            }
+          ]
+        },
+        {
+          "id": 134032964037,
+          "name": "real-http-security-matrix",
+          "url": "https://github.com/nazozero/NazoAuth/actions/runs/44081397523/job/134032964037",
+          "status": "completed",
+          "conclusion": "skipped",
+          "steps": null
+        }
+      ]
+    },
+    {
+      "label": "quality",
+      "id": 44081397484,
+      "name": "code-quality",
+      "path": ".github/workflows/code-quality.yml",
+      "run_number": 2279,
+      "attempt": 1,
+      "event": "pull_request",
+      "source_head": "2d5c335fc6563e874d8626a5067b4fa8df89bacc",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-11-17T12:15:15Z",
+      "updated_at": "2026-11-17T12:24:27Z",
+      "url": "https://github.com/nazozero/NazoAuth/actions/runs/44081397484",
+      "pull_request_heads": [
+        {
+          "number": 287,
+          "head": "2d5c335fc6563e874d8626a5067b4fa8df89bacc",
+          "base": "9560ea04bbc01a2da7b002eeeeb0ebe2e7dffbe9"
+        }
+      ],
+      "jobs": [
+        {
+          "id": 134032616215,
+          "name": "Python script syntax gate",
+          "url": "https://github.com/nazozero/NazoAuth/actions/runs/44081397484/job/134032616215",
+          "status": "completed",
+          "conclusion": "success",
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1
+            },
+            {
+              "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2
+            },
+            {
+              "name": "Run actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3
+            },
+            {
+              "name": "Run dtolnay/rust-toolchain@9522411a9bce8484da960823fc2f46e52f981f71",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4
+            },
+            {
+              "name": "Install streaming evidence decoder",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 5
+            },
+            {
+              "name": "Verify compatibility contracts",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 6
+            },
+            {
+              "name": "Verify persistence dependency isolation",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 7
+            },
+            {
+              "name": "Verify crypto boundary",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 8
+            },
+            {
+              "name": "Test crypto boundary guard",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 9
+            },
+            {
+              "name": "Verify perf results layout",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 10
+            },
+            {
+              "name": "Compile Python scripts",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 11
+            },
+            {
+              "name": "Run actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 12
+            },
+            {
+              "name": "Verify performance measurement and acceptance regressions",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 13
+            },
+            {
+              "name": "Post Run actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 24
+            },
+            {
+              "name": "Post Run actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 25
+            },
+            {
+              "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 26
+            },
+            {
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 27
+            }
+          ]
+        },
+        {
+          "id": 134032616296,
+          "name": "inputs / inputs",
+          "url": "https://github.com/nazozero/NazoAuth/actions/runs/44081397484/job/134032616296",
+          "status": "completed",
+          "conclusion": "success",
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1
+            },
+            {
+              "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2
+            },
+            {
+              "name": "Run python3 scripts/ci_inputs.py \"$INPUT_SCOPE\"",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3
+            },
+            {
+              "name": "Run actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4
+            },
+            {
+              "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 8
+            },
+            {
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 9
+            }
+          ]
+        },
+        {
+          "id": 134032749250,
+          "name": "Build reusable Rust tests",
+          "url": "https://github.com/nazozero/NazoAuth/actions/runs/44081397484/job/134032749250",
+          "status": "completed",
+          "conclusion": "success",
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1
+            },
+            {
+              "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2
+            },
+            {
+              "name": "Run dtolnay/rust-toolchain@9522411a9bce8484da960823fc2f46e52f981f71",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3
+            },
+            {
+              "name": "Run Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4
+            },
+            {
+              "name": "Budget build concurrency",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 5
+            },
+            {
+              "name": "Install native dependencies",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 6
+            },
+            {
+              "name": "Run taiki-e/install-action@ab49d3c64680143e184118bed66a46419fc15519",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 7
+            },
+            {
+              "name": "Build and archive the complete test suite",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 8
+            },
+            {
+              "name": "Test documentation examples",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 9
+            },
+            {
+              "name": "Run actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 10
+            },
+            {
+              "name": "Post Run Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 19
+            },
+            {
+              "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 20
+            },
+            {
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 21
+            }
+          ]
+        },
+        {
+          "id": 134032749364,
+          "name": "Rust format and Clippy",
+          "url": "https://github.com/nazozero/NazoAuth/actions/runs/44081397484/job/134032749364",
+          "status": "completed",
+          "conclusion": "success",
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1
+            },
+            {
+              "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2
+            },
+            {
+              "name": "Run dtolnay/rust-toolchain@9522411a9bce8484da960823fc2f46e52f981f71",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3
+            },
+            {
+              "name": "Run Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4
+            },
+            {
+              "name": "Budget build concurrency",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 5
+            },
+            {
+              "name": "Install native dependencies",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 6
+            },
+            {
+              "name": "Check native transport dependencies",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 7
+            },
+            {
+              "name": "Format",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 8
+            },
+            {
+              "name": "Clippy all targets",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 9
+            },
+            {
+              "name": "Post Run Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 17
+            },
+            {
+              "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 18
+            },
+            {
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 19
+            }
+          ]
+        },
+        {
+          "id": 134032749369,
+          "name": "Build shared S3 test fixture",
+          "url": "https://github.com/nazozero/NazoAuth/actions/runs/44081397484/job/134032749369",
+          "status": "completed",
+          "conclusion": "success",
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1
+            },
+            {
+              "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2
+            },
+            {
+              "name": "Run docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3
+            },
+            {
+              "name": "Run docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4
+            },
+            {
+              "name": "Save fixture image",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 5
+            },
+            {
+              "name": "Run actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 6
+            },
+            {
+              "name": "Post Run docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 10
+            },
+            {
+              "name": "Post Run docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 11
+            },
+            {
+              "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 12
+            },
+            {
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 13
+            }
+          ]
+        },
+        {
+          "id": 134032751946,
+          "name": "Rust quality manual gate",
+          "url": "https://github.com/nazozero/NazoAuth/actions/runs/44081397484/job/134032751946",
+          "status": "completed",
+          "conclusion": "skipped",
+          "steps": null
+        },
+        {
+          "id": 134032752806,
+          "name": "coverage",
+          "url": "https://github.com/nazozero/NazoAuth/actions/runs/44081397484/job/134032752806",
+          "status": "completed",
+          "conclusion": "skipped",
+          "steps": null
+        },
+        {
+          "id": 134034677635,
+          "name": "Rust tests (6/6)",
+          "url": "https://github.com/nazozero/NazoAuth/actions/runs/44081397484/job/134034677635",
+          "status": "completed",
+          "conclusion": "success",
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1
+            },
+            {
+              "name": "Initialize containers",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2
+            },
+            {
+              "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3
+            },
+            {
+              "name": "Run dtolnay/rust-toolchain@9522411a9bce8484da960823fc2f46e52f981f71",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4
+            },
+            {
+              "name": "Run taiki-e/install-action@ab49d3c64680143e184118bed66a46419fc15519",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 5
+            },
+            {
+              "name": "Run actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 6
+            },
+            {
+              "name": "Run actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 7
+            },
+            {
+              "name": "Prepare PostgreSQL client and migration reference",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 8
+            },
+            {
+              "name": "Prepare isolated avatar object storage",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 9
+            },
+            {
+              "name": "Create isolated audit ledger test database",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 10
+            },
+            {
+              "name": "Materialize the isolated CI schema",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 11
+            },
+            {
+              "name": "Test workspace partition with PostgreSQL and Valkey",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 12
+            },
+            {
+              "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 23
+            },
+            {
+              "name": "Stop containers",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 24
+            },
+            {
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 25
+            }
+          ]
+        },
+        {
+          "id": 134034677648,
+          "name": "Rust tests (1/6)",
+          "url": "https://github.com/nazozero/NazoAuth/actions/runs/44081397484/job/134034677648",
+          "status": "completed",
+          "conclusion": "success",
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1
+            },
+            {
+              "name": "Initialize containers",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2
+            },
+            {
+              "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3
+            },
+            {
+              "name": "Run dtolnay/rust-toolchain@9522411a9bce8484da960823fc2f46e52f981f71",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4
+            },
+            {
+              "name": "Run taiki-e/install-action@ab49d3c64680143e184118bed66a46419fc15519",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 5
+            },
+            {
+              "name": "Run actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 6
+            },
+            {
+              "name": "Run actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 7
+            },
+            {
+              "name": "Prepare PostgreSQL client and migration reference",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 8
+            },
+            {
+              "name": "Prepare isolated avatar object storage",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 9
+            },
+            {
+              "name": "Create isolated audit ledger test database",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 10
+            },
+            {
+              "name": "Materialize the isolated CI schema",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 11
+            },
+            {
+              "name": "Test workspace partition with PostgreSQL and Valkey",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 12
+            },
+            {
+              "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 23
+            },
+            {
+              "name": "Stop containers",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 24
+            },
+            {
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 25
+            }
+          ]
+        },
+        {
+          "id": 134034677715,
+          "name": "Rust tests (3/6)",
+          "url": "https://github.com/nazozero/NazoAuth/actions/runs/44081397484/job/134034677715",
+          "status": "completed",
+          "conclusion": "success",
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1
+            },
+            {
+              "name": "Initialize containers",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2
+            },
+            {
+              "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3
+            },
+            {
+              "name": "Run dtolnay/rust-toolchain@9522411a9bce8484da960823fc2f46e52f981f71",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4
+            },
+            {
+              "name": "Run taiki-e/install-action@ab49d3c64680143e184118bed66a46419fc15519",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 5
+            },
+            {
+              "name": "Run actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 6
+            },
+            {
+              "name": "Run actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 7
+            },
+            {
+              "name": "Prepare PostgreSQL client and migration reference",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 8
+            },
+            {
+              "name": "Prepare isolated avatar object storage",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 9
+            },
+            {
+              "name": "Create isolated audit ledger test database",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 10
+            },
+            {
+              "name": "Materialize the isolated CI schema",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 11
+            },
+            {
+              "name": "Test workspace partition with PostgreSQL and Valkey",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 12
+            },
+            {
+              "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 23
+            },
+            {
+              "name": "Stop containers",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 24
+            },
+            {
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 25
+            }
+          ]
+        },
+        {
+          "id": 134034677741,
+          "name": "Rust tests (4/6)",
+          "url": "https://github.com/nazozero/NazoAuth/actions/runs/44081397484/job/134034677741",
+          "status": "completed",
+          "conclusion": "success",
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1
+            },
+            {
+              "name": "Initialize containers",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2
+            },
+            {
+              "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3
+            },
+            {
+              "name": "Run dtolnay/rust-toolchain@9522411a9bce8484da960823fc2f46e52f981f71",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4
+            },
+            {
+              "name": "Run taiki-e/install-action@ab49d3c64680143e184118bed66a46419fc15519",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 5
+            },
+            {
+              "name": "Run actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 6
+            },
+            {
+              "name": "Run actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 7
+            },
+            {
+              "name": "Prepare PostgreSQL client and migration reference",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 8
+            },
+            {
+              "name": "Prepare isolated avatar object storage",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 9
+            },
+            {
+              "name": "Create isolated audit ledger test database",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 10
+            },
+            {
+              "name": "Materialize the isolated CI schema",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 11
+            },
+            {
+              "name": "Test workspace partition with PostgreSQL and Valkey",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 12
+            },
+            {
+              "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 23
+            },
+            {
+              "name": "Stop containers",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 24
+            },
+            {
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 25
+            }
+          ]
+        },
+        {
+          "id": 134034677763,
+          "name": "Rust tests (2/6)",
+          "url": "https://github.com/nazozero/NazoAuth/actions/runs/44081397484/job/134034677763",
+          "status": "completed",
+          "conclusion": "success",
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1
+            },
+            {
+              "name": "Initialize containers",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2
+            },
+            {
+              "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3
+            },
+            {
+              "name": "Run dtolnay/rust-toolchain@9522411a9bce8484da960823fc2f46e52f981f71",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4
+            },
+            {
+              "name": "Run taiki-e/install-action@ab49d3c64680143e184118bed66a46419fc15519",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 5
+            },
+            {
+              "name": "Run actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 6
+            },
+            {
+              "name": "Run actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 7
+            },
+            {
+              "name": "Prepare PostgreSQL client and migration reference",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 8
+            },
+            {
+              "name": "Prepare isolated avatar object storage",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 9
+            },
+            {
+              "name": "Create isolated audit ledger test database",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 10
+            },
+            {
+              "name": "Materialize the isolated CI schema",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 11
+            },
+            {
+              "name": "Test workspace partition with PostgreSQL and Valkey",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 12
+            },
+            {
+              "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 23
+            },
+            {
+              "name": "Stop containers",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 24
+            },
+            {
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 25
+            }
+          ]
+        },
+        {
+          "id": 134034677956,
+          "name": "Rust tests (5/6)",
+          "url": "https://github.com/nazozero/NazoAuth/actions/runs/44081397484/job/134034677956",
+          "status": "completed",
+          "conclusion": "success",
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1
+            },
+            {
+              "name": "Initialize containers",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2
+            },
+            {
+              "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3
+            },
+            {
+              "name": "Run dtolnay/rust-toolchain@9522411a9bce8484da960823fc2f46e52f981f71",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4
+            },
+            {
+              "name": "Run taiki-e/install-action@ab49d3c64680143e184118bed66a46419fc15519",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 5
+            },
+            {
+              "name": "Run actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 6
+            },
+            {
+              "name": "Run actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 7
+            },
+            {
+              "name": "Prepare PostgreSQL client and migration reference",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 8
+            },
+            {
+              "name": "Prepare isolated avatar object storage",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 9
+            },
+            {
+              "name": "Create isolated audit ledger test database",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 10
+            },
+            {
+              "name": "Materialize the isolated CI schema",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 11
+            },
+            {
+              "name": "Test workspace partition with PostgreSQL and Valkey",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 12
+            },
+            {
+              "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 23
+            },
+            {
+              "name": "Stop containers",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 24
+            },
+            {
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 25
+            }
+          ]
+        },
+        {
+          "id": 134037450918,
+          "name": "Rust quality gate",
+          "url": "https://github.com/nazozero/NazoAuth/actions/runs/44081397484/job/134037450918",
+          "status": "completed",
+          "conclusion": "success",
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1
+            },
+            {
+              "name": "Require all applicable Rust checks",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2
+            },
+            {
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "label": "spec",
+      "id": 44081397509,
+      "name": "specification-freshness",
+      "path": ".github/workflows/spec-freshness.yml",
+      "run_number": 1460,
+      "attempt": 1,
+      "event": "pull_request",
+      "source_head": "2d5c335fc6563e874d8626a5067b4fa8df89bacc",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-11-17T12:15:15Z",
+      "updated_at": "2026-11-17T12:15:34Z",
+      "url": "https://github.com/nazozero/NazoAuth/actions/runs/44081397509",
+      "pull_request_heads": [
+        {
+          "number": 287,
+          "head": "2d5c335fc6563e874d8626a5067b4fa8df89bacc",
+          "base": "9560ea04bbc01a2da7b002eeeeb0ebe2e7dffbe9"
+        }
+      ],
+      "jobs": [
+        {
+          "id": 134032615990,
+          "name": "Validate inventory and active pins",
+          "url": "https://github.com/nazozero/NazoAuth/actions/runs/44081397509/job/134032615990",
+          "status": "completed",
+          "conclusion": "success",
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1
+            },
+            {
+              "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2
+            },
+            {
+              "name": "Validate GitHub Actions workflows",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3
+            },
+            {
+              "name": "Run actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4
+            },
+            {
+              "name": "Run python -m unittest tests.unit.test_spec_freshness",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 5
+            },
+            {
+              "name": "Run python scripts/check_spec_freshness.py --offline",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 6
+            },
+            {
+              "name": "Post Run actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 11
+            },
+            {
+              "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 12
+            },
+            {
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 13
+            }
+          ]
+        },
+        {
+          "id": 134032784935,
+          "name": "Verify official primary sources",
+          "url": "https://github.com/nazozero/NazoAuth/actions/runs/44081397509/job/134032784935",
+          "status": "completed",
+          "conclusion": "skipped",
+          "steps": null
+        }
+      ]
+    },
+    {
+      "label": "dependencies",
+      "id": 44081397851,
+      "name": "dependency-review",
+      "path": ".github/workflows/dependency-review.yml",
+      "run_number": 1819,
+      "attempt": 1,
+      "event": "pull_request",
+      "source_head": "2d5c335fc6563e874d8626a5067b4fa8df89bacc",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-11-17T12:15:15Z",
+      "updated_at": "2026-11-17T12:15:33Z",
+      "url": "https://github.com/nazozero/NazoAuth/actions/runs/44081397851",
+      "pull_request_heads": [
+        {
+          "number": 287,
+          "head": "2d5c335fc6563e874d8626a5067b4fa8df89bacc",
+          "base": "9560ea04bbc01a2da7b002eeeeb0ebe2e7dffbe9"
+        }
+      ],
+      "jobs": [
+        {
+          "id": 134032618546,
+          "name": "Dependency vulnerability review",
+          "url": "https://github.com/nazozero/NazoAuth/actions/runs/44081397851/job/134032618546",
+          "status": "completed",
+          "conclusion": "success",
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1
+            },
+            {
+              "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2
+            },
+            {
+              "name": "Run actions/dependency-review-action@a1d282b36b6f3519aa1f3fc636f609c47dddb294",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3
+            },
+            {
+              "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 6
+            },
+            {
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 7
+            }
+          ]
+        },
+        {
+          "id": 134032619587,
+          "name": "Rust advisory audit",
+          "url": "https://github.com/nazozero/NazoAuth/actions/runs/44081397851/job/134032619587",
+          "status": "completed",
+          "conclusion": "skipped",
+          "steps": null
+        }
+      ]
+    },
+    {
+      "label": "wasm",
+      "id": 44081397488,
+      "name": "wasm-portability",
+      "path": ".github/workflows/wasm-portability.yml",
+      "run_number": 47,
+      "attempt": 1,
+      "event": "pull_request",
+      "source_head": "2d5c335fc6563e874d8626a5067b4fa8df89bacc",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-11-17T12:15:15Z",
+      "updated_at": "2026-11-17T12:19:16Z",
+      "url": "https://github.com/nazozero/NazoAuth/actions/runs/44081397488",
+      "pull_request_heads": [
+        {
+          "number": 287,
+          "head": "2d5c335fc6563e874d8626a5067b4fa8df89bacc",
+          "base": "9560ea04bbc01a2da7b002eeeeb0ebe2e7dffbe9"
+        }
+      ],
+      "jobs": [
+        {
+          "id": 134032615940,
+          "name": "Portable inner packages and operations",
+          "url": "https://github.com/nazozero/NazoAuth/actions/runs/44081397488/job/134032615940",
+          "status": "completed",
+          "conclusion": "success",
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1
+            },
+            {
+              "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2
+            },
+            {
+              "name": "Run actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3
+            },
+            {
+              "name": "Run dtolnay/rust-toolchain@9522411a9bce8484da960823fc2f46e52f981f71",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4
+            },
+            {
+              "name": "Run actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 5
+            },
+            {
+              "name": "Run Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 6
+            },
+            {
+              "name": "Reject native execution at the architecture boundary",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 7
+            },
+            {
+              "name": "Check every inner package and their combined production graph",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 8
+            },
+            {
+              "name": "Install the test runner matching the locked WASM ABI",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 9
+            },
+            {
+              "name": "Execute portable operations and cryptography inside WASM",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 10
+            },
+            {
+              "name": "Validate OIDC profile timezone syntax inside WASM",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 11
+            },
+            {
+              "name": "Post Run Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 19
+            },
+            {
+              "name": "Post Run actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 20
+            },
+            {
+              "name": "Post Run actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 21
+            },
+            {
+              "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 22
+            },
+            {
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 23
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "label": "performance",
+      "id": 44081397690,
+      "name": "performance-images",
+      "path": ".github/workflows/perf-images.yml",
+      "run_number": 982,
+      "attempt": 1,
+      "event": "pull_request",
+      "source_head": "2d5c335fc6563e874d8626a5067b4fa8df89bacc",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-11-17T12:15:15Z",
+      "updated_at": "2026-11-17T12:15:25Z",
+      "url": "https://github.com/nazozero/NazoAuth/actions/runs/44081397690",
+      "pull_request_heads": [
+        {
+          "number": 287,
+          "head": "2d5c335fc6563e874d8626a5067b4fa8df89bacc",
+          "base": "9560ea04bbc01a2da7b002eeeeb0ebe2e7dffbe9"
+        }
+      ],
+      "jobs": [
+        {
+          "id": 134032617326,
+          "name": "inputs / inputs",
+          "url": "https://github.com/nazozero/NazoAuth/actions/runs/44081397690/job/134032617326",
+          "status": "completed",
+          "conclusion": "success",
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1
+            },
+            {
+              "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2
+            },
+            {
+              "name": "Run python3 scripts/ci_inputs.py \"$INPUT_SCOPE\"",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3
+            },
+            {
+              "name": "Run actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9",
+              "status": "completed",
+              "conclusion": "skipped",
+              "number": 4
+            },
+            {
+              "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 8
+            },
+            {
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 9
+            }
+          ]
+        },
+        {
+          "id": 134032696412,
+          "name": "${{ matrix.name }} image",
+          "url": "https://github.com/nazozero/NazoAuth/actions/runs/44081397690/job/134032696412",
+          "status": "completed",
+          "conclusion": "skipped",
+          "steps": null
+        }
+      ]
+    },
+    {
+      "label": "fuzz",
+      "id": 44081397683,
+      "name": "operator-fuzz",
+      "path": ".github/workflows/operator-fuzz.yml",
+      "run_number": 653,
+      "attempt": 1,
+      "event": "pull_request",
+      "source_head": "2d5c335fc6563e874d8626a5067b4fa8df89bacc",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-11-17T12:15:15Z",
+      "updated_at": "2026-11-17T12:17:43Z",
+      "url": "https://github.com/nazozero/NazoAuth/actions/runs/44081397683",
+      "pull_request_heads": [
+        {
+          "number": 287,
+          "head": "2d5c335fc6563e874d8626a5067b4fa8df89bacc",
+          "base": "9560ea04bbc01a2da7b002eeeeb0ebe2e7dffbe9"
+        }
+      ],
+      "jobs": [
+        {
+          "id": 134032617159,
+          "name": "inputs / inputs",
+          "url": "https://github.com/nazozero/NazoAuth/actions/runs/44081397683/job/134032617159",
+          "status": "completed",
+          "conclusion": "success",
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1
+            },
+            {
+              "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2
+            },
+            {
+              "name": "Run python3 scripts/ci_inputs.py \"$INPUT_SCOPE\"",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3
+            },
+            {
+              "name": "Run actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4
+            },
+            {
+              "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 8
+            },
+            {
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 9
+            }
+          ]
+        },
+        {
+          "id": 134032702679,
+          "name": "Operator JWS parser fuzz gate",
+          "url": "https://github.com/nazozero/NazoAuth/actions/runs/44081397683/job/134032702679",
+          "status": "completed",
+          "conclusion": "success",
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1
+            },
+            {
+              "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2
+            },
+            {
+              "name": "Run dtolnay/rust-toolchain@9522411a9bce8484da960823fc2f46e52f981f71",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3
+            },
+            {
+              "name": "Install pinned nightly and cargo-fuzz",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4
+            },
+            {
+              "name": "Fuzz closed operator JWS parser",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 5
+            },
+            {
+              "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 10
+            },
+            {
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 11
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "blockers": [
+    {
+      "workflow_run": 44081397523,
+      "job_id": 134032722935,
+      "step": "Check dependency policy",
+      "command": "cargo deny check advisories bans licenses sources",
+      "exit_code": 1,
+      "advisory": "RUSTSEC-2026-0543",
+      "advisory_url": "https://rustsec.org/advisories/RUSTSEC-2026-0543",
+      "crate": "chrono",
+      "version": "0.4.45",
+      "category": "unmaintained",
+      "scope": "Existing application-wide dependency policy failure; not a newly detected WebAuthn signature-verification failure. The advisory is not ignored or suppressed.",
+      "other_policy_sections": {
+        "bans": "ok",
+        "licenses": "ok",
+        "sources": "ok"
+      },
+      "excerpts": [
+        "2026-11-17T12:15:51.9084892Z error[unmaintained]: chrono is unmaintained",
+        "2026-11-17T12:15:51.9086503Z 68 │ chrono 0.4.45 registry+https://github.com/rust-lang/crates.io-index",
+        "2026-11-17T12:15:51.9087641Z    ├ ID: RUSTSEC-2026-0543",
+        "2026-11-17T12:15:51.9089114Z    ├ The chrono crate is unmaintained; all versions are affected.",
+        "2026-11-17T12:15:51.9105486Z    ├ Solution: No safe upgrade is available!",
+        "2026-11-17T12:15:51.9232480Z advisories FAILED, bans ok, licenses ok, sources ok",
+        "2026-11-17T12:15:51.9249731Z ##[error]Process completed with exit code 1."
+      ],
+      "skipped_following_steps": [
+        "Generate Rust SBOM",
+        "Set up Docker Buildx",
+        "Build service image",
+        "Scan service image",
+        "Upload scanned service image",
+        "Upload SBOM"
+      ],
+      "blocked_job": {
+        "id": 134032964037,
+        "name": "real-http-security-matrix",
+        "status": "completed",
+        "conclusion": "skipped",
+        "reason": "needs includes supply-chain-gate; it failed",
+        "workflow_source": "https://github.com/nazozero/NazoAuth/blob/2d5c335fc6563e874d8626a5067b4fa8df89bacc/.github/workflows/conformance-security.yml"
+      }
+    }
+  ],
+  "executed_checks": {
+    "rust_format_clippy": {
+      "job_id": 134032749364,
+      "conclusion": "success",
+      "commands": [
+        "cargo fmt --check",
+        "cargo clippy --workspace --all-targets --all-features --locked --keep-going -- -D warnings"
+      ]
+    },
+    "reusable_test_archive": {
+      "job_id": 134032749250,
+      "conclusion": "success",
+      "command": "cargo nextest archive --workspace --all-features --locked --archive-file nextest.tar.zst",
+      "archived_files": 611,
+      "note": "Archive compilation is distinguished from test execution in the six shard jobs."
+    },
+    "rust_doc_tests": {
+      "job_id": 134032749250,
+      "command": "cargo test --workspace --all-features --locked --doc",
+      "passed": 6,
+      "failed": 0,
+      "ignored": 0
+    },
+    "native_nextest_shards": {
+      "workflow_run": 44081397484,
+      "quality_gate_job_id": 134037450918,
+      "quality_gate": "success",
+      "test_binaries": 163,
+      "enumerated_tests": 3965,
+      "partitioned_tests_run": 3960,
+      "partitioned_tests_passed": 3960,
+      "partitioned_tests_failed": 0,
+      "schema_setup": {
+        "command": "cargo nextest run --archive-file nextest.tar.zst --workspace-remap \"$GITHUB_WORKSPACE\" -E 'binary(migrations) and test(=pending_migrations_create_all_runtime_module_state_tables)' --test-threads 1",
+        "executions": 6,
+        "passed_each": 1,
+        "note": "The same migration setup test executes in every shard. These six repeated executions are not six additional unique tests."
+      },
+      "services": [
+        "PostgreSQL 18.6",
+        "Valkey 9.1.2",
+        "shared S3 fixture"
+      ],
+      "shards": [
+        {
+          "partition": "slice:1/6",
+          "job_id": 134034677648,
+          "command": "cargo nextest run --archive-file nextest.tar.zst --workspace-remap \"$GITHUB_WORKSPACE\" --partition slice:1/6 --test-threads 1 --no-fail-fast",
+          "tests_run": 660,
+          "passed": 660,
+          "failed": 0,
+          "reported_skipped": 3305,
+          "summary": "2026-11-17T12:24:14.4493518Z      Summary [ 174.917s] 660 tests run: 660 passed, 3305 skipped"
+        },
+        {
+          "partition": "slice:2/6",
+          "job_id": 134034677763,
+          "command": "cargo nextest run --archive-file nextest.tar.zst --workspace-remap \"$GITHUB_WORKSPACE\" --partition slice:2/6 --test-threads 1 --no-fail-fast",
+          "tests_run": 660,
+          "passed": 660,
+          "failed": 0,
+          "reported_skipped": 3305,
+          "summary": "2026-11-17T12:23:07.6642232Z      Summary [ 157.457s] 660 tests run: 660 passed, 3305 skipped"
+        },
+        {
+          "partition": "slice:3/6",
+          "job_id": 134034677715,
+          "command": "cargo nextest run --archive-file nextest.tar.zst --workspace-remap \"$GITHUB_WORKSPACE\" --partition slice:3/6 --test-threads 1 --no-fail-fast",
+          "tests_run": 660,
+          "passed": 660,
+          "failed": 0,
+          "reported_skipped": 3305,
+          "summary": "2026-11-17T12:23:19.8501852Z      Summary [ 158.074s] 660 tests run: 660 passed, 3305 skipped"
+        },
+        {
+          "partition": "slice:4/6",
+          "job_id": 134034677741,
+          "command": "cargo nextest run --archive-file nextest.tar.zst --workspace-remap \"$GITHUB_WORKSPACE\" --partition slice:4/6 --test-threads 1 --no-fail-fast",
+          "tests_run": 660,
+          "passed": 660,
+          "failed": 0,
+          "reported_skipped": 3305,
+          "summary": "2026-11-17T12:22:30.6365209Z      Summary [ 124.249s] 660 tests run: 660 passed, 3305 skipped"
+        },
+        {
+          "partition": "slice:5/6",
+          "job_id": 134034677956,
+          "command": "cargo nextest run --archive-file nextest.tar.zst --workspace-remap \"$GITHUB_WORKSPACE\" --partition slice:5/6 --test-threads 1 --no-fail-fast",
+          "tests_run": 660,
+          "passed": 660,
+          "failed": 0,
+          "reported_skipped": 3305,
+          "summary": "2026-11-17T12:23:02.7417268Z      Summary [ 153.097s] 660 tests run: 660 passed, 3305 skipped"
+        },
+        {
+          "partition": "slice:6/6",
+          "job_id": 134034677635,
+          "command": "cargo nextest run --archive-file nextest.tar.zst --workspace-remap \"$GITHUB_WORKSPACE\" --partition slice:6/6 --test-threads 1 --no-fail-fast",
+          "tests_run": 660,
+          "passed": 660,
+          "failed": 0,
+          "reported_skipped": 3305,
+          "summary": "2026-11-17T12:23:25.6753736Z      Summary [ 158.179s] 660 tests run: 660 passed, 3305 skipped"
+        }
+      ],
+      "skip_interpretation": "Each shard's skipped count includes tests assigned to other shards and five source-declared ignored tests. Do not add the per-shard skipped counts or claim that all 3964 enumerated tests executed directly.",
+      "ignored_tests_not_selected_directly": [
+        {
+          "test": "audit_claim_is_bounded_at_million_row_backlogs",
+          "reason": "million-row SQL plan regression; owned by audit-scale CI",
+          "source": "https://github.com/nazozero/NazoAuth/blob/2d5c335fc6563e874d8626a5067b4fa8df89bacc/crates/persistence-postgres/tests/audit_ledger.rs"
+        },
+        {
+          "test": "s3_platform_tls_child",
+          "reason": "invoked by the parent test with an isolated platform trust environment",
+          "source": "https://github.com/nazozero/NazoAuth/blob/2d5c335fc6563e874d8626a5067b4fa8df89bacc/crates/authorization-server-object-store/tests/s3_tls.rs"
+        },
+        {
+          "test": "token_hotpath_benchmark",
+          "reason": "requires isolated PostgreSQL, Valkey and NAZO_PERF_OUTPUT",
+          "source": "https://github.com/nazozero/NazoAuth/blob/2d5c335fc6563e874d8626a5067b4fa8df89bacc/crates/server/tests/token_hotpath_perf.rs"
+        },
+        {
+          "test": "official_ui_initialization_keeps_later_local_replacements",
+          "reason": "downloads the current official UI from GitHub",
+          "source": "https://github.com/nazozero/NazoAuth/blob/2d5c335fc6563e874d8626a5067b4fa8df89bacc/crates/server/tests/unit/ui_release.rs"
+        },
+        {
+          "test": "canonicalize_controller_start_wire",
+          "reason": "requires NAZO_VP_WIRE_INPUT and NAZO_VP_HASH_OUTPUT from the controller contract test",
+          "source": "https://github.com/nazozero/NazoAuth/blob/2d5c335fc6563e874d8626a5067b4fa8df89bacc/crates/server/tests/unit/domain/openid4vc_endpoints_openid4vp.rs"
+        }
+      ],
+      "ignored_child_note": "An ignored helper can be invoked by a parent test; these are source-level selection facts, not a claim that every helper body is wholly unexercised.",
+      "key_passkey_mfa_results": [
+        {
+          "shard": 1,
+          "line": "2026-11-17T12:21:45.6284169Z         PASS [   0.028s] (224/660) nazo-postgres convert::identity::passkey_tests::legacy_jsonb_es256_and_ed25519_credentials_authenticate_without_registration"
+        },
+        {
+          "shard": 1,
+          "line": "2026-11-17T12:22:17.9648335Z         PASS [   0.160s] (268/660) nazo-postgres::identity_repositories passkey_counter_update_is_monotonic_compare_and_set"
+        },
+        {
+          "shard": 1,
+          "line": "2026-11-17T12:24:14.2735751Z         PASS [   0.005s] (634/660) nazoauth http::passkey::tests::login_only_allows_uv_initialization_with_the_existing_session_csrf_proof"
+        },
+        {
+          "shard": 2,
+          "line": "2026-11-17T12:20:32.4961937Z         PASS [   0.005s] ( 97/660) nazo-identity passkey::tests::uv_initialization_requires_fresh_independent_mfa_bound_to_the_account"
+        },
+        {
+          "shard": 3,
+          "line": "2026-11-17T12:22:11.1517829Z         PASS [   0.240s] (418/660) nazo-server domain::passkey::login_tests::passkey_login_finish_creates_session_updates_counter_and_consumes_ceremony_once"
+        },
+        {
+          "shard": 3,
+          "line": "2026-11-17T12:22:11.4363419Z         PASS [   0.285s] (419/660) nazo-server domain::passkey::login_tests::passkey_login_finish_rejects_origin_mismatch_and_consumes_ceremony"
+        },
+        {
+          "shard": 3,
+          "line": "2026-11-17T12:22:12.2348291Z         PASS [   0.297s] (423/660) nazo-server domain::passkey::profile_tests::registration_finish_returns_conflict_without_second_row_on_duplicate_credential"
+        },
+        {
+          "shard": 3,
+          "line": "2026-11-17T12:23:19.3343103Z         PASS [   0.007s] (595/660) nazo-valkey::remaining_contract typed_passkey_ceremony_is_atomically_consumed_once_under_concurrency"
+        },
+        {
+          "shard": 4,
+          "line": "2026-11-17T12:22:02.7242993Z         PASS [   2.020s] (417/660) nazo-server domain::passkey::login_tests::legacy_or_uninitialized_uv_needs_independent_mfa_before_future_eligibility"
+        },
+        {
+          "shard": 5,
+          "line": "2026-11-17T12:22:04.6780914Z         PASS [   0.166s] (417/660) nazo-server domain::passkey::login_tests::passkey_ceremony_cannot_finish_through_a_different_tenant_service"
+        },
+        {
+          "shard": 6,
+          "line": "2026-11-17T12:22:31.1820119Z         PASS [   2.248s] (419/660) nazo-server domain::passkey::login_tests::passkey_login_reuses_verified_uv_and_preserves_mfa_without_it"
+        },
+        {
+          "shard": 6,
+          "line": "2026-11-17T12:22:31.5351251Z         PASS [   0.353s] (420/660) nazo-server domain::passkey::profile_tests::excluded_credential_with_invalid_packed_signature_is_rejected_and_audited"
+        },
+        {
+          "shard": 6,
+          "line": "2026-11-17T12:23:12.8673662Z         PASS [   0.009s] (573/660) nazo-server settings::tests::passkey_settings_validate_the_serialized_origin_and_rp_binding"
+        }
+      ],
+      "new_required_audit_case": "excluded_credential_with_invalid_packed_signature_is_rejected_and_audited",
+      "quality_gate_excerpts": [
+        "2026-11-17T12:24:23.8569964Z   INPUT_RUN: true",
+        "2026-11-17T12:24:23.8571465Z   BUILD_RESULT: success",
+        "2026-11-17T12:24:23.8572255Z   CLIPPY_RESULT: success",
+        "2026-11-17T12:24:23.8573063Z   FIXTURE_RESULT: success",
+        "2026-11-17T12:24:23.8574006Z   SHARDS_RESULT: success"
+      ]
+    },
+    "python_quality": {
+      "job_id": 134032616215,
+      "crypto_boundary_tests": {
+        "reported": 23,
+        "conclusion": "OK"
+      },
+      "ci_performance_contract_tests": {
+        "reported": 353,
+        "skipped": 2,
+        "conclusion": "OK (skipped=2)"
+      },
+      "scope": "Static contracts, persistence dependency graph, crypto boundary, syntax compilation and CI/performance tooling unit tests; no production latency claim follows from these tests."
+    },
+    "source_policy": {
+      "job_id": 134032722939,
+      "tests": 7,
+      "conclusion": "OK",
+      "commands": [
+        "python -m py_compile scripts/full_real_request_source_policy.py scripts/rfc9967_scim_set_e2e.py",
+        "python scripts/rfc9967_scim_set_e2e.py --source-policy-check",
+        "python tests/unit/test_rfc9967_scim_set_e2e_source_policy.py"
+      ],
+      "scope": "Source-policy validation only; not execution of the dependent real HTTP security matrix."
+    },
+    "specification_inventory": {
+      "job_id": 134032615990,
+      "tests": 17,
+      "conclusion": "OK",
+      "commands": [
+        "python -m unittest tests.unit.test_spec_freshness",
+        "python scripts/check_spec_freshness.py --offline"
+      ],
+      "note": "The expected expired-draft error printed by a negative unit test is not a failed CI job; the unit suite ends OK."
+    },
+    "dependency_review": {
+      "job_id": 134032618546,
+      "conclusion": "success",
+      "fail_on_severity": "high",
+      "vulnerability_check": true,
+      "license_check": false,
+      "scope": "PR dependency diff review, not a full cargo-audit execution."
+    },
+    "operator_fuzz": {
+      "job_id": 134032702679,
+      "conclusion": "success",
+      "command": "cargo +nightly-2026-10-04 fuzz run operator_jws_parser -- -max_total_time=60 -rss_limit_mb=512 -timeout=10",
+      "runs": 439576,
+      "seconds": 61,
+      "seed": 3411054449,
+      "scope": "NazoAuth operator JWS parser fuzzing, distinct from the library WebAuthn verifier fuzz targets."
+    },
+    "codeql": {
+      "job_id": 134032713513,
+      "conclusion": "success",
+      "language": "rust",
+      "build_mode": "none",
+      "query_suite": "security-extended",
+      "sarif_upload": "Successfully uploaded; status complete",
+      "files_extracted_without_error": 1193,
+      "files_with_extraction_errors": 1,
+      "warnings": [
+        "The existing tokio::select! expansion at crates/server/tests/unit/adapters/avatar_files.rs:129:3 reports a select_priv_declare_output_enum macro extraction error.",
+        "Existing init/analyze action revisions differ and generate a version mismatch warning."
+      ],
+      "scope": "Successful analysis/upload, not a zero-alert or complete-extraction claim."
+    },
+    "wasm": {
+      "source_head": "2d5c335fc6563e874d8626a5067b4fa8df89bacc",
+      "source_tree": "f01983bb64f094ec7c88ccda0de7551297be6127",
+      "library_pin": "8260480634fac09e1151ca2b1a9eaa1c02af6f67",
+      "checkout_merge": "ea551e890c6cc74f029a776c1b05cf33082eb6ac",
+      "checkout_evidence": "2026-11-17T12:15:22.0201152Z HEAD is now at ea551e8 Merge 2d5c335fc6563e874d8626a5067b4fa8df89bacc into 9560ea04bbc01a2da7b002eeeeb0ebe2e7dffbe9",
+      "commands": [
+        "cargo test --target wasm32-unknown-unknown --locked -p nazo-oauth-server -p nazo-identity -p nazo-openid4vci -p nazo-openid4vp -p nazo-runtime-modules -p nazo-crypto --features nazo-crypto/jose,nazo-crypto/ecdh,nazo-crypto/aead,nazo-crypto/password,nazo-crypto/ed25519,nazo-crypto/x509 --test application_boundaries --test authorization_application --test security_facts --test host_replacement_contract --test delivery_batches --test token_outcome --test federation_authentication --test service_contract --test revision_races --test portable_jose --test certificate_paths",
+        "cargo test --target wasm32-unknown-unknown --locked -p nazo-identity --lib oidc_profile_fields_validate_their_declared_syntax"
+      ],
+      "architecture_boundary_python_tests": 47,
+      "test_results": [
+        {
+          "passed": 4,
+          "failed": 0,
+          "ignored": 0,
+          "filtered": 0
+        },
+        {
+          "passed": 9,
+          "failed": 0,
+          "ignored": 0,
+          "filtered": 0
+        },
+        {
+          "passed": 1,
+          "failed": 0,
+          "ignored": 0,
+          "filtered": 0
+        },
+        {
+          "passed": 2,
+          "failed": 0,
+          "ignored": 0,
+          "filtered": 0
+        },
+        {
+          "passed": 16,
+          "failed": 0,
+          "ignored": 0,
+          "filtered": 0
+        },
+        {
+          "passed": 6,
+          "failed": 0,
+          "ignored": 0,
+          "filtered": 0
+        },
+        {
+          "passed": 4,
+          "failed": 0,
+          "ignored": 0,
+          "filtered": 0
+        },
+        {
+          "passed": 3,
+          "failed": 0,
+          "ignored": 0,
+          "filtered": 0
+        },
+        {
+          "passed": 4,
+          "failed": 0,
+          "ignored": 0,
+          "filtered": 0
+        },
+        {
+          "passed": 8,
+          "failed": 0,
+          "ignored": 0,
+          "filtered": 0
+        },
+        {
+          "passed": 11,
+          "failed": 0,
+          "ignored": 0,
+          "filtered": 0
+        },
+        {
+          "passed": 2,
+          "failed": 0,
+          "ignored": 0,
+          "filtered": 0
+        },
+        {
+          "passed": 1,
+          "failed": 0,
+          "ignored": 0,
+          "filtered": 0
+        }
+      ],
+      "portable_operations_tests": 70,
+      "timezone_syntax_tests": 1,
+      "total_wasm_tests": 71,
+      "warnings": [],
+      "failed": 0,
+      "ignored": 0,
+      "filtered": 0,
+      "runner_version_evidence": [
+        "2026-11-17T12:15:45.7198937Z node: v26.12.0",
+        "2026-11-17T12:16:59.4201217Z   Downloaded wasm-bindgen-cli v0.2.130",
+        "2026-11-17T12:16:59.4316219Z      Ignored package `wasm-bindgen-cli v0.2.130` is already installed, use --force to override"
+      ],
+      "compiled_library_pin_evidence": [
+        "2026-11-17T12:16:59.7094368Z    Compiling passkey-auth v0.2.0 (https://github.com/nazozero/passkey-auth-rs?rev=8260480634fac09e1151ca2b1a9eaa1c02af6f67#82604806)",
+        "2026-11-17T12:17:55.4430663Z    Compiling passkey-auth v0.2.0 (https://github.com/nazozero/passkey-auth-rs?rev=8260480634fac09e1151ca2b1a9eaa1c02af6f67#82604806)"
+      ]
+    }
+  },
+  "skipped_workflow_jobs": [
+    {
+      "run_id": 44081397851,
+      "job_id": 134032619587,
+      "name": "Rust advisory audit",
+      "condition": "github.event_name != 'pull_request'",
+      "source": "https://github.com/nazozero/NazoAuth/blob/2d5c335fc6563e874d8626a5067b4fa8df89bacc/.github/workflows/dependency-review.yml",
+      "conclusion": "skipped"
+    },
+    {
+      "run_id": 44081397690,
+      "job_id": 134032696412,
+      "name": "${{ matrix.name }} image",
+      "condition": "!cancelled() && (needs.inputs.result != 'success' || needs.inputs.outputs.run != 'false')",
+      "source": "https://github.com/nazozero/NazoAuth/blob/2d5c335fc6563e874d8626a5067b4fa8df89bacc/.github/workflows/perf-images.yml",
+      "conclusion": "skipped",
+      "note": "Only inputs job succeeded; no performance image build, dependency import smoke test or k6 evidence test executed in this run. Condition-related inference is based on the workflow and observed skipped status."
+    },
+    {
+      "run_id": 44081397509,
+      "job_id": 134032784935,
+      "name": "Verify official primary sources",
+      "condition": "github.event_name != 'pull_request'",
+      "source": "https://github.com/nazozero/NazoAuth/blob/2d5c335fc6563e874d8626a5067b4fa8df89bacc/.github/workflows/spec-freshness.yml",
+      "conclusion": "skipped"
+    },
+    {
+      "run_id": 44081397484,
+      "job_id": 134032752806,
+      "name": "coverage",
+      "condition": "github.event_name == 'workflow_dispatch'",
+      "source": "https://github.com/nazozero/NazoAuth/blob/2d5c335fc6563e874d8626a5067b4fa8df89bacc/.github/workflows/code-quality.yml",
+      "conclusion": "skipped"
+    },
+    {
+      "run_id": 44081397484,
+      "job_id": 134032751946,
+      "name": "Rust quality manual gate",
+      "condition": "workflow_dispatch only",
+      "source": "https://github.com/nazozero/NazoAuth/blob/2d5c335fc6563e874d8626a5067b4fa8df89bacc/.github/workflows/code-quality.yml",
+      "conclusion": "skipped"
+    }
+  ],
+  "log_evidence": [
+    {
+      "file": "nazo826-ci-build-archive-134032749250.log",
+      "job_id": 134032749250,
+      "bytes": 74208,
+      "sha256": "cdd0a396c59621282b664211b3c872d454203b2ec84f663cc17f7c172eea3e5c",
+      "sha_scope": "Exact saved UTF-8 bytes. Self-collected logs normalize CRLF to LF and one final newline; independent WASM/CodeQL logs retain returned bytes.",
+      "excerpts": [
+        "2026-11-17T12:18:42.0845733Z     Archived 611 files to nextest.tar.zst in 5.19s"
+      ]
+    },
+    {
+      "file": "nazo826-ci-clippy-134032749364.log",
+      "job_id": 134032749364,
+      "bytes": 53862,
+      "sha256": "d39e4d9c7a06a2565971efd4566cc15e5892847a2a4f0a36a425c7322c96e196",
+      "sha_scope": "Exact saved UTF-8 bytes. Self-collected logs normalize CRLF to LF and one final newline; independent WASM/CodeQL logs retain returned bytes.",
+      "excerpts": []
+    },
+    {
+      "file": "nazo826-ci-codeql-134032713513.log",
+      "job_id": 134032713513,
+      "bytes": 157321,
+      "sha256": "e7ecfa53ea80b34f103e399be51f94059b0bdda9bc40a53781139264d65c650e",
+      "sha_scope": "Exact saved UTF-8 bytes. Self-collected logs normalize CRLF to LF and one final newline; independent WASM/CodeQL logs retain returned bytes.",
+      "excerpts": [
+        "2026-11-17T12:17:23.9188205Z [2026-11-17 12:17:23] [build-stdout] [2026-11-17 12:17:23] [build-stdout]  WARN /home/runner/work/NazoAuth/NazoAuth/crates/server/tests/unit/adapters/avatar_files.rs:129:3: macro expansion failed for '$crate::select_priv_declare_output_enum'",
+        "2026-11-17T12:24:52.0007779Z Interpreted metric query \"Total number of Rust files that were extracted without error\" (rust/summary/number-of-successfully-extracted-files) at path /home/runner/work/_temp/codeql_databases/rust/results/codeql/rust-queries/queries/summary/NumberOfSuccessfullyExtractedFiles.bqrs.",
+        "2026-11-17T12:24:52.0011941Z Interpreted metric query \"Total number of Rust files that were extracted with errors\" (rust/summary/number-of-files-extracted-with-errors) at path /home/runner/work/_temp/codeql_databases/rust/results/codeql/rust-queries/queries/summary/NumberOfFilesExtractedWithErrors.bqrs.",
+        "2026-11-17T12:24:53.1008376Z | Total number of Rust files that were extracted without error |  1193 |",
+        "2026-11-17T12:24:53.1008740Z | Total number of Rust files that were extracted with errors   |     1 |",
+        "2026-11-17T12:24:59.5618687Z Analysis upload status is complete."
+      ]
+    },
+    {
+      "file": "nazo826-ci-dependency-review-134032618546.log",
+      "job_id": 134032618546,
+      "bytes": 15905,
+      "sha256": "586f2d2d78dc6a71f7beb3a40b738fad989343c45b18d749169d3e806c5c3149",
+      "sha_scope": "Exact saved UTF-8 bytes. Self-collected logs normalize CRLF to LF and one final newline; independent WASM/CodeQL logs retain returned bytes.",
+      "excerpts": []
+    },
+    {
+      "file": "nazo826-ci-operator-fuzz-134032702679.log",
+      "job_id": 134032702679,
+      "bytes": 144748,
+      "sha256": "c20aa6e6719ffd5457e0c504ac009ec76f9b73f17bd64c9c2992f098cf531f77",
+      "sha_scope": "Exact saved UTF-8 bytes. Self-collected logs normalize CRLF to LF and one final newline; independent WASM/CodeQL logs retain returned bytes.",
+      "excerpts": [
+        "2026-11-17T12:17:41.5060859Z Done 439576 runs in 61 second(s)"
+      ]
+    },
+    {
+      "file": "nazo826-ci-performance-inputs-134032617326.log",
+      "job_id": 134032617326,
+      "bytes": 26732,
+      "sha256": "a0409ac5fdc773d71ad45b338533b0c28e1f21a7345a99ea9d9df71be6f161c0",
+      "sha_scope": "Exact saved UTF-8 bytes. Self-collected logs normalize CRLF to LF and one final newline; independent WASM/CodeQL logs retain returned bytes.",
+      "excerpts": []
+    },
+    {
+      "file": "nazo826-ci-python-quality-134032616215.log",
+      "job_id": 134032616215,
+      "bytes": 54173,
+      "sha256": "0152c0b6c1fe8f7d8f9d52be0656521145cbc2b7fcf5b965b14e41cc3fade725",
+      "sha_scope": "Exact saved UTF-8 bytes. Self-collected logs normalize CRLF to LF and one final newline; independent WASM/CodeQL logs retain returned bytes.",
+      "excerpts": [
+        "2026-11-17T12:15:59.8010507Z Ran 23 tests in 0.112s",
+        "2026-11-17T12:15:59.8010972Z OK",
+        "2026-11-17T12:16:15.5500628Z Ran 353 tests in 10.657s",
+        "2026-11-17T12:16:15.5501087Z OK (skipped=2)"
+      ]
+    },
+    {
+      "file": "nazo826-ci-quality-gate-134037450918.log",
+      "job_id": 134037450918,
+      "bytes": 2934,
+      "sha256": "710d357403320d22d406ed4ba20b0e1a81824c58e460e3151f938f256918feba",
+      "sha_scope": "Exact saved UTF-8 bytes. Self-collected logs normalize CRLF to LF and one final newline; independent WASM/CodeQL logs retain returned bytes.",
+      "excerpts": [
+        "2026-11-17T12:24:23.8571465Z   BUILD_RESULT: success",
+        "2026-11-17T12:24:23.8574006Z   SHARDS_RESULT: success"
+      ]
+    },
+    {
+      "file": "nazo826-ci-shard-1-134034677648.log",
+      "job_id": 134034677648,
+      "bytes": 291605,
+      "sha256": "cdb8eb207660c6ed80f0a37989ad4ee54c4d207a2503a3334f1d6bc4388612e7",
+      "sha_scope": "Exact saved UTF-8 bytes. Self-collected logs normalize CRLF to LF and one final newline; independent WASM/CodeQL logs retain returned bytes.",
+      "excerpts": [
+        "2026-11-17T12:21:14.5549690Z      Summary [   4.378s] 1 test run: 1 passed, 6 skipped",
+        "2026-11-17T12:24:14.4493518Z      Summary [ 174.917s] 660 tests run: 660 passed, 3305 skipped"
+      ]
+    },
+    {
+      "file": "nazo826-ci-shard-2-134034677763.log",
+      "job_id": 134034677763,
+      "bytes": 894720,
+      "sha256": "74480c32b23f8bc39f4b7fe930c12b523005e3645c846f2f2fe0be843f211ad9",
+      "sha_scope": "Exact saved UTF-8 bytes. Self-collected logs normalize CRLF to LF and one final newline; independent WASM/CodeQL logs retain returned bytes.",
+      "excerpts": [
+        "2026-11-17T12:20:24.4488245Z      Summary [   1.767s] 1 test run: 1 passed, 6 skipped",
+        "2026-11-17T12:23:07.6642232Z      Summary [ 157.457s] 660 tests run: 660 passed, 3305 skipped"
+      ]
+    },
+    {
+      "file": "nazo826-ci-shard-3-134034677715.log",
+      "job_id": 134034677715,
+      "bytes": 264221,
+      "sha256": "456fbb292f124244e05b407d62370841fc79ff0da0fd4a794bb596332062831c",
+      "sha_scope": "Exact saved UTF-8 bytes. Self-collected logs normalize CRLF to LF and one final newline; independent WASM/CodeQL logs retain returned bytes.",
+      "excerpts": [
+        "2026-11-17T12:20:36.2333081Z      Summary [   4.392s] 1 test run: 1 passed, 6 skipped",
+        "2026-11-17T12:23:19.8501852Z      Summary [ 158.074s] 660 tests run: 660 passed, 3305 skipped"
+      ]
+    },
+    {
+      "file": "nazo826-ci-shard-4-134034677741.log",
+      "job_id": 134034677741,
+      "bytes": 312468,
+      "sha256": "323abb256602859d190176fbb23edfd1f11c09cec2b4b402ba7d7a52fee2d2ed",
+      "sha_scope": "Exact saved UTF-8 bytes. Self-collected logs normalize CRLF to LF and one final newline; independent WASM/CodeQL logs retain returned bytes.",
+      "excerpts": [
+        "2026-11-17T12:20:22.0812057Z      Summary [   5.959s] 1 test run: 1 passed, 6 skipped",
+        "2026-11-17T12:22:30.6365209Z      Summary [ 124.249s] 660 tests run: 660 passed, 3305 skipped"
+      ]
+    },
+    {
+      "file": "nazo826-ci-shard-5-134034677956.log",
+      "job_id": 134034677956,
+      "bytes": 293538,
+      "sha256": "b22fefde1938afec9a33e5f223da7f13dfc561ca639cc4ceb040ba42c0bf0b54",
+      "sha_scope": "Exact saved UTF-8 bytes. Self-collected logs normalize CRLF to LF and one final newline; independent WASM/CodeQL logs retain returned bytes.",
+      "excerpts": [
+        "2026-11-17T12:20:24.3862989Z      Summary [   5.856s] 1 test run: 1 passed, 6 skipped",
+        "2026-11-17T12:20:30.8551454Z         PASS [   0.005s] ( 93/660) nazo-identity avatar::tests::direct_upload_recognizes_completed_and_already_recorded_candidates",
+        "2026-11-17T12:23:02.7417268Z      Summary [ 153.097s] 660 tests run: 660 passed, 3305 skipped"
+      ]
+    },
+    {
+      "file": "nazo826-ci-shard-6-134034677635.log",
+      "job_id": 134034677635,
+      "bytes": 271284,
+      "sha256": "eeb875a899bac2e1a3eeb0f9e16ffca20e35b471fdfa79470d4b0864042c6e64",
+      "sha_scope": "Exact saved UTF-8 bytes. Self-collected logs normalize CRLF to LF and one final newline; independent WASM/CodeQL logs retain returned bytes.",
+      "excerpts": [
+        "2026-11-17T12:20:41.7834932Z      Summary [   7.128s] 1 test run: 1 passed, 6 skipped",
+        "2026-11-17T12:23:25.6753736Z      Summary [ 158.179s] 660 tests run: 660 passed, 3305 skipped"
+      ]
+    },
+    {
+      "file": "nazo826-ci-source-policy-134032722939.log",
+      "job_id": 134032722939,
+      "bytes": 19195,
+      "sha256": "c2e631ec3afa2893d0b823f5776b822d0b7bc1ad8670504b9698d3f8729d0fa1",
+      "sha_scope": "Exact saved UTF-8 bytes. Self-collected logs normalize CRLF to LF and one final newline; independent WASM/CodeQL logs retain returned bytes.",
+      "excerpts": [
+        "2026-11-17T12:15:40.8360388Z Ran 7 tests in 0.063s",
+        "2026-11-17T12:15:40.8361099Z OK"
+      ]
+    },
+    {
+      "file": "nazo826-ci-spec-inventory-134032615990.log",
+      "job_id": 134032615990,
+      "bytes": 21424,
+      "sha256": "4223bfa8054aa3af0559f3e5dbcd213dccc1306cda9941fa314b03edea6dcaa4",
+      "sha_scope": "Exact saved UTF-8 bytes. Self-collected logs normalize CRLF to LF and one final newline; independent WASM/CodeQL logs retain returned bytes.",
+      "excerpts": [
+        "2026-11-17T12:15:31.4850572Z Ran 17 tests in 0.035s",
+        "2026-11-17T12:15:31.4850789Z OK"
+      ]
+    },
+    {
+      "file": "nazo826-ci-supply-chain-134032722935.log",
+      "job_id": 134032722935,
+      "bytes": 976113,
+      "sha256": "52298d5398602c17ab99ade4dbdc6ab6b3e402f0d8c7c7bbd83f0944d464c1ab",
+      "sha_scope": "Exact saved UTF-8 bytes. Self-collected logs normalize CRLF to LF and one final newline; independent WASM/CodeQL logs retain returned bytes.",
+      "excerpts": [
+        "2026-11-17T12:15:51.9084892Z error[unmaintained]: chrono is unmaintained",
+        "2026-11-17T12:15:51.9232480Z advisories FAILED, bans ok, licenses ok, sources ok",
+        "2026-11-17T12:15:51.9249731Z ##[error]Process completed with exit code 1."
+      ]
+    },
+    {
+      "file": "nazo826-ci-wasm-134032615940.log",
+      "job_id": 134032615940,
+      "bytes": 104038,
+      "sha256": "8ba48c337c48de565ccc5e5fbfc8d103f6c7ba15f5ab6b8dae7b28ee54233b75",
+      "sha_scope": "Exact saved UTF-8 bytes. Self-collected logs normalize CRLF to LF and one final newline; independent WASM/CodeQL logs retain returned bytes.",
+      "excerpts": [
+        "2026-11-17T12:16:13.0265986Z Ran 47 tests in 0.089s",
+        "2026-11-17T12:16:13.0266196Z OK"
+      ]
+    }
+  ],
+  "provenance_note": "All eight final workflow/run/job/step outcomes and successful/failing job logs were read independently for source head 2d5c335. Source, synthetic merge and tested local tree match. The prior c002 checkpoint is separate; it is not substituted for this run.",
+  "observed_at": "2026-11-17 12:29:53 UTC",
+  "workflow_totals": {
+    "completed": 8,
+    "success": 7,
+    "failure": 1,
+    "jobs": 29,
+    "job_success": 22,
+    "job_failure": 1,
+    "job_skipped": 6
+  },
+  "previous_checkpoint": "nazo-ci-c002858-checkpoint.json",
+  "raw_log_archive": "nazo-2d5-ci-logs.tar.gz",
+  "independent_wasm_review": {
+    "repo": "nazozero/NazoAuth",
+    "run": {
+      "id": 44081397488,
+      "html_url": "https://github.com/nazozero/NazoAuth/actions/runs/44081397488",
+      "head_sha": "2d5c335fc6563e874d8626a5067b4fa8df89bacc",
+      "run_attempt": 1,
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-11-17T12:15:15Z",
+      "updated_at": "2026-11-17T12:19:16Z"
+    },
+    "job": {
+      "id": 134032615940,
+      "run_id": 44081397488,
+      "workflow_name": "wasm-portability",
+      "head_branch": "nazoauth/passkey-calibration-integration-20261117",
+      "run_url": "https://api.github.com/repos/nazozero/NazoAuth/actions/runs/44081397488",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOSsArwc8AAAAfNPdqBA",
+      "head_sha": "2d5c335fc6563e874d8626a5067b4fa8df89bacc",
+      "url": "https://api.github.com/repos/nazozero/NazoAuth/actions/jobs/134032615940",
+      "html_url": "https://github.com/nazozero/NazoAuth/actions/runs/44081397488/job/134032615940",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-11-17T12:15:15Z",
+      "started_at": "2026-11-17T12:15:17Z",
+      "completed_at": "2026-11-17T12:19:15Z",
+      "name": "Portable inner packages and operations",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-11-17T12:15:18Z",
+          "completed_at": "2026-11-17T12:15:20Z"
+        },
+        {
+          "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-11-17T12:15:20Z",
+          "completed_at": "2026-11-17T12:15:22Z"
+        },
+        {
+          "name": "Run actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-11-17T12:15:22Z",
+          "completed_at": "2026-11-17T12:15:29Z"
+        },
+        {
+          "name": "Run dtolnay/rust-toolchain@9522411a9bce8484da960823fc2f46e52f981f71",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-11-17T12:15:29Z",
+          "completed_at": "2026-11-17T12:15:38Z"
+        },
+        {
+          "name": "Run actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-11-17T12:15:38Z",
+          "completed_at": "2026-11-17T12:15:45Z"
+        },
+        {
+          "name": "Run Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-11-17T12:15:45Z",
+          "completed_at": "2026-11-17T12:16:05Z"
+        },
+        {
+          "name": "Reject native execution at the architecture boundary",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-11-17T12:16:05Z",
+          "completed_at": "2026-11-17T12:16:13Z"
+        },
+        {
+          "name": "Check every inner package and their combined production graph",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-11-17T12:16:13Z",
+          "completed_at": "2026-11-17T12:16:59Z"
+        },
+        {
+          "name": "Install the test runner matching the locked WASM ABI",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-11-17T12:16:59Z",
+          "completed_at": "2026-11-17T12:16:59Z"
+        },
+        {
+          "name": "Execute portable operations and cryptography inside WASM",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10,
+          "started_at": "2026-11-17T12:16:59Z",
+          "completed_at": "2026-11-17T12:17:55Z"
+        },
+        {
+          "name": "Validate OIDC profile timezone syntax inside WASM",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11,
+          "started_at": "2026-11-17T12:17:55Z",
+          "completed_at": "2026-11-17T12:18:01Z"
+        },
+        {
+          "name": "Post Run Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 19,
+          "started_at": "2026-11-17T12:18:01Z",
+          "completed_at": "2026-11-17T12:19:10Z"
+        },
+        {
+          "name": "Post Run actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 20,
+          "started_at": "2026-11-17T12:19:10Z",
+          "completed_at": "2026-11-17T12:19:10Z"
+        },
+        {
+          "name": "Post Run actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 21,
+          "started_at": "2026-11-17T12:19:10Z",
+          "completed_at": "2026-11-17T12:19:10Z"
+        },
+        {
+          "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 22,
+          "started_at": "2026-11-17T12:19:10Z",
+          "completed_at": "2026-11-17T12:19:11Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 23,
+          "started_at": "2026-11-17T12:19:11Z",
+          "completed_at": "2026-11-17T12:19:11Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/nazozero/NazoAuth/check-runs/134032615940",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": 1000028279,
+      "runner_name": "GitHub Actions 1000028279",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    "execution_review": {
+      "source_head": "2d5c335fc6563e874d8626a5067b4fa8df89bacc",
+      "source_tree": "f01983bb64f094ec7c88ccda0de7551297be6127",
+      "library_pin": "8260480634fac09e1151ca2b1a9eaa1c02af6f67",
+      "checkout_merge": "ea551e890c6cc74f029a776c1b05cf33082eb6ac",
+      "checkout_evidence": "2026-11-17T12:15:22.0201152Z HEAD is now at ea551e8 Merge 2d5c335fc6563e874d8626a5067b4fa8df89bacc into 9560ea04bbc01a2da7b002eeeeb0ebe2e7dffbe9",
+      "commands": [
+        "cargo test --target wasm32-unknown-unknown --locked -p nazo-oauth-server -p nazo-identity -p nazo-openid4vci -p nazo-openid4vp -p nazo-runtime-modules -p nazo-crypto --features nazo-crypto/jose,nazo-crypto/ecdh,nazo-crypto/aead,nazo-crypto/password,nazo-crypto/ed25519,nazo-crypto/x509 --test application_boundaries --test authorization_application --test security_facts --test host_replacement_contract --test delivery_batches --test token_outcome --test federation_authentication --test service_contract --test revision_races --test portable_jose --test certificate_paths",
+        "cargo test --target wasm32-unknown-unknown --locked -p nazo-identity --lib oidc_profile_fields_validate_their_declared_syntax"
+      ],
+      "architecture_boundary_python_tests": 47,
+      "test_results": [
+        {
+          "passed": 4,
+          "failed": 0,
+          "ignored": 0,
+          "filtered": 0
+        },
+        {
+          "passed": 9,
+          "failed": 0,
+          "ignored": 0,
+          "filtered": 0
+        },
+        {
+          "passed": 1,
+          "failed": 0,
+          "ignored": 0,
+          "filtered": 0
+        },
+        {
+          "passed": 2,
+          "failed": 0,
+          "ignored": 0,
+          "filtered": 0
+        },
+        {
+          "passed": 16,
+          "failed": 0,
+          "ignored": 0,
+          "filtered": 0
+        },
+        {
+          "passed": 6,
+          "failed": 0,
+          "ignored": 0,
+          "filtered": 0
+        },
+        {
+          "passed": 4,
+          "failed": 0,
+          "ignored": 0,
+          "filtered": 0
+        },
+        {
+          "passed": 3,
+          "failed": 0,
+          "ignored": 0,
+          "filtered": 0
+        },
+        {
+          "passed": 4,
+          "failed": 0,
+          "ignored": 0,
+          "filtered": 0
+        },
+        {
+          "passed": 8,
+          "failed": 0,
+          "ignored": 0,
+          "filtered": 0
+        },
+        {
+          "passed": 11,
+          "failed": 0,
+          "ignored": 0,
+          "filtered": 0
+        },
+        {
+          "passed": 2,
+          "failed": 0,
+          "ignored": 0,
+          "filtered": 0
+        },
+        {
+          "passed": 1,
+          "failed": 0,
+          "ignored": 0,
+          "filtered": 0
+        }
+      ],
+      "portable_operations_tests": 70,
+      "timezone_syntax_tests": 1,
+      "total_wasm_tests": 71,
+      "warnings": [],
+      "failed": 0,
+      "ignored": 0,
+      "filtered": 0,
+      "runner_version_evidence": [
+        "2026-11-17T12:15:45.7198937Z node: v26.12.0",
+        "2026-11-17T12:16:59.4201217Z   Downloaded wasm-bindgen-cli v0.2.130",
+        "2026-11-17T12:16:59.4316219Z      Ignored package `wasm-bindgen-cli v0.2.130` is already installed, use --force to override"
+      ],
+      "compiled_library_pin_evidence": [
+        "2026-11-17T12:16:59.7094368Z    Compiling passkey-auth v0.2.0 (https://github.com/nazozero/passkey-auth-rs?rev=8260480634fac09e1151ca2b1a9eaa1c02af6f67#82604806)",
+        "2026-11-17T12:17:55.4430663Z    Compiling passkey-auth v0.2.0 (https://github.com/nazozero/passkey-auth-rs?rev=8260480634fac09e1151ca2b1a9eaa1c02af6f67#82604806)"
+      ]
+    },
+    "log": {
+      "path": "/workspace/scratch/f7903e352d2d/evidence/nazo826-ci-wasm-134032615940.log",
+      "bytes": 104038,
+      "sha256": "8ba48c337c48de565ccc5e5fbfc8d103f6c7ba15f5ab6b8dae7b28ee54233b75",
+      "utf8_bom_preserved": true
+    }
+  },
+  "independent_codeql_review": {
+    "repo": "nazozero/NazoAuth",
+    "run": {
+      "id": 44081397736,
+      "html_url": "https://github.com/nazozero/NazoAuth/actions/runs/44081397736",
+      "head_sha": "2d5c335fc6563e874d8626a5067b4fa8df89bacc",
+      "run_attempt": 1,
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-11-17T12:15:15Z",
+      "updated_at": "2026-11-17T12:25:03Z"
+    },
+    "job": {
+      "id": 134032713513,
+      "run_id": 44081397736,
+      "workflow_name": "codeql",
+      "head_branch": "nazoauth/passkey-calibration-integration-20261117",
+      "run_url": "https://api.github.com/repos/nazozero/NazoAuth/actions/runs/44081397736",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOSsArwc8AAAAfNPjnKQ",
+      "head_sha": "2d5c335fc6563e874d8626a5067b4fa8df89bacc",
+      "url": "https://api.github.com/repos/nazozero/NazoAuth/actions/jobs/134032713513",
+      "html_url": "https://github.com/nazozero/NazoAuth/actions/runs/44081397736/job/134032713513",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-11-17T12:15:26Z",
+      "started_at": "2026-11-17T12:15:28Z",
+      "completed_at": "2026-11-17T12:25:03Z",
+      "name": "CodeQL Rust analysis",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-11-17T12:15:29Z",
+          "completed_at": "2026-11-17T12:15:30Z"
+        },
+        {
+          "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-11-17T12:15:31Z",
+          "completed_at": "2026-11-17T12:15:32Z"
+        },
+        {
+          "name": "Run dtolnay/rust-toolchain@9522411a9bce8484da960823fc2f46e52f981f71",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-11-17T12:15:32Z",
+          "completed_at": "2026-11-17T12:15:39Z"
+        },
+        {
+          "name": "Install native dependencies",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-11-17T12:15:39Z",
+          "completed_at": "2026-11-17T12:15:42Z"
+        },
+        {
+          "name": "Run github/codeql-action/init@6f2ac81f5cd81fe351a197ba0b00d91d03cd2aee",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-11-17T12:15:42Z",
+          "completed_at": "2026-11-17T12:15:53Z"
+        },
+        {
+          "name": "Run github/codeql-action/analyze@48870fdd6b42ee6474ec4207209ff87609271a5e",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-11-17T12:15:53Z",
+          "completed_at": "2026-11-17T12:24:59Z"
+        },
+        {
+          "name": "Post Run github/codeql-action/analyze@48870fdd6b42ee6474ec4207209ff87609271a5e",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10,
+          "started_at": "2026-11-17T12:24:59Z",
+          "completed_at": "2026-11-17T12:25:00Z"
+        },
+        {
+          "name": "Post Run github/codeql-action/init@6f2ac81f5cd81fe351a197ba0b00d91d03cd2aee",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11,
+          "started_at": "2026-11-17T12:25:00Z",
+          "completed_at": "2026-11-17T12:25:00Z"
+        },
+        {
+          "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 12,
+          "started_at": "2026-11-17T12:25:00Z",
+          "completed_at": "2026-11-17T12:25:00Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 13,
+          "started_at": "2026-11-17T12:25:00Z",
+          "completed_at": "2026-11-17T12:25:00Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/nazozero/NazoAuth/check-runs/134032713513",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": 1000028287,
+      "runner_name": "GitHub Actions 1000028287",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    "execution_review": {
+      "source_head": "2d5c335fc6563e874d8626a5067b4fa8df89bacc",
+      "source_tree": "f01983bb64f094ec7c88ccda0de7551297be6127",
+      "library_pin": "8260480634fac09e1151ca2b1a9eaa1c02af6f67",
+      "checkout_merge": "ea551e890c6cc74f029a776c1b05cf33082eb6ac",
+      "checkout_evidence": "2026-11-17T12:15:32.7438543Z HEAD is now at ea551e8 Merge 2d5c335fc6563e874d8626a5067b4fa8df89bacc into 9560ea04bbc01a2da7b002eeeeb0ebe2e7dffbe9",
+      "language": "rust",
+      "build_mode": "none",
+      "queries": "security-extended",
+      "codeql_version": "2.27.4",
+      "rust_queries_version": "0.1.46",
+      "extract_without_error": 1193,
+      "extract_with_errors": 1,
+      "metrics_evidence": [
+        "2026-11-17T12:24:53.1008376Z | Total number of Rust files that were extracted without error |  1193 |",
+        "2026-11-17T12:24:53.1008740Z | Total number of Rust files that were extracted with errors   |     1 |"
+      ],
+      "warnings": [
+        "2026-11-17T12:15:49.1838465Z ##[warning]1 issue was detected with this workflow: Not all workflow steps that use `github/codeql-action` actions use the same version. Please ensure that all such steps use the same version to avoid compatibility issues.",
+        "2026-11-17T12:17:23.9188205Z [2026-11-17 12:17:23] [build-stdout] [2026-11-17 12:17:23] [build-stdout]  WARN /home/runner/work/NazoAuth/NazoAuth/crates/server/tests/unit/adapters/avatar_files.rs:129:3: macro expansion failed for '$crate::select_priv_declare_output_enum'"
+      ],
+      "commands": [
+        "2026-11-17T12:15:49.1873146Z [command]/opt/hostedtoolcache/CodeQL/2.27.4/x64/codeql/codeql resolve languages --format=betterjson --extractor-options-verbosity=4 --extractor-include-aliases --filter-to-languages-with-queries",
+        "2026-11-17T12:15:50.6222709Z [command]/opt/hostedtoolcache/CodeQL/2.27.4/x64/codeql/codeql resolve languages --format=betterjson --extractor-options-verbosity=4 --extractor-include-aliases",
+        "2026-11-17T12:15:51.3552137Z [command]/opt/hostedtoolcache/CodeQL/2.27.4/x64/codeql/codeql database init --force-overwrite --db-cluster /home/runner/work/_temp/codeql_databases --source-root=/home/runner/work/NazoAuth/NazoAuth --no-calculate-baseline --extractor-include-aliases --language=rust --codescanning-config=/home/runner/work/_temp/user-config.yaml --build-mode=none",
+        "2026-11-17T12:15:54.4778877Z [command]/opt/hostedtoolcache/CodeQL/2.27.4/x64/codeql/codeql database trace-command --use-build-mode --working-dir /home/runner/work/NazoAuth/NazoAuth /home/runner/work/_temp/codeql_databases/rust",
+        "2026-11-17T12:18:53.8119672Z [command]/opt/hostedtoolcache/CodeQL/2.27.4/x64/codeql/codeql database finalize --finalize-dataset --threads=4 --ram=14569 /home/runner/work/_temp/codeql_databases/rust",
+        "2026-11-17T12:19:38.8894050Z [command]/opt/hostedtoolcache/CodeQL/2.27.4/x64/codeql/codeql database run-queries --ram=14569 --threads=4 --expect-discarded-cache --additional-packs=/home/runner/work/_temp/pr-diff-range --extension-packs=codeql-action/pr-diff-range /home/runner/work/_temp/codeql_databases/rust --min-disk-free=1024 -v"
+      ],
+      "upload_evidence": [
+        "2026-11-17T12:24:54.2019491Z Successfully uploaded results",
+        "2026-11-17T12:24:59.5618687Z Analysis upload status is complete."
+      ],
+      "interpretation": "Analysis and upload completed. The log reports one file extracted with errors and a macro-expansion warning. Job success does not establish zero code-scanning alerts or complete extraction coverage.",
+      "same_extraction_limit_as_prior_c002_run": true
+    },
+    "log": {
+      "path": "/workspace/scratch/f7903e352d2d/evidence/nazo826-ci-codeql-134032713513.log",
+      "bytes": 157321,
+      "sha256": "e7ecfa53ea80b34f103e399be51f94059b0bdda9bc40a53781139264d65c650e",
+      "utf8_bom_preserved": true
+    }
+  },
+  "local_validation_provenance": {
+    "local_commit": "c8214e5a32a3f19fb7a7b5cac82a5bb5f4268070",
+    "remote_commit": "2d5c335fc6563e874d8626a5067b4fa8df89bacc",
+    "identical_tree": "f01983bb64f094ec7c88ccda0de7551297be6127",
+    "tested_base": "c002858a138a134544c1cc64875f7e11a5af2629",
+    "tested_worktree_diff_sha256": "ef7c92cdc02da82e77b0324179daaa25c5ba2782e8f011c9fa6ca0683dc62e30",
+    "remote_diff_sha256": "ef7c92cdc02da82e77b0324179daaa25c5ba2782e8f011c9fa6ca0683dc62e30",
+    "worktree_clean": true,
+    "passkey_revision": "8260480634fac09e1151ca2b1a9eaa1c02af6f67",
+    "test_log": "nazo-server-passkey-37.log",
+    "passed": 38,
+    "failed": 0,
+    "ignored": 0
+  }
+}
