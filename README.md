@@ -34,7 +34,7 @@ Add `features = ["aws-lc"]` to select native AWS-LC ES256 verification.
 | --- | --- |
 | Keys | ES256 / P-256 (`alg=-7`) and Ed25519 (`alg=-8`), with matching COSE key type, curve, and coordinates |
 | Registration | Challenge, origin, RP ID, UP/UV, backup flags, credential key, exclusion list, and attestation verification |
-| Authentication | Account and credential binding, signed flags, signature, backup eligibility, and signature counter policy |
+| Authentication | Account and credential binding, signed flags, signature, backup eligibility, and authenticated signature counter evidence |
 | Login | Username-first and discoverable credentials |
 | Attestation | `none`, ES256/Ed25519 `packed` self-attestation, and ES256 certificate attestation for `packed` and `fido-u2f` |
 | Origins | Exact configured web origin; same-origin ceremonies |
@@ -85,10 +85,16 @@ and validation policy and expire after at most 300 seconds. A shorter server
 TTL can further restrict their lifetime. Consume state atomically, for example
 with a transactional delete or `GETDEL`.
 
-Authentication returns the new signature counter and signed backup flags. Save
-these with an account-scoped compare-and-swap before issuing a session. The
-counter policy accepts zero-only counters and rejects other non-increasing
-values; concurrent assertions can therefore require a retry.
+Authentication returns `AuthSuccess` with `counter_status` and a `CredentialUpdate`.
+The counter status is `Unsupported` for zero/zero, `Advanced` for an increase,
+and `NonIncreasing` for any other pair. The last is an authenticated anomaly;
+the application decides whether to reject it or require another factor.
+The examples reject it before changing stored credentials.
+
+Commit `update` with an account-scoped compare-and-swap before issuing a
+session. Match its expected counter, backup eligibility, and backup state,
+then store the new values together. Comparing backup state also protects
+zero-counter credentials when that state changed after verification began.
 
 ### Discoverable credentials
 

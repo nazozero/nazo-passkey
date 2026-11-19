@@ -1,6 +1,6 @@
 # Security review
 
-Review date: **2026-11-18**. Component: `nazo-passkey 0.2.0`.
+Review date: **2026-11-19**. Component: `nazo-passkey 0.3.0`.
 
 ## Verification boundary
 
@@ -17,7 +17,14 @@ parsers validate untrusted wire data; stored-key decoding preserves explicitly
 supported historical forms. Internal helpers reuse parsed fields and verified
 keys.
 
-## Findings fixed during the final review
+## Findings fixed in 0.3
+
+| Finding | Change | Regression evidence |
+| --- | --- | --- |
+| The verifier enforced one RP's counter rejection policy | Return authenticated `CounterStatus` and a typed `CredentialUpdate`; examples retain explicit strict policy | Real signed assertions cover zero, increasing, equal, decreasing and maximum counters, including backup credentials |
+| Profile fixtures altered certificate contents without re-signing the certificate | Re-sign modified TBS bytes and independently verify the issuer signature before testing the profile | All 27 attestation tests pass with valid certificate signatures |
+
+## Findings retained from the 0.2 review
 
 | Finding | Change | Regression evidence |
 | --- | --- | --- |
@@ -44,7 +51,7 @@ uses bounded lengths, recursion, and item counts and consumes complete frames.
 The stored-key compatibility reader checks usage restrictions and known
 metadata types without relaxing public-key or algorithm requirements.
 
-Certificate signatures establish the stated evidence level. Trust in a
+Attestation statement signatures establish the stated evidence level. Trust in a
 manufacturer requires a separate root, chain, validity, revocation, and
 metadata policy. See the [protocol matrix](protocol-compliance.md) for the
 supported leaf profiles and formats.
@@ -93,9 +100,12 @@ second attestation-object parse.
 - Apply HTTP limits, account quotas, CSRF protection, and request throttling.
 - Establish a trust policy when approved authenticator provenance is required.
 
-The counter policy can reject a reordered concurrent assertion. A zero-only
-counter is accepted; other non-increasing values reject. Retry and recovery
-behavior belongs to the application.
+The verifier classifies the signed counter once and returns its status with the
+expected and new credential facts. The application selects the risk response
+to `NonIncreasing`; strict rejection can reject a reordered concurrent
+assertion. Storage enforces the update's expected counter and backup state,
+including zero-only counters. UV initialization requires independent
+application authorization and remains outside `CredentialUpdate`.
 
 ## Evidence
 

@@ -1,5 +1,24 @@
 # Migrate from passkey-auth
 
+## 0.2 to 0.3
+
+Authentication now returns protocol evidence before the relying party's counter
+risk decision. `Error::CounterReplay` is removed. Check
+`outcome.counter_status == CounterStatus::NonIncreasing` to preserve a strict
+reject policy. Zero/zero returns `Unsupported`; an increase returns `Advanced`.
+All mandatory account, challenge, flag, key and signature checks still execute
+before any outcome is returned.
+
+`AuthSuccess::new_counter`, `backup_eligible`, and `backup_state` move into
+`AuthSuccess::update`, a `CredentialUpdate`. The update also carries the
+expected counter, backup eligibility and backup state from the authenticated
+credential snapshot. Use these expected fields in an atomic storage update;
+do not repeat WebAuthn's counter classification in the storage implementation.
+UV initialization and its authorization remain application decisions.
+
+Stored `PasskeyCredential` and ceremony-state serialization remain unchanged.
+The transient `AuthSuccess` JSON shape changes with the Rust API.
+
 ## Package and imports
 
 Use package `nazo-passkey` and Rust imports under `nazo_passkey`. The independently

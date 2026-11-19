@@ -98,12 +98,6 @@ pub enum Error {
     #[error("signature verification failed")]
     BadSignature,
 
-    /// The authenticator counter went backwards or did not increase
-    /// under this RP's strict counter policy. This is an anomaly signal,
-    /// not proof of cloning; concurrent authenticators can also cause it.
-    #[error("counter went backwards (stored={stored}, new={new}): possible cloned credential")]
-    CounterReplay { stored: u32, new: u32 },
-
     /// The ceremony state handed to `finish_*` is older than the
     /// allowed ceiling (default 5 minutes). Indicates the caller did
     /// not TTL their session store, or the response came back after

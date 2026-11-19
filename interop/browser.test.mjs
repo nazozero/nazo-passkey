@@ -187,7 +187,7 @@ test("username-first with preferred UV and a non-discoverable USB credential", {
   });
   const repeated = await assertion(page, "preferred", [registration.id]);
   assert.equal(repeated.data.counter, previous);
-  await rejectsAssertion(page, repeated.body, /counter went backwards/);
+  await rejectsAssertion(page, repeated.body, /signature counter did not increase/);
 
   const allow = [registration.id];
   const wrongAccount = await assertion(page, "preferred", allow);

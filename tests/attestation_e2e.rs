@@ -722,14 +722,28 @@ struct TbsCertificateFixture {
 }
 
 impl CertBundle {
-    /// Attestation verification does not authenticate the certificate issuer.
-    /// Mutating a certificate's profile does not change the key that signs the
-    /// attestation, which isolates these checks from the signature check.
+    /// Re-sign each modified certificate and verify its issuer signature.
+    /// Profile failures must be independent of broken certificate signatures.
+    /// Tests that alter the SPKI still use this original key as the issuer.
     fn modify(&mut self, change: impl FnOnce(&mut CertificateFixture)) {
+        use p256::ecdsa::signature::Verifier;
         use x509_cert::der::{Decode, Encode};
         let mut certificate = CertificateFixture::from_der(&self.cert_der).unwrap();
         change(&mut certificate);
+        let tbs = certificate.tbs_certificate.to_der().unwrap();
+        let signature: EsSig = self.signing_key.sign(&tbs);
+        certificate.signature =
+            x509_cert::der::asn1::BitString::from_bytes(signature.to_der().as_bytes()).unwrap();
         self.cert_der = certificate.to_der().unwrap();
+
+        let signed = CertificateFixture::from_der(&self.cert_der).unwrap();
+        self.signing_key
+            .verifying_key()
+            .verify(
+                &signed.tbs_certificate.to_der().unwrap(),
+                &EsSig::from_der(signed.signature.as_bytes().unwrap()).unwrap(),
+            )
+            .unwrap();
     }
 
     fn add_raw_extension(&mut self, oid: &str, critical: bool, value: &[u8]) {
