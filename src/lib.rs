@@ -53,7 +53,7 @@ pub use error::{Error, Result};
 pub use types::{
     AssertionResponse, AttestationConveyancePreference, AttestationEvidence, AttestationResponse,
     AuthSuccess, AuthenticationChallenge, AuthenticationResponse, AuthenticationState, Challenge,
-    CosePublicKey, CredentialId, PasskeyCredential, PublicKeyCredential, RegistrationChallenge,
-    RegistrationOptions, RegistrationResponse, RegistrationState, ResidentKeyRequirement, RpId,
-    VerifiedAttestation,
+    CosePublicKey, CounterStatus, CredentialId, CredentialUpdate, PasskeyCredential,
+    PublicKeyCredential, RegistrationChallenge, RegistrationOptions, RegistrationResponse,
+    RegistrationState, ResidentKeyRequirement, RpId, VerifiedAttestation,
 };

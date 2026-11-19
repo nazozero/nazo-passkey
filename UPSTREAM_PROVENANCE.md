@@ -10,7 +10,7 @@ The inherited `passkey-auth 0.1.3` baseline is commit
 changes. The WebAuthn verifier, credential security metadata, bounded parsers,
 backend selection, examples, and validation were subsequently reworked here.
 
-The independent crate is `nazo-passkey 0.2.0`; its Rust library name is
+The independent crate is `nazo-passkey`; its Rust library name is
 `nazo_passkey`. Maintainer: [bymoye](https://github.com/bymoye),
 `s3moye@gmail.com`. Credential compatibility is documented in
 [migration](docs/migration.md).

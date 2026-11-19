@@ -222,14 +222,21 @@ fn authenticate_finish(
         .finish_authentication(&auth_state, &body, stored)
         .map_err(|e| Custom(Status::Unauthorized, format!("auth verify failed: {e}")))?;
 
-    stored.counter = outcome.new_counter;
-    stored.backup_eligible = Some(outcome.backup_eligible);
-    stored.backup_state = Some(outcome.backup_state);
+    if outcome.counter_status == nazo_passkey::CounterStatus::NonIncreasing {
+        return Err(Custom(
+            Status::Unauthorized,
+            "signature counter did not increase".into(),
+        ));
+    }
+
+    stored.counter = outcome.update.new_counter;
+    stored.backup_eligible = Some(outcome.update.backup_eligible);
+    stored.backup_state = Some(outcome.update.backup_state);
 
     Ok(Json(AuthFinishReply {
         ok: true,
         user_verified: outcome.user_verified,
-        new_counter: outcome.new_counter,
+        new_counter: outcome.update.new_counter,
     }))
 }
 

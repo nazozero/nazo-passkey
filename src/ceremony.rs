@@ -11,10 +11,10 @@ use crate::crypto;
 use crate::error::{Error, Result};
 use crate::types::{
     AuthSuccess, AuthenticationChallenge, AuthenticationResponse, AuthenticationState,
-    AuthenticatorSelection, Challenge, CosePublicKey, CredentialDescriptor, CredentialId,
-    PasskeyCredential, PubKeyCredParam, RegistrationChallenge, RegistrationOptions,
-    RegistrationResponse, RegistrationState, RpId, RpInfo, UserInfo, VerifiedAttestation,
-    decode_b64_bounded, decode_b64_into, now_secs,
+    AuthenticatorSelection, Challenge, CosePublicKey, CounterStatus, CredentialDescriptor,
+    CredentialId, CredentialUpdate, PasskeyCredential, PubKeyCredParam, RegistrationChallenge,
+    RegistrationOptions, RegistrationResponse, RegistrationState, RpId, RpInfo, UserInfo,
+    VerifiedAttestation, decode_b64_bounded, decode_b64_into, now_secs,
 };
 
 const CEREMONY_TIMEOUT_MS: u32 = 60_000;
@@ -26,7 +26,7 @@ const CEREMONY_TIMEOUT_MS: u32 = 60_000;
 /// Used in two places that must agree:
 ///   1. `start_registration` advertises this list to the browser in
 ///      `pubKeyCredParams`.
-///   2. `finish_registration` enforces (WebAuthn-3 §7.1 step 19) that
+///   2. `finish_registration` enforces (WebAuthn-3 §7.1 step 20) that
 ///      the algorithm of the credential the authenticator actually
 ///      returned is one of the advertised values. Without this check a
 ///      hostile or buggy authenticator could register a key for any
@@ -474,7 +474,7 @@ impl Webauthn {
         }
         let cose = &attested.key;
 
-        // 6a. WebAuthn §7.1 step 19: the credential's alg MUST be one of
+        // 6a. WebAuthn §7.1 step 20: the credential's alg MUST be one of
         // the algorithms the RP advertised in pubKeyCredParams. Without
         // this check a hostile or buggy authenticator could register a
         // key for any algorithm our COSE parser supports, bypassing the
@@ -662,6 +662,9 @@ impl Webauthn {
     ///
     /// Consume the ceremony state once and atomically persist the returned
     /// counter and backup metadata before granting authentication success.
+    /// A valid signature with a non-increasing counter returns
+    /// [`CounterStatus::NonIncreasing`]; the relying party decides whether to
+    /// reject, require another factor, or accept that counter anomaly.
     pub fn finish_authentication(
         &self,
         state: &AuthenticationState,
@@ -758,20 +761,26 @@ impl Webauthn {
         let mut sig = [0; 80];
         let sig_len = decode_b64_into(&body.signature, &mut sig, "signature")?;
         crypto::verify_auth_data(&key, &ad_bytes, &cdj_hash, &sig[..sig_len])?;
-        // Reject non-increasing counters, including backups; 0/0 is supported.
-        if (new_counter != 0 || stored.counter != 0) && new_counter <= stored.counter {
-            return Err(Error::CounterReplay {
-                stored: stored.counter,
-                new: new_counter,
-            });
-        }
+        let counter_status = if new_counter == 0 && stored.counter == 0 {
+            CounterStatus::Unsupported
+        } else if new_counter > stored.counter {
+            CounterStatus::Advanced
+        } else {
+            CounterStatus::NonIncreasing
+        };
         Ok(AuthSuccess {
             credential_id: asserted_id.clone(),
-            new_counter,
+            update: CredentialUpdate {
+                expected_counter: stored.counter,
+                new_counter,
+                expected_backup_eligible: stored.backup_eligible,
+                backup_eligible,
+                expected_backup_state: stored.backup_state,
+                backup_state,
+            },
+            counter_status,
             user_verified,
             user_verification_eligible: user_verified && stored.uv_initialized == Some(true),
-            backup_eligible,
-            backup_state,
         })
     }
 }

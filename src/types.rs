@@ -610,25 +610,54 @@ pub struct PasskeyCredential {
     pub attestation: AttestationEvidence,
 }
 
-/// Successful authentication outcome. Caller updates the stored
-/// credential's `counter` to `new_counter` before responding.
+/// Result of comparing the authenticated signature counter with the stored one.
 ///
-/// `Serialize + Deserialize` are derived for symmetry with
-/// [`PasskeyCredential`] — useful when an outer service wants to log
-/// or forward the outcome as JSON.
+/// WebAuthn §7.2 leaves the response to a non-increasing counter to the relying
+/// party's risk policy. Such a result may indicate cloning, a malfunction, or
+/// reordered concurrent assertions; it does not invalidate the signature.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum CounterStatus {
+    /// Both counters are zero; this credential does not supply a counter signal.
+    Unsupported,
+    /// The authenticated counter is greater than the stored counter.
+    Advanced,
+    /// At least one counter is nonzero and the authenticated counter did not rise.
+    NonIncreasing,
+}
+
+/// Authenticated credential facts and the snapshot they were verified against.
+///
+/// After accepting the counter outcome, persist the new values atomically only
+/// if the expected values still match. Compare backup state even for zero-only
+/// counters so an update based on a different backup state fails the comparison.
+/// User-verification initialization requires application authorization and is
+/// deliberately absent from this protocol update.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+pub struct CredentialUpdate {
+    pub expected_counter: u32,
+    pub new_counter: u32,
+    pub expected_backup_eligible: Option<bool>,
+    pub backup_eligible: bool,
+    pub expected_backup_state: Option<bool>,
+    pub backup_state: bool,
+}
+
+/// Cryptographically verified authentication outcome.
+///
+/// Apply the relying party's counter policy and atomically persist `update`
+/// before creating a session. The relying party decides how to handle
+/// [`CounterStatus::NonIncreasing`].
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AuthSuccess {
     pub credential_id: CredentialId,
-    pub new_counter: u32,
+    pub update: CredentialUpdate,
+    pub counter_status: CounterStatus,
     pub user_verified: bool,
     /// The signed UV flag may count as a factor only when this is true.
     /// A false/unknown `uv_initialized` cannot be upgraded by this assertion alone.
     #[serde(default)]
     pub user_verification_eligible: bool,
-    // Unlike persisted credentials, outcomes are transient. Missing fields
-    // must not become false and overwrite known credential metadata.
-    pub backup_eligible: bool,
-    pub backup_state: bool,
 }
 
 #[cfg(test)]
@@ -850,16 +879,23 @@ mod tests {
     fn auth_success_json_round_trips() {
         let original = AuthSuccess {
             credential_id: CredentialId(vec![0xDE, 0xAD, 0xBE, 0xEF]),
-            new_counter: 42,
+            update: CredentialUpdate {
+                expected_counter: 41,
+                new_counter: 42,
+                expected_backup_eligible: Some(false),
+                backup_eligible: false,
+                expected_backup_state: Some(false),
+                backup_state: false,
+            },
+            counter_status: CounterStatus::Advanced,
             user_verified: true,
             user_verification_eligible: true,
-            backup_eligible: false,
-            backup_state: false,
         };
         let wire = serde_json::to_string(&original).expect("serialise");
         let back: AuthSuccess = serde_json::from_str(&wire).expect("deserialise");
         assert_eq!(back.credential_id.0, original.credential_id.0);
-        assert_eq!(back.new_counter, original.new_counter);
+        assert_eq!(back.update, original.update);
+        assert_eq!(back.counter_status, original.counter_status);
         assert_eq!(back.user_verified, original.user_verified);
     }
 }

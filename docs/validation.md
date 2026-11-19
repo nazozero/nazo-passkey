@@ -1,4 +1,38 @@
-# Validation — 2026-11-18
+# Validation
+
+## 0.3 protocol boundary update — 2026-11-19
+
+Baseline: `092f672175e5facdd24062536df34a75c6145f98`. The 0.3 change separates
+authenticated counter evidence from RP risk policy and supplies the expected
+and new counter / backup values for atomic application updates. Modified
+certificate-profile fixtures now carry independently verified issuer signatures.
+
+Executed locally with Rust 1.100.0 on Linux x86-64:
+
+| Gate | Outcome |
+| --- | --- |
+| `cargo test --locked --lib --tests --no-default-features` | 128 tests passed |
+| `cargo test --locked --all-targets --all-features` | 129 library/integration and four example tests passed; benchmark smoke completed |
+| `cargo clippy --locked --all-targets --all-features -- -D warnings` | Passed |
+| `cargo test --locked --doc --all-features` | One doctest passed |
+| `cargo fmt --all -- --check` | Passed |
+| `wasm32-unknown-unknown` library, all features | Compiled |
+| `wasm32-wasip1` portable benchmark, all features | Release build and ten cases at 100 iterations completed |
+
+The existing W3C vectors and independent strict Ed25519 oracle remain in the
+native suites. The new counter regression checks authenticated outcomes and
+rejects invalid signatures for every tested counter pair. Hosted CI must run
+the new head for the other platforms, browser and fuzz gates; the earlier
+results below do not substitute for those runs.
+
+A short native comparison used the existing performance driver, identical
+release dependencies, six alternating rounds of 1,500 iterations and one CPU.
+Registration retained seven allocations (485 bytes for ES256, 414 for Ed25519);
+assertion verification retained three allocations / 203 bytes. The independent
+glibc trace matched these counts and bytes. Concurrent workspace builds make
+the timing sample unsuitable for a speedup claim.
+
+## Historical 0.2 validation — 2026-11-18
 
 Package: **nazo-passkey 0.2.0**. Review input: PR #1 at
 `4652c67b1bdea01163296cfd5735d4b0bebeac18`. This review adds three ceremony

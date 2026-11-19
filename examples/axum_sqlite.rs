@@ -430,14 +430,20 @@ async fn authenticate_finish(
         .finish_authentication(&auth_state, &body, &stored)
         .map_err(|e| AppError::Unauthorized(format!("auth verify failed: {e}")))?;
 
+    if outcome.counter_status == nazo_passkey::CounterStatus::NonIncreasing {
+        return Err(AppError::Unauthorized(
+            "signature counter did not increase".into(),
+        ));
+    }
+
     // Preserve every verified metadata field; advancing the counter alone
     // would lose backup state and any known registration UV history.
     // Compare metadata as well: authenticators with a 0 -> 0 counter still
     // must not overwrite a newer backup/UV record from another process.
     let mut updated = stored.clone();
-    updated.counter = outcome.new_counter;
-    updated.backup_eligible = Some(outcome.backup_eligible);
-    updated.backup_state = Some(outcome.backup_state);
+    updated.counter = outcome.update.new_counter;
+    updated.backup_eligible = Some(outcome.update.backup_eligible);
+    updated.backup_state = Some(outcome.update.backup_state);
     if !store
         .update_credential(user_handle, &stored, &updated)
         .map_err(db_err)?
@@ -450,7 +456,7 @@ async fn authenticate_finish(
     Ok(Json(AuthFinishReply {
         ok: true,
         user_verified: outcome.user_verified,
-        new_counter: outcome.new_counter,
+        new_counter: outcome.update.new_counter,
     }))
 }
 

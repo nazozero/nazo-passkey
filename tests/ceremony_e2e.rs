@@ -6,7 +6,7 @@
 //!
 //! - registration extracts the public key the authenticator provided
 //! - authentication verifies the signature against that stored key
-//! - the counter check rejects replays
+//! - signed counter evidence is separated from relying-party acceptance policy
 //! - user-verification enforcement (`require_user_verification(true)`)
 //!   rejects assertions where the UV bit is clear
 //! - clientDataJSON tampering (wrong challenge / wrong origin) is
@@ -215,40 +215,65 @@ fn register_then_authenticate_happy_path() {
     let outcome = wa
         .finish_authentication(&state, &response, &credential)
         .expect("auth must succeed");
-    assert_eq!(outcome.new_counter, 1);
+    assert_eq!(outcome.update.new_counter, 1);
     assert!(outcome.user_verified);
 }
 
 #[test]
-fn counter_replay_rejected() {
+fn counter_status_follows_signed_values_and_preserves_update_preconditions() {
+    use nazo_passkey::CounterStatus::{Advanced, NonIncreasing, Unsupported};
+
     let wa = Webauthn::new(RP_ID, "Example", ORIGIN);
     let mut auth = FakeAuthenticator::new();
-    let credential = do_register(&wa, &mut auth);
+    // Backed-up credentials are subject to the same comparison; a library
+    // must not silently discard an anomaly based on authenticator flags.
+    auth.flags |= 8 | 16;
+    let mut stored = do_register(&wa, &mut auth);
+    for (previous, received, expected) in [
+        (0, 0, Unsupported),
+        (0, 1, Advanced),
+        (4, 5, Advanced),
+        (5, 5, NonIncreasing),
+        (5, 4, NonIncreasing),
+        (5, 0, NonIncreasing),
+        (u32::MAX - 1, u32::MAX, Advanced),
+        (u32::MAX, u32::MAX, NonIncreasing),
+        (u32::MAX, 0, NonIncreasing),
+    ] {
+        stored.counter = previous;
+        let (chal, state) = wa.start_authentication(std::slice::from_ref(&stored.id));
+        let auth_data = auth.auth_data_authenticate(Some(received));
+        let (cdj_raw, cdj_b64) = client_data("webauthn.get", &chal.challenge, ORIGIN);
+        let signature = auth.sign_assertion(&auth_data, &cdj_raw);
+        let mut response = AuthenticationResponse {
+            id: CredentialId(auth.credential_id.clone()),
+            response: AssertionResponse {
+                authenticator_data: B64URL.encode(&auth_data),
+                signature: B64URL.encode(&signature),
+                client_data_json: cdj_b64,
+                user_handle: None,
+            },
+        };
+        let outcome = wa
+            .finish_authentication(&state, &response, &stored)
+            .unwrap();
+        assert_eq!(outcome.counter_status, expected);
+        assert_eq!(outcome.update.expected_counter, previous);
+        assert_eq!(outcome.update.new_counter, received);
+        assert_eq!(outcome.update.expected_backup_eligible, Some(true));
+        assert_eq!(outcome.update.expected_backup_state, Some(true));
+        assert!(outcome.update.backup_eligible && outcome.update.backup_state);
 
-    // Pretend the user already authenticated up to counter=5.
-    let mut stored = credential.clone();
-    stored.counter = 5;
-
-    // Authenticator (somehow) emits counter=5 - equal, not strictly greater.
-    let (chal, state) = wa.start_authentication(&[stored.id.clone()]);
-    let auth_data = auth.auth_data_authenticate(Some(5));
-    let (cdj_raw, cdj_b64) = client_data("webauthn.get", &chal.challenge, ORIGIN);
-    let sig = auth.sign_assertion(&auth_data, &cdj_raw);
-
-    let response = AuthenticationResponse {
-        id: CredentialId(auth.credential_id.clone()),
-        response: AssertionResponse {
-            authenticator_data: B64URL.encode(&auth_data),
-            signature: B64URL.encode(&sig),
-            client_data_json: cdj_b64,
-            user_handle: None,
-        },
-    };
-
-    let err = wa
-        .finish_authentication(&state, &response, &stored)
-        .unwrap_err();
-    assert!(matches!(err, Error::CounterReplay { stored: 5, new: 5 }));
+        // Even a counter anomaly is returned only for an authenticated message.
+        let mut invalid_signature = signature;
+        let last = invalid_signature.len() - 1;
+        invalid_signature[last] ^= 1;
+        response.response.signature = B64URL.encode(invalid_signature);
+        assert!(matches!(
+            wa.finish_authentication(&state, &response, &stored),
+            Err(Error::BadSignature)
+        ));
+    }
 }
 
 #[test]
@@ -712,6 +737,9 @@ fn uv_fact_and_factor_eligibility_are_distinct_and_legacy_json_is_readable() {
         .unwrap();
     assert!(result.user_verified);
     assert!(!result.user_verification_eligible);
+    assert_eq!(result.update.expected_backup_eligible, None);
+    assert_eq!(result.update.expected_backup_state, None);
+    assert_eq!(result.update.expected_counter, legacy.counter);
 }
 
 #[test]
@@ -760,7 +788,9 @@ fn backup_flags_and_immutable_eligibility_are_enforced() {
     let result = wa
         .finish_authentication(&state, &response, &credential)
         .unwrap();
-    assert!(result.backup_eligible && result.backup_state);
+    assert!(result.update.backup_eligible && result.update.backup_state);
+    assert_eq!(result.update.expected_backup_eligible, Some(true));
+    assert_eq!(result.update.expected_backup_state, Some(false));
     auth.flags = FLAG_UP | FLAG_UV;
     let response = make_assertion(&mut auth, &chal.challenge, Some(USER_HANDLE));
     assert!(matches!(

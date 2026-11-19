@@ -1,4 +1,7 @@
-# NazoAuth WebAuthn integration evidence
+# Historical NazoAuth WebAuthn integration evidence
+
+This record describes the dated source revisions below. For the current
+authentication API, see [migration](migration.md).
 
 This execution and review record is kept in the verifier repository, outside
 the NazoAuth source repository as its AGENTS.md requires. It records failures

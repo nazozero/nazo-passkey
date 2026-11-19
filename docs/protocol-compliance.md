@@ -1,6 +1,6 @@
 # Protocol scope and verification
 
-Reviewed on **2026-11-18** for `nazo-passkey 0.2.0`. The primary reference is
+Reviewed on **2026-11-19** for `nazo-passkey 0.3.0`. The primary reference is
 [WebAuthn Level 3, W3C Recommendation 2026-08-25][W3]. The library implements
 the relying-party verification operations listed below. Browser APIs,
 authenticator operations, and CTAP transports belong to their respective peers.
@@ -17,7 +17,7 @@ authenticator operations, and CTAP transports belong to their respective peers.
 | [W3] §7.1 steps 5–6, §7.2 steps 8–9: UTF-8 and JSON | Strip one leading BOM for parsing; use UTF-8 replacement decoding; reject malformed JSON and duplicate typed fields. Preserve all original bytes for hashing. |
 | [W3] §7.1 steps 7–8, §7.2 steps 10–11: type and challenge | Exact ceremony type and canonical unpadded base64url challenge. |
 | [W3] §7.1 steps 9–11, §7.2 steps 12–14: origin | Exact configured origin; same-origin policy rejects `crossOrigin=true` and any `topOrigin`. |
-| [W3] §7.1 step 13, §7.2 step 21: client-data hash | SHA-256 over the original decoded bytes. Signature tests distinguish original bytes from BOM-stripped or replacement-decoded text. |
+| [W3] §7.1 step 12, §7.2 step 20: client-data hash | SHA-256 over the original decoded bytes. Signature tests distinguish original bytes from BOM-stripped or replacement-decoded text. |
 | [W3] §7.1 step 14, §7.2 step 15: RP ID | Compare the signed `rpIdHash` with the configured RP hash. |
 | [W3] §7.1 steps 15–16, §7.2 steps 16–17: UP / UV | Require UP for ordinary registration and all authentication; require UV when configured. |
 | [W3] §6.1, §7.1 step 17, §7.2 steps 18–20: backup flags | Reject BS without BE. Preserve BE/BS; known credential BE remains immutable. |
@@ -31,9 +31,9 @@ authenticator operations, and CTAP transports belong to their respective peers.
 | [W3] §7.2 step 6: discoverable login | Require the response handle when no account was identified; require a matching stored or explicit expected handle. |
 | [W3] §7.2 step 21: assertion signature | Verify `authenticatorData || SHA256(clientDataJSON)` using the stored credential key. |
 | [W3] §6.5.5: signature representation | ES256 uses ASN.1 DER with valid scalars; Ed25519 uses its 64-byte representation. |
-| [W3] §7.2 step 22: signature counter | Accept zero-only counters; reject other non-increasing values as the selected RP policy. |
+| [W3] §7.2 step 22: signature counter | Return `Unsupported`, `Advanced`, or `NonIncreasing` after signature verification; the application applies its risk policy. |
 | [W3] §4 credential record: UV initialization | Distinguish signed UV from established additional-factor eligibility. Unknown legacy history remains unknown. |
-| [W3] §7.2 step 24: verified state updates | Return counter and backup metadata after successful verification; the application atomically persists them before session success. |
+| [W3] §7.2 step 24: verified state updates | Return `CredentialUpdate` with expected and new counter / BE / BS; the application accepts policy and atomically persists the update before session success. |
 
 The named source modules are in `src/`. Executable coverage comprises unit
 tests, `ceremony_e2e`, `binary_regressions`, `attestation_e2e`, the official W3C
@@ -78,7 +78,8 @@ verification remain independent of the resident-key request.
 
 | Area | Policy |
 | --- | --- |
-| Level 1 / Level 2 | Supported credential algorithms and same-origin client behavior remain usable. Existing records can omit the newly added security metadata. |
+| Level 1 / Level 2 | Supported credential algorithms and same-origin client behavior remain usable. Existing records can omit the newly added security metadata. `requireResidentKey` preserves Level 1 option handling; omitted `crossOrigin` is accepted. |
+| Historical Token Binding | L3 §5.8.1 reserves `tokenBinding`. This verifier neither negotiates nor relies on it; applications needing the former L1/L2 Token Binding mode require a separate protocol choice. |
 | Historical COSE keys | Accept historical map ordering and integer widths; enforce required fields, known metadata types, `key_ops` verification permission, and public-only material. |
 | Outer response encoding | [W3] §5.1 `PublicKeyCredential.toJSON()` envelope. Check `type` and matching `id` / `rawId` and require canonical unpadded base64url for verifier inputs. Client extension hints do not participate in verification. |
 | Reserved flags | Ignore unknown reserved bits while enforcing known AT/ED/UP/UV/BE/BS rules. |
@@ -100,6 +101,20 @@ enrollment authorization, account and tenant isolation, single-use state,
 atomic credential uniqueness and updates, session issuance, and any selected
 attestation-trust policy. Physical authenticator and browser interoperability
 and FIDO certification require separate evidence.
+
+## FIDO2 server boundary
+
+[FIDO2 Server Requirements v2.3][FIDO] is linked as active by the FIDO
+certification site; the linked specification identifies itself as the
+2025-10-23 Review Draft. Sections 2.1, 2.3 and 6 require broader attestation,
+metadata and algorithm coverage than this library's selected WebAuthn scope.
+TPM, SafetyNet and RSA support remain absent. Chain trust and Metadata Service
+validation require the assembled server's application policy and integrations.
+The [official conformance tool][FIDO-TEST] requires registered access; local
+vectors, browser interoperability and fuzz tests are distinct evidence.
+
+[FIDO]: https://fidoalliance.org/specs/fidoserver/fido-server-v2.3-rd-20251023.html
+[FIDO-TEST]: https://fidoalliance.org/certification/functional-certification/conformance/
 
 ## References
 
